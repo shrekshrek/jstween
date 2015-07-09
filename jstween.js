@@ -52,26 +52,11 @@
         return str.replace(/([A-Z])/g, "-$1").toLowerCase();
     }
 
-    //  -webkit-transform 转 WebkitTransform
-    function camelize(str){
-        return str.replace(/\-(\w)/g, function(all, letter){
-            return letter.toUpperCase();
-        });
-    }
-
     //  webkitTransform 转 WebkitTransform
     function firstUper(str){
         return str.replace(/\b(\w)|\s(\w)/g, function(m){
             return m.toUpperCase();
         });
-    }
-
-    function objct2array(obj){
-        var _a = [];
-        for(var i in obj){
-            _a[i] = obj[i];
-        }
-        return _a;
     }
 
     // --------------------------------------------------------------------检测是否支持,浏览器补全方法

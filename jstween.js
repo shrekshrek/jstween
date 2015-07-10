@@ -6,6 +6,24 @@
  * @author: Shrek.wang, shrekshrek@gmail.com
  **/
 
+(function(){
+    if ("performance" in window == false) {
+        window.performance = {};
+    }
+    Date.now = (Date.now || function () {  // thanks IE8
+        return new Date().getTime();
+    });
+    if ("now" in window.performance == false){
+        var nowOffset = Date.now();
+        if (performance.timing && performance.timing.navigationStart){
+            nowOffset = performance.timing.navigationStart
+        }
+        window.performance.now = function now(){
+            return Date.now() - nowOffset;
+        }
+    }
+})();
+
 (function(factory) {
     var root = (typeof self == 'object' && self.self == self && self) ||
         (typeof global == 'object' && global.global == global && global);

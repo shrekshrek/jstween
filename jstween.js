@@ -232,15 +232,7 @@
             this.startTime = this.delay;
             this.endTime = this.startTime + this.duration;
 
-            for(var prop in this.fromVars){
-                var _n = this.fromVars[prop];
-                if(this.isDom){
-                    this.target.style[prop] = checkNumberValue(prop, _n);
-                }else{
-                    this.target[prop] = _n;
-                }
-            }
-
+            this.restart();
             tweens.push(this);
             globalUpdate();
         },
@@ -308,8 +300,17 @@
         },
         restart: function(){
             this.curTime = 0;
+            for(var prop in this.fromVars){
+                var _n = this.fromVars[prop];
+                if(this.isDom){
+                    this.target.style[prop] = checkNumberValue(prop, _n);
+                }else{
+                    this.target[prop] = _n;
+                }
+            }
         },
         reverse: function(){
+            this.curTime = this.endTime - this.curTime + this.startTime;
             this.isReverse = !this.isReverse;
         },
         kill: function(toEnd){
@@ -475,49 +476,59 @@
             }
         },
 
-        pause: function(target){
-            var _target = getElement(target);
-            var _len = tweens.length;
-            each(_target, function(index, obj){
-                for(var i = _len-1; i >= 0; i--){
-                    var _tween = tweens[i];
-                    if(_tween.target === obj){
-                        _tween.pause();
-                    }
-                }
-            });
-        },
-
-        pauseAll: function(){
-            var _len = tweens.length;
-            for(var i = _len-1; i >= 0; i--){
-                var _tween = tweens[i];
-                _tween.pause();
-            }
-        },
-
         play: function(target){
-            var _target = getElement(target);
-            var _len = tweens.length;
-            each(_target, function(index, obj){
-                for(var i = _len-1; i >= 0; i--){
-                    var _tween = tweens[i];
-                    if(_tween.target === obj){
-                        _tween.play();
-                    }
-                }
-            });
+            actionProxy(target, 'play');
         },
 
         playAll: function(){
-            var _len = tweens.length;
+            actionProxyAll('play');
+        },
+
+        pause: function(target){
+            actionProxy(target, 'pause');
+        },
+
+        pauseAll: function(){
+            actionProxyAll('pause');
+        },
+
+        restart: function(target){
+            actionProxy(target, 'restart');
+        },
+
+        restartAll: function(){
+            actionProxyAll('restart');
+        },
+
+        reverse: function(target){
+            actionProxy(target, 'reverse');
+        },
+
+        reverseAll: function(){
+            actionProxyAll('reverse');
+        }
+    });
+
+    function actionProxy(target, action){
+        var _target = getElement(target);
+        var _len = tweens.length;
+        each(_target, function(index, obj){
             for(var i = _len-1; i >= 0; i--){
                 var _tween = tweens[i];
-                _tween.play();
+                if(_tween.target === obj){
+                    _tween[action]();
+                }
             }
-        }
+        });
+    }
 
-    });
+    function actionProxyAll(action){
+        var _len = tweens.length;
+        for(var i = _len-1; i >= 0; i--){
+            var _tween = tweens[i];
+            _tween[action]();
+        }
+    }
 
     // --------------------------------------------------------------------缓动选项
     extend(JT, {

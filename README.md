@@ -8,26 +8,20 @@ API
 ============
 
 JT.get(target, param);
-
 JT.set(target, params);
-
 JT.fromTo(target, duration, fromParams, toParams);
-
 JT.from(target, duration, fromParams);
-
 JT.to(target, duration, toParams);
-
 JT.kill(target, [toEnd]);
-
 JT.killAll([toEnd]);
-
 JT.pause(target);
-
 JT.pauseAll();
-
 JT.play(target);
-
 JT.playAll();
+JT.reverse(target);
+JT.reverseAll();
+JT.restart(target);
+JT.restartAll();
 
 param为字符串，  
 Params为数组，

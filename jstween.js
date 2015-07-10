@@ -78,18 +78,13 @@
         });
     }
 
-    // --------------------------------------------------------------------检测是否支持,浏览器补全方法
-    var prefix = '';
-    var requestFrame = window.requestAnimationFrame;
-    var cancelFrame = window.cancelAnimationFrame || window.cancelRequestAnimationFrame;
+    // --------------------------------------------------------------------prefix
+    var requestFrame = window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame;
+    var cancelFrame = window.cancelAnimationFrame||window.webkitCancelRequestAnimationFrame||window.mozCancelRequestAnimationFrame||window.oCancelRequestAnimationFrame||window.msCancelRequestAnimationFrame;
 
+    var prefix = '';
     (function (){
         var _prefixes = ['webkit', 'moz', 'ms', 'o'];
-        for(var i = 0; i < _prefixes.length && !requestFrame; i++) {
-            requestFrame = window[_prefixes[i]+'RequestAnimationFrame'];
-            cancelFrame = window[_prefixes[i]+'CancelAnimationFrame'] || window[_prefixes[i]+'CancelRequestAnimationFrame'];
-        }
-
         var _d = document.createElement('div');
         for (var i in _prefixes) {
             if ((_prefixes[i] + 'Transform') in _d.style) {

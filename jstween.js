@@ -35,6 +35,7 @@
         for (var prop in obj2) {
             obj[prop] = obj2[prop];
         }
+        return obj;
     }
 
     function each(obj, callback) {
@@ -157,7 +158,7 @@
     // --------------------------------------------------------------------主体
     var tweens = [];
 
-    function update(time) {
+    function globalUpdate(time) {
         if ( tweens.length === 0 ) return;
         var i = 0;
         time = time !== undefined ? time : window.performance.now();
@@ -169,7 +170,7 @@
                 if(_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
             }
         }
-        requestFrame(update);
+        requestFrame(globalUpdate);
     }
 
     function tween(){
@@ -194,30 +195,39 @@
             this.onEndParams = toVars.onEndParams || [];
             this.onUpdate = toVars.onUpdate || null;
             this.onUpdateParams = toVars.onUpdateParams || [];
-            this.reverse = false;
+            this.isPlaying = toVars.isPlaying || true;
+
+            this.isReverse = false;
             this.isDom = isDom;
 
-            this.isPlaying = false;
-            this._curTime = 0;
-            this._lastTime = window.performance.now();
+            this.curTime = 0;
+            this.lastTime = window.performance.now();
             this.isStart = false;
-            this._startTime = this.delay;
-            this._endTime = this._startTime + this.duration;
+            this.startTime = this.delay;
+            this.endTime = this.startTime + this.duration;
+
+            for(var prop in this.fromVars){
+                var _n = this.fromVars[prop];
+                if(this.isDom){
+                    this.target.style[prop] = checkNumberValue(prop, _n);
+                }else{
+                    this.target[prop] = _n;
+                }
+            }
 
             tweens.push(this);
-            this.play();
-            update();
+            globalUpdate();
         },
         update: function(time){
-            var _time = time - this._lastTime;
-            this._lastTime = time;
+            var _time = time - this.lastTime;
+            this.lastTime = time;
 
             if(!this.isPlaying)
                 return true;
 
-            this._curTime += _time;
+            this.curTime += _time;
 
-            if(this._curTime < this._startTime)
+            if(this.curTime < this.startTime)
                 return true;
 
             if(!this.isStart){
@@ -225,31 +235,29 @@
                 if(this.onStart) this.onStart.apply(this.target, this.onStartParams);
             }
 
-            var _elapsed = (this._curTime - this._startTime)/this.duration;
+            var _elapsed = (this.curTime - this.startTime)/this.duration;
             _elapsed = _elapsed > 1 ? 1 : _elapsed;
 
-            if(this.reverse)
+            if(this.isReverse)
                 _elapsed = 1 - _elapsed;
 
-            var _value = parseFloat(this.ease(_elapsed), 10);
+            var _radio = parseFloat(this.ease(_elapsed), 10);
 
+            for(var prop in this.fromVars){
+                var _start = this.fromVars[prop];
+                var _end = this.toVars[prop] || 0;
 
-            var property;
-            for(property in this.fromVars){
-                var _start = this.fromVars[property];
-                var _end = this.toVars[property] || 0;
-
-                var _n = _start + ( _end - _start ) * _value;
+                var _n = _start + ( _end - _start ) * _radio;
                 if(this.isDom){
-                    this.target.style[property] = checkNumberValue(property, _n);
+                    this.target.style[prop] = checkNumberValue(prop, _n);
                 }else{
-                    this.target[property] = _n;
+                    this.target[prop] = _n;
                 }
             }
 
             if(this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
 
-            if(this._curTime >= this._endTime){
+            if(this.curTime >= this.endTime){
                 if(this.repeat == 1){
                     return false;
                 }else if(this.repeat > 1){
@@ -257,10 +265,10 @@
                     this.repeat--;
                 }
 
-                this._curTime = this._startTime;
+                this.curTime = this.startTime;
 
                 if(this.yoyo){
-                    this.reverse = !this.reverse;
+                    this.isReverse = !this.isReverse;
                 }
             }
 
@@ -271,6 +279,24 @@
         },
         pause: function(){
             this.isPlaying = false;
+        },
+        restart: function(){
+            this.curTime = 0;
+        },
+        reverse: function(){
+            this.isReverse = !this.isReverse;
+        },
+        kill: function(toEnd){
+            var i = tweens.indexOf(this);
+            if (i !== -1) {
+                if(toEnd){
+                    var _tween = tweens.splice(i, 1)[0];
+                    _tween.update(_tween.endTime - _tween.curTime + _tween.lastTime);
+                    if(_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
+                }else{
+                    tweens.splice(i, 1);
+                }
+            }
         }
     });
 
@@ -288,7 +314,7 @@
                 else
                     return null;
             }else{
-                return _target.param;
+                return _target[param];
             }
         },
 
@@ -312,6 +338,7 @@
 
         fromTo: function(target, time, fromVars, toVars){
             var _target = getElement(target);
+            var _tweens = [];
             each(_target, function(index, obj){
                 var _fromVars = {};
                 var _toVars = {};
@@ -327,12 +354,20 @@
                     }
                 }
 
-                new tween(obj, time, _fromVars, _toVars, _isDom);
+                var _tween = new tween(obj, time, _fromVars, _toVars, _isDom);
+                _tweens.push(_tween);
             });
+
+            if(_tweens.length == 1){
+                return _tweens[0];
+            }else{
+                return _tweens;
+            }
         },
 
         from: function(target, time, fromVars){
             var _target = getElement(target);
+            var _tweens = [];
             each(_target, function(index, obj){
                 var _fromVars = {};
                 var _toVars = {};
@@ -348,12 +383,20 @@
                     }
                 }
 
-                new tween(obj, time, _fromVars, _toVars, _isDom);
+                var _tween = new tween(obj, time, _fromVars, _toVars, _isDom);
+                _tweens.push(_tween);
             });
+
+            if(_tweens.length == 1){
+                return _tweens[0];
+            }else{
+                return _tweens;
+            }
         },
 
         to: function(target, time, toVars){
             var _target = getElement(target);
+            var _tweens = [];
             each(_target, function(index, obj){
                 var _fromVars = {};
                 var _toVars = {};
@@ -369,8 +412,15 @@
                     }
                 }
 
-                new tween(obj, time, _fromVars, _toVars, _isDom);
+                var _tween = new tween(obj, time, _fromVars, _toVars, _isDom);
+                _tweens.push(_tween);
             });
+
+            if(_tweens.length == 1){
+                return _tweens[0];
+            }else{
+                return _tweens;
+            }
         },
 
         kill: function(target, toEnd){
@@ -380,13 +430,7 @@
                 for(var i = _len-1; i >= 0; i--){
                     var _tween = tweens[i];
                     if(_tween.target === obj){
-                        if(toEnd){
-                            _tween.update(_tween._endTime - _tween._curTime + _tween._lastTime);
-                            var _tween = tweens.splice(i, 1)[0];
-                            if(_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
-                        }else{
-                            tweens.splice(i, 1);
-                        }
+                        _tween.kill(toEnd);
                     }
                 }
             });
@@ -401,11 +445,7 @@
             var _len = tweens.length;
             for(var i = _len-1; i >= 0; i--){
                 var _tween = tweens[i];
-                if(toEnd){
-                    _tween.update(_tween._endTime - _tween._curTime + _tween._lastTime);
-                    var _tween = tweens.splice(i, 1)[0];
-                    if(_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
-                }
+                _tween.kill(toEnd);
             }
         },
 

@@ -80,15 +80,22 @@
 
     // --------------------------------------------------------------------检测是否支持,浏览器补全方法
     var prefix = '';
-    var requestFrame;
-    var cancelFrame;
+    var requestFrame = window.requestAnimationFrame;
+    var cancelFrame = window.cancelAnimationFrame || window.cancelRequestAnimationFrame;
 
     (function (){
-        var _prefixes = ['webkit', 'moz', 'ms', 'o', ''];
+        var _prefixes = ['webkit', 'moz', 'ms', 'o'];
         for(var i = 0; i < _prefixes.length && !requestFrame; i++) {
             requestFrame = window[_prefixes[i]+'RequestAnimationFrame'];
             cancelFrame = window[_prefixes[i]+'CancelAnimationFrame'] || window[_prefixes[i]+'CancelRequestAnimationFrame'];
-            prefix = _prefixes[i];
+        }
+
+        var _d = document.createElement('div');
+        for (var i in _prefixes) {
+            if ((_prefixes[i] + 'Transform') in _d.style) {
+                prefix = _prefixes[i];
+                break;
+            }
         }
     }());
 
@@ -136,8 +143,10 @@
         }
     }
 
-    function getStyle(dom, param){
-        if(document.defaultView && document.defaultView.getComputedStyle){
+    function getStyleValue(dom, param){
+        if(dom.style[param]){
+            return dom.style[param];
+        }else if(document.defaultView && document.defaultView.getComputedStyle){
             var _p = hyphenize(param);
             var _s = document.defaultView.getComputedStyle(dom,'');
             return _s && _s.getPropertyValue(_p);
@@ -148,7 +157,7 @@
         }
     }
 
-    function setStyle(dom, params){
+    function setStyleValue(dom, params){
         for(var i in params){
             dom.style[i] = checkNumberValue(i, params[i]);
         }
@@ -164,13 +173,17 @@
         return typeof(value) === 'number'?value + 'px':value;
     }
 
-    var isDOM = (typeof HTMLElement === 'object')?
-        function(obj){
-            return obj instanceof HTMLElement;
-        }:
-        function(obj){
-            return obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
-        };
+    //var isDOM = (typeof HTMLElement === 'object')?
+    //    function(obj){
+    //        return obj instanceof HTMLElement;
+    //    }:
+    //    function(obj){
+    //        return obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
+    //    };
+
+    function isDOM(obj){
+        return obj.style !== undefined;
+    }
 
 
     // --------------------------------------------------------------------主体
@@ -328,7 +341,7 @@
             if(isDOM(_target)){
                 var _name = checkDomProp(_target, param);
                 if(_name)
-                    return getStyle(_target, _name);
+                    return getStyleValue(_target, _name);
                 else
                     return null;
             }else{
@@ -345,7 +358,7 @@
                         var _name = checkDomProp(obj, j);
                         if(_name) _params[_name] = params[j];
                     }
-                    setStyle(obj, _params);
+                    setStyleValue(obj, _params);
                 }else{
                     for(var j in params){
                         obj[j] = params[j];
@@ -363,9 +376,8 @@
                 var _isDom = isDOM(obj);
 
                 for(var j in toVars){
-                    if(_isDom) var _name = checkDomProp(obj, j);
-                    if(_isDom ? _name : (obj[j] !== undefined)){
-                        var _n = _isDom ? parseFloat(getStyle(obj, _name)) : obj[j];
+                    if(_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)){
+                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]).toFixed(2);
                         _fromVars[j] = checkValue(_n, fromVars[j]);
                         _toVars[j] = checkValue(_n, toVars[j]);
                     }else{
@@ -393,9 +405,8 @@
                 var _isDom = isDOM(obj);
 
                 for(var j in fromVars){
-                    if(_isDom) var _name = checkDomProp(obj, j);
-                    if(_isDom ? _name : (obj[j] !== undefined)){
-                        var _n = _isDom ? parseFloat(getStyle(obj, _name)) : obj[j];
+                    if(_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)){
+                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]).toFixed(2);
                         _toVars[j] = _n;
                         _fromVars[j] = checkValue(_n, fromVars[j]);
                     }else{
@@ -423,9 +434,8 @@
                 var _isDom = isDOM(obj);
 
                 for(var j in toVars){
-                    if(_isDom) var _name = checkDomProp(obj, j);
-                    if(_isDom ? _name : (obj[j] !== undefined)){
-                        var _n = _isDom ? parseFloat(getStyle(obj, _name)) : obj[j];
+                    if(_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)){
+                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]).toFixed(2);
                         _fromVars[j] = _n;
                         _toVars[j] = checkValue(_n, toVars[j]);
                     }else{
@@ -491,7 +501,7 @@
             }
         },
 
-        resume: function(target){
+        play: function(target){
             var _target = getElement(target);
             var _len = tweens.length;
             each(_target, function(index, obj){
@@ -504,7 +514,7 @@
             });
         },
 
-        resumeAll: function(){
+        playAll: function(){
             var _len = tweens.length;
             for(var i = _len-1; i >= 0; i--){
                 var _tween = tweens[i];

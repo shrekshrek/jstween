@@ -49,23 +49,22 @@
         y:150,
         ease:JT.Back.InOut,
         onStart: function(){
-            console.log(this);
+            console.log(this.x,this.y);
         },
         onUpdate: function(){
-            console.log(this);
+            console.log(this.x,this.y);
         },
         onEnd: function(){
-            console.log(this);
+            console.log(this.x,this.y);
         }
     });
 
 
-
 //    JT.set('.b1 #box2',{marginLeft:300, opacity:0});
 //
-//    JT.fromTo('.box', 1, {marginLeft:400, opacity:0.5}, {marginLeft:200, opacity:1, delay:1, ease:JT.Quad.InOut, onEnd:function(){
-//        console.log("first complete");
-//    }});
+    JT.fromTo('.box', 1, {marginLeft:400, opacity:0.5}, {marginLeft:200, opacity:1, delay:1, ease:JT.Quad.InOut, onEnd:function(){
+        console.log("first complete");
+    }});
 //
 //    setTimeout(function(){
 //        JT.killAll(true);

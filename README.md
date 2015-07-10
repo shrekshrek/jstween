@@ -25,9 +25,9 @@ JT.pause(target);
 
 JT.pauseAll();
 
-JT.resume(target);
+JT.play(target);
 
-JT.resumeAll();
+JT.playAll();
 
 param为字符串，  
 Params为数组，

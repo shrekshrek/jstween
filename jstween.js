@@ -345,8 +345,9 @@
                 var _isDom = isDOM(obj);
 
                 for(var j in toVars){
-                    if(_isDom ? checkDomProp(obj, j) : (obj[j] !== undefined)){
-                        var _n = _isDom ? parseFloat(getStyle(obj, j)) : obj[j];
+                    if(_isDom) var _name = checkDomProp(obj, j);
+                    if(_isDom ? _name : (obj[j] !== undefined)){
+                        var _n = _isDom ? parseFloat(getStyle(obj, _name)) : obj[j];
                         _fromVars[j] = checkValue(_n, fromVars[j]);
                         _toVars[j] = checkValue(_n, toVars[j]);
                     }else{
@@ -374,8 +375,9 @@
                 var _isDom = isDOM(obj);
 
                 for(var j in fromVars){
-                    if(_isDom ? checkDomProp(obj, j) : (obj[j] !== undefined)){
-                        var _n = _isDom ? parseFloat(getStyle(obj, j)) : obj[j];
+                    if(_isDom) var _name = checkDomProp(obj, j);
+                    if(_isDom ? _name : (obj[j] !== undefined)){
+                        var _n = _isDom ? parseFloat(getStyle(obj, _name)) : obj[j];
                         _toVars[j] = _n;
                         _fromVars[j] = checkValue(_n, fromVars[j]);
                     }else{
@@ -403,8 +405,9 @@
                 var _isDom = isDOM(obj);
 
                 for(var j in toVars){
-                    if(_isDom ? checkDomProp(obj, j) : (obj[j] !== undefined)){
-                        var _n = _isDom ? parseFloat(getStyle(obj, j)) : obj[j];
+                    if(_isDom) var _name = checkDomProp(obj, j);
+                    if(_isDom ? _name : (obj[j] !== undefined)){
+                        var _n = _isDom ? parseFloat(getStyle(obj, _name)) : obj[j];
                         _fromVars[j] = _n;
                         _toVars[j] = checkValue(_n, toVars[j]);
                     }else{

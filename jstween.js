@@ -80,11 +80,11 @@
 
     // --------------------------------------------------------------------检测是否支持,浏览器补全方法
     var prefix = '';
-    var requestFrame = window.requestAnimationFrame;
-    var cancelFrame = window.cancelAnimationFrame || window.cancelRequestAnimationFrame;
+    var requestFrame;
+    var cancelFrame;
 
     (function (){
-        var _prefixes = ['webkit', 'moz', 'ms', 'o'];
+        var _prefixes = ['webkit', 'moz', 'ms', 'o', ''];
         for(var i = 0; i < _prefixes.length && !requestFrame; i++) {
             requestFrame = window[_prefixes[i]+'RequestAnimationFrame'];
             cancelFrame = window[_prefixes[i]+'CancelAnimationFrame'] || window[_prefixes[i]+'CancelRequestAnimationFrame'];
@@ -120,7 +120,7 @@
             return name;
         }
 
-        name = browserPrefix(name)
+        name = browserPrefix(name);
         if(dom.style[name] !== undefined){
             return name;
         }
@@ -343,7 +343,7 @@
                     var _params = {};
                     for(var j in params){
                         var _name = checkDomProp(obj, j);
-                        if(_name) _params[_name] = checkValue(getStyle(obj, _name)*1.0, params[j]);
+                        if(_name) _params[_name] = params[j];
                     }
                     setStyle(obj, _params);
                 }else{

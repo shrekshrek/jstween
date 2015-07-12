@@ -132,7 +132,7 @@
 
     function checkValue(value, value2){
         if(typeof(value2) === "string"){
-            return value + parseFloat(value2, 10);
+            return value + parseFloat(value2);
         }else if(typeof(value2) === "number"){
             return value2;
         }
@@ -373,7 +373,7 @@
 
                 for(var j in toVars){
                     if(_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)){
-                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]).toFixed(2);
+                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]);
                         _fromVars[j] = checkValue(_n, fromVars[j]);
                         _toVars[j] = checkValue(_n, toVars[j]);
                     }else{
@@ -402,7 +402,7 @@
 
                 for(var j in fromVars){
                     if(_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)){
-                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]).toFixed(2);
+                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]);
                         _toVars[j] = _n;
                         _fromVars[j] = checkValue(_n, fromVars[j]);
                     }else{
@@ -431,7 +431,7 @@
 
                 for(var j in toVars){
                     if(_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)){
-                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]).toFixed(2);
+                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]);
                         _fromVars[j] = _n;
                         _toVars[j] = checkValue(_n, toVars[j]);
                     }else{

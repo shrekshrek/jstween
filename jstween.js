@@ -187,7 +187,8 @@
     function globalUpdate(time) {
         if ( tweens.length === 0 ) return;
         var i = 0;
-        time = time !== undefined ? time : window.performance.now();
+        //time = time !== undefined ? time : window.performance.now();
+        time = window.performance.now();
         while ( i < tweens.length ) {
             if ( tweens[i].update( time ) ) {
                 i++;

@@ -79,8 +79,12 @@
     }
 
     // --------------------------------------------------------------------prefix
-    var requestFrame = window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame;
-    var cancelFrame = window.cancelAnimationFrame||window.webkitCancelRequestAnimationFrame||window.mozCancelRequestAnimationFrame||window.oCancelRequestAnimationFrame||window.msCancelRequestAnimationFrame;
+    var requestFrame = window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback) { window.setTimeout(callback, 1000 / 60); };
 
     var prefix = '';
     (function (){
@@ -95,7 +99,6 @@
     }());
 
     JT.requestAnimationFrame = requestFrame;
-    JT.cancelAnimationFrame = cancelFrame;
 
     function browserPrefix(str){
         if (str) {
@@ -182,18 +185,18 @@
 
 
     // --------------------------------------------------------------------主体
-    var tweens = [];
+    var globalTweens = [];
 
-    function globalUpdate(time) {
-        if ( tweens.length === 0 ) return;
+    function globalUpdate() {
+        if ( globalTweens.length === 0 ) return;
         var i = 0;
         //time = time !== undefined ? time : window.performance.now();
-        time = window.performance.now();
-        while ( i < tweens.length ) {
-            if ( tweens[i].update( time ) ) {
+        var _time = window.performance.now();
+        while ( i < globalTweens.length ) {
+            if ( globalTweens[i].update( _time ) ) {
                 i++;
             } else {
-                var _tween = tweens.splice(i, 1)[0];
+                var _tween = globalTweens.splice(i, 1)[0];
                 if(_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
             }
         }
@@ -234,7 +237,7 @@
             this.endTime = this.startTime + this.duration;
 
             this.restart();
-            tweens.push(this);
+            globalTweens.push(this);
             globalUpdate();
         },
         update: function(time){
@@ -315,14 +318,14 @@
             this.isReverse = !this.isReverse;
         },
         kill: function(toEnd){
-            var i = tweens.indexOf(this);
+            var i = globalTweens.indexOf(this);
             if (i !== -1) {
                 if(toEnd){
-                    var _tween = tweens.splice(i, 1)[0];
+                    var _tween = globalTweens.splice(i, 1)[0];
                     _tween.update(_tween.endTime - _tween.curTime + _tween.lastTime);
                     if(_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
                 }else{
-                    tweens.splice(i, 1);
+                    globalTweens.splice(i, 1);
                 }
             }
         }
@@ -366,7 +369,7 @@
 
         fromTo: function(target, time, fromVars, toVars){
             var _target = getElement(target);
-            var _tweens = [];
+            var _globalTweens = [];
             each(_target, function(index, obj){
                 var _fromVars = {};
                 var _toVars = {};
@@ -383,19 +386,19 @@
                 }
 
                 var _tween = new tween(obj, time, _fromVars, _toVars, _isDom);
-                _tweens.push(_tween);
+                _globalTweens.push(_tween);
             });
 
-            if(_tweens.length == 1){
-                return _tweens[0];
+            if(_globalTweens.length == 1){
+                return _globalTweens[0];
             }else{
-                return _tweens;
+                return _globalTweens;
             }
         },
 
         from: function(target, time, fromVars){
             var _target = getElement(target);
-            var _tweens = [];
+            var _globalTweens = [];
             each(_target, function(index, obj){
                 var _fromVars = {};
                 var _toVars = {};
@@ -412,19 +415,19 @@
                 }
 
                 var _tween = new tween(obj, time, _fromVars, _toVars, _isDom);
-                _tweens.push(_tween);
+                _globalTweens.push(_tween);
             });
 
-            if(_tweens.length == 1){
-                return _tweens[0];
+            if(_globalTweens.length == 1){
+                return _globalTweens[0];
             }else{
-                return _tweens;
+                return _globalTweens;
             }
         },
 
         to: function(target, time, toVars){
             var _target = getElement(target);
-            var _tweens = [];
+            var _globalTweens = [];
             each(_target, function(index, obj){
                 var _fromVars = {};
                 var _toVars = {};
@@ -441,22 +444,22 @@
                 }
 
                 var _tween = new tween(obj, time, _fromVars, _toVars, _isDom);
-                _tweens.push(_tween);
+                _globalTweens.push(_tween);
             });
 
-            if(_tweens.length == 1){
-                return _tweens[0];
+            if(_globalTweens.length == 1){
+                return _globalTweens[0];
             }else{
-                return _tweens;
+                return _globalTweens;
             }
         },
 
         kill: function(target, toEnd){
             var _target = getElement(target);
-            var _len = tweens.length;
+            var _len = globalTweens.length;
             each(_target, function(index, obj){
                 for(var i = _len-1; i >= 0; i--){
-                    var _tween = tweens[i];
+                    var _tween = globalTweens[i];
                     if(_tween.target === obj){
                         _tween.kill(toEnd);
                     }
@@ -466,13 +469,13 @@
 
         killAll: function(toEnd){
             if(!toEnd){
-                tweens = [];
+                globalTweens = [];
                 return;
             }
 
-            var _len = tweens.length;
+            var _len = globalTweens.length;
             for(var i = _len-1; i >= 0; i--){
-                var _tween = tweens[i];
+                var _tween = globalTweens[i];
                 _tween.kill(toEnd);
             }
         },
@@ -512,10 +515,10 @@
 
     function actionProxy(target, action){
         var _target = getElement(target);
-        var _len = tweens.length;
+        var _len = globalTweens.length;
         each(_target, function(index, obj){
             for(var i = _len-1; i >= 0; i--){
-                var _tween = tweens[i];
+                var _tween = globalTweens[i];
                 if(_tween.target === obj){
                     _tween[action]();
                 }
@@ -524,9 +527,9 @@
     }
 
     function actionProxyAll(action){
-        var _len = tweens.length;
+        var _len = globalTweens.length;
         for(var i = _len-1; i >= 0; i--){
-            var _tween = tweens[i];
+            var _tween = globalTweens[i];
             _tween[action]();
         }
     }

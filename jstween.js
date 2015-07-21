@@ -324,8 +324,10 @@
                     var _tween = globalTweens.splice(i, 1)[0];
                     _tween.update(_tween.endTime - _tween.curTime + _tween.lastTime);
                     if(_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
+                    _tween.target = null;
                 }else{
-                    globalTweens.splice(i, 1);
+                    var _tween = globalTweens.splice(i, 1);
+                    _tween.target = null;
                 }
             }
         }

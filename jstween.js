@@ -46,12 +46,28 @@
     };
 
     // --------------------------------------------------------------------辅助方法
-    function extend(obj, obj2) {
-        for (var prop in obj2) {
-            obj[prop] = obj2[prop];
+    var extend = function(obj){
+        var length = arguments.length;
+        if (length < 2 || obj == null) return obj;
+        for (var index = 1; index < length; index++) {
+            var source = arguments[index],
+                ks = keys(source),
+                l = ks.length;
+            for (var i = 0; i < l; i++) {
+                var key = ks[i];
+                obj[key] = source[key];
+            }
         }
         return obj;
-    }
+    };
+
+    var keys = function(obj){
+        var keys = [];
+        for(var key in obj){
+            keys.push(key);
+        }
+        return keys;
+    };
 
     function each(obj, callback) {
         if(obj.length === undefined){
@@ -205,6 +221,30 @@
         requestFrame(globalUpdate);
     }
 
+    function checkUnique(tween){
+        var _len = globalTweens.length;
+        var i, j, k;
+        for(i = _len-1; i >= 0; i--){
+            if(tween.target == globalTweens[i].target){
+                var k1 = keys(tween.fromVars);
+                var k2 = keys(globalTweens[i].fromVars);
+                if(k1.length == k2.length){
+                    for(j in k1){
+                        if(k1[j] != k2[j]) continue;
+                    }
+                }
+
+                var _tween = globalTweens.splice(i, 1)[0];
+                _tween.update(window.performance.now());
+                for(k in tween.fromVars){
+                    tween.fromVars[k] = parseFloat(_tween.isDom ? getStyleValue(_tween.target, k) : _tween.target[k]);
+                }
+                _tween.target = null;
+                break;
+            }
+        }
+    }
+
     function tween(){
         this.init.apply(this, arguments);
     }
@@ -239,7 +279,8 @@
             this.endTime = this.startTime + this.duration;
 
             this.restart();
-            globalTweens.push(this);
+            checkUnique(this);
+            globalTweens.unshift(this);
 
             if(!isUpdating)
                 globalUpdate();
@@ -376,7 +417,7 @@
 
         fromTo: function(target, time, fromVars, toVars){
             var _target = getElement(target);
-            var _globalTweens = [];
+            var _tweens = [];
             each(_target, function(index, obj){
                 var _fromVars = {};
                 var _toVars = {};
@@ -393,19 +434,19 @@
                 }
 
                 var _tween = new tween(obj, time, _fromVars, _toVars, _isDom);
-                _globalTweens.push(_tween);
+                _tweens.push(_tween);
             });
 
-            if(_globalTweens.length == 1){
-                return _globalTweens[0];
+            if(_tweens.length == 1){
+                return _tweens[0];
             }else{
-                return _globalTweens;
+                return _tweens;
             }
         },
 
         from: function(target, time, fromVars){
             var _target = getElement(target);
-            var _globalTweens = [];
+            var _tweens = [];
             each(_target, function(index, obj){
                 var _fromVars = {};
                 var _toVars = {};
@@ -422,19 +463,19 @@
                 }
 
                 var _tween = new tween(obj, time, _fromVars, _toVars, _isDom);
-                _globalTweens.push(_tween);
+                _tweens.push(_tween);
             });
 
-            if(_globalTweens.length == 1){
-                return _globalTweens[0];
+            if(_tweens.length == 1){
+                return _tweens[0];
             }else{
-                return _globalTweens;
+                return _tweens;
             }
         },
 
         to: function(target, time, toVars){
             var _target = getElement(target);
-            var _globalTweens = [];
+            var _tweens = [];
             each(_target, function(index, obj){
                 var _fromVars = {};
                 var _toVars = {};
@@ -451,13 +492,13 @@
                 }
 
                 var _tween = new tween(obj, time, _fromVars, _toVars, _isDom);
-                _globalTweens.push(_tween);
+                _tweens.push(_tween);
             });
 
-            if(_globalTweens.length == 1){
-                return _globalTweens[0];
+            if(_tweens.length == 1){
+                return _tweens[0];
             }else{
-                return _globalTweens;
+                return _tweens;
             }
         },
 

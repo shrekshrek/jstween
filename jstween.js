@@ -221,34 +221,34 @@
         requestFrame(globalUpdate);
     }
 
-    function checkUnique(tween){
-        var _len = globalTweens.length;
-        var i, j, k;
-        for(i = _len-1; i >= 0; i--){
-            if(tween.target == globalTweens[i].target){
-                var k1 = keys(tween.fromVars);
-                var k2 = keys(globalTweens[i].fromVars);
-                var isSame = true;
-                if(k1.length == k2.length){
-                    for(j in k1){
-                        if(k1[j] != k2[j]){
-                            isSame = false;
-                            break;
-                        }
-                    }
-                }
-                if(!isSame) continue;
-
-                var _tween = globalTweens.splice(i, 1)[0];
-                _tween.update(window.performance.now());
-                for(k in tween.fromVars){
-                    tween.fromVars[k] = parseFloat(_tween.isDom ? getStyleValue(_tween.target, k) : _tween.target[k]);
-                }
-                _tween.target = null;
-                break;
-            }
-        }
-    }
+    //function checkUnique(tween){
+    //    var _len = globalTweens.length;
+    //    var i, j, k;
+    //    for(i = _len-1; i >= 0; i--){
+    //        if(tween.target == globalTweens[i].target){
+    //            var k1 = keys(tween.fromVars);
+    //            var k2 = keys(globalTweens[i].fromVars);
+    //            var isSame = true;
+    //            if(k1.length == k2.length){
+    //                for(j in k1){
+    //                    if(k1[j] != k2[j]){
+    //                        isSame = false;
+    //                        break;
+    //                    }
+    //                }
+    //            }
+    //            if(!isSame) continue;
+    //
+    //            var _tween = globalTweens.splice(i, 1)[0];
+    //            _tween.update(window.performance.now());
+    //            for(k in tween.fromVars){
+    //                tween.fromVars[k] = parseFloat(_tween.isDom ? getStyleValue(_tween.target, k) : _tween.target[k]);
+    //            }
+    //            _tween.target = null;
+    //            break;
+    //        }
+    //    }
+    //}
 
     function tween(){
         this.init.apply(this, arguments);
@@ -284,7 +284,7 @@
             this.endTime = this.startTime + this.duration;
 
             this.restart();
-            checkUnique(this);
+            //checkUnique(this);
             globalTweens.unshift(this);
 
             if(!isUpdating)

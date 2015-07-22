@@ -228,11 +228,16 @@
             if(tween.target == globalTweens[i].target){
                 var k1 = keys(tween.fromVars);
                 var k2 = keys(globalTweens[i].fromVars);
+                var isSame = true;
                 if(k1.length == k2.length){
                     for(j in k1){
-                        if(k1[j] != k2[j]) continue;
+                        if(k1[j] != k2[j]){
+                            isSame = false;
+                            break;
+                        }
                     }
                 }
+                if(!isSame) continue;
 
                 var _tween = globalTweens.splice(i, 1)[0];
                 _tween.update(window.performance.now());

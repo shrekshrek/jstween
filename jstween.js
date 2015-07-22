@@ -330,7 +330,8 @@
                     if(_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
                     _tween.target = null;
                 }else{
-                    var _tween = globalTweens.splice(i, 1);
+                    var _tween = globalTweens.splice(i, 1)[0];
+                    _tween.update(window.performance.now());
                     _tween.target = null;
                 }
             }

@@ -313,7 +313,7 @@
             if(this.isReverse)
                 _elapsed = 1 - _elapsed;
 
-            var _radio = parseInt(this.ease(_elapsed)*100)/100;
+            var _radio = parseFloat(this.ease(_elapsed));
 
             for(var prop in this.fromVars){
                 var _start = this.fromVars[prop];

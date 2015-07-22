@@ -193,18 +193,15 @@
             return;
         }
 
-        var i = 0;
-        //time = time !== undefined ? time : window.performance.now();
         var _time = window.performance.now();
-        while ( i < _len ) {
-            if ( globalTweens[i].update( _time ) ) {
-                i++;
-            } else {
+        for(var i = _len-1; i >= 0; i--){
+            if ( !globalTweens[i].update( _time ) ) {
                 var _tween = globalTweens.splice(i, 1)[0];
                 if(_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
                 _tween.target = null;
             }
         }
+
         requestFrame(globalUpdate);
     }
 

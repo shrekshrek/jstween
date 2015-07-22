@@ -183,13 +183,20 @@
 
     // --------------------------------------------------------------------主体
     var globalTweens = [];
+    var isUpdating = false;
 
     function globalUpdate() {
-        if ( globalTweens.length === 0 ) return;
+        isUpdating = true;
+        var _len = globalTweens.length;
+        if ( _len === 0 ) {
+            isUpdating = false;
+            return;
+        }
+
         var i = 0;
         //time = time !== undefined ? time : window.performance.now();
         var _time = window.performance.now();
-        while ( i < globalTweens.length ) {
+        while ( i < _len ) {
             if ( globalTweens[i].update( _time ) ) {
                 i++;
             } else {
@@ -236,7 +243,9 @@
 
             this.restart();
             globalTweens.push(this);
-            globalUpdate();
+
+            if(!isUpdating)
+                globalUpdate();
         },
         update: function(time){
             var _time = time - this.lastTime;

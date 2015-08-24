@@ -64,56 +64,56 @@
         console.log("first complete");
     }});
 
-//
-//    setTimeout(function(){
-//        JT.killAll(true);
-//        JT.to('.b1 #box2', 1, {marginTop:300, opacity:1, ease:JT.Quad.InOut, onEnd:function(){
-//            console.log("complete2");
-//            JT.from('.b1 #box2', 1, {marginTop:100, opacity:0.5, ease:JT.Quad.Out, onEnd:function(){
-//                console.log("complete3");
-//                JT.fromTo('.b1 #box2', 2, {marginLeft:500, opacity:0.5}, {marginLeft:400, opacity:1, ease:JT.Quad.Out, onEnd:function(n){
-//                    console.log("complete",this,n);
-//                }, onEndParams:[50]});
-//            }});
-//        }});
-//    }, 500);
-//
-////////
-//    JT.fromTo('.b1 #box1', 1, {
-//        marginLeft:300,
-//        transform:'rotate(80deg)',
-//        opacity:0
-//    }, {
-//        marginLeft:200,
-//        transform:'rotate(300deg)',
-//        opacity:0.5,
-//        repeat:5,
-//        yoyo:true,
-//        delay:1,
-//        ease:JT.Quart.Out,
-//        onStart:function(){
-//            console.log("start");
-//        },
-//        onIteration:function(){
-//            console.log("iteration");
-//        },
-//        onEnd:function(){
-//            console.log("complete");
-//        }
-//    });
-//
-//    setTimeout(function(){
-//        JT.pauseAll();
-//        console.log(JT.get('.b1 #box1','transform'));
-//    }, 2000);
-//
-//    setTimeout(function(){
-//        JT.resume('.b1 #box1');
-//    }, 3000);
-//
-//    setTimeout(function(){console.log('tttt');
-//        JT.resume('.b1 #box2');
-//    }, 4000);
+
+    setTimeout(function(){
+        JT.killAll(true);
+        JT.to('.b1 #box2', 1, {marginTop:300, opacity:1, ease:JT.Quad.InOut, onEnd:function(){
+            console.log("complete2");
+            JT.from('.b1 #box2', 1, {marginTop:100, opacity:0.5, ease:JT.Quad.Out, onEnd:function(){
+                console.log("complete3");
+                JT.fromTo('.b1 #box2', 2, {marginLeft:500, opacity:0.5}, {marginLeft:400, opacity:1, ease:JT.Quad.Out, onEnd:function(n){
+                    console.log("complete",this,n);
+                }, onEndParams:[50]});
+            }});
+        }});
+    }, 500);
+
+
+    JT.fromTo('.b1 #box1', 1, {
+        marginLeft:300,
+        transform:'rotate(80deg)',
+        opacity:0
+    }, {
+        marginLeft:200,
+        transform:'rotate(300deg)',
+        opacity:0.5,
+        repeat:5,
+        yoyo:true,
+        delay:1,
+        ease:JT.Quart.Out,
+        onStart:function(){
+            console.log("start");
+        },
+        onIteration:function(){
+            console.log("iteration");
+        },
+        onEnd:function(){
+            console.log("complete");
+        }
+    });
+
+    setTimeout(function(){
+        JT.pauseAll();
+        console.log(JT.get('.b1 #box1','transform'));
+    }, 2000);
+
+    setTimeout(function(){
+        JT.resume('.b1 #box1');
+    }, 3000);
+
+    setTimeout(function(){console.log('tttt');
+        JT.resume('.b1 #box2');
+    }, 4000);
 
 </script>
 </body>

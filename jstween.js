@@ -46,28 +46,11 @@
     };
 
     // --------------------------------------------------------------------辅助方法
-    var extend = function(obj){
-        var length = arguments.length;
-        if (length < 2 || obj == null) return obj;
-        for (var index = 1; index < length; index++) {
-            var source = arguments[index],
-                ks = keys(source),
-                l = ks.length;
-            for (var i = 0; i < l; i++) {
-                var key = ks[i];
-                obj[key] = source[key];
-            }
+    function extend(obj, obj2) {
+        for (var prop in obj2) {
+            obj[prop] = obj2[prop];
         }
-        return obj;
-    };
-
-    var keys = function(obj){
-        var keys = [];
-        for(var key in obj){
-            keys.push(key);
-        }
-        return keys;
-    };
+    }
 
     function each(obj, callback) {
         if(obj.length === undefined){
@@ -100,16 +83,18 @@
         function (callback) { window.setTimeout(callback, 1000 / 60); };
 
     var prefix = '';
-    (function (){
-        var _prefixes = ['webkit', 'moz', 'ms', 'o'];
+
+    function initPrefix(){
         var _d = document.createElement('div');
+        var _prefixes = ['Webkit', 'Moz', 'Ms', 'O'];
+
         for (var i in _prefixes) {
             if ((_prefixes[i] + 'Transform') in _d.style) {
                 prefix = _prefixes[i];
                 break;
             }
         }
-    }());
+    }
 
     JT.requestAnimationFrame = requestFrame;
 
@@ -133,7 +118,7 @@
         }
     }
 
-    function checkDomProp(dom, name){
+    function checkCssName(dom, name){
         if(dom.style[name] !== undefined){
             return name;
         }
@@ -146,42 +131,52 @@
         return null;
     }
 
-    function checkValue(value, value2){
-        if(typeof(value2) === "string"){
-            return value + parseFloat(value2);
-        }else if(typeof(value2) === "number"){
-            return value2;
+    function calcValue(value, value2){
+        if(typeof(value2) === 'string'){
+            var _s = value2.substr(0, 2);
+            var _n = parseFloat(value2.substr(2));
+            switch(_s){
+                case '+=':
+                    value2 = parseFloat(value) + _n;
+                    break;
+                case '-=':
+                    value2 = parseFloat(value) - _n;
+                    break;
+                default:
+                    break;
+            }
         }
-    }
-
-    function getStyleValue(dom, param){
-        if(dom.style[param]){
-            return dom.style[param];
-        }else if(document.defaultView && document.defaultView.getComputedStyle){
-            var _p = hyphenize(param);
-            var _s = document.defaultView.getComputedStyle(dom,'');
-            return _s && _s.getPropertyValue(_p);
-        }else if(dom.currentStyle){
-            return dom.currentStyle[param];
-        }else{
-            return null;
-        }
-    }
-
-    function setStyleValue(dom, params){
-        for(var i in params){
-            dom.style[i] = checkNumberValue(i, params[i]);
-        }
+        return value2;
     }
 
     var numberNames = ['fontWeight','lineHeight','opacity','zoom'];
-    function checkNumberValue(name, value){
+    function checkCssValue(name, value){
         for(var i in numberNames){
             if(name === numberNames[i]){
                 return value;
             }
         }
         return typeof(value) === 'number'?value + 'px':value;
+    }
+
+    function getStyle(target, name){
+        if(target.style[name]){
+            return target.style[name];
+        }else if(document.defaultView && document.defaultView.getComputedStyle){
+            var _p = hyphenize(name);
+            var _s = document.defaultView.getComputedStyle(target,'');
+            return _s && _s.getPropertyValue(_p);
+        }else if(target.currentStyle){
+            return target.currentStyle[name];
+        }else{
+            return null;
+        }
+    }
+
+    function setStyle(target, params){
+        for(var i in params){
+            target.style[i] = params[i];
+        }
     }
 
     //var isDOM = (typeof HTMLElement === 'object')?
@@ -198,12 +193,12 @@
 
 
     // --------------------------------------------------------------------主体
-    var globalTweens = [];
+    var tweens = [];
     var isUpdating = false;
 
     function globalUpdate() {
         isUpdating = true;
-        var _len = globalTweens.length;
+        var _len = tweens.length;
         if ( _len === 0 ) {
             isUpdating = false;
             return;
@@ -211,8 +206,8 @@
 
         var _time = window.performance.now();
         for(var i = _len-1; i >= 0; i--){
-            if ( !globalTweens[i].update( _time ) ) {
-                var _tween = globalTweens.splice(i, 1)[0];
+            if ( !tweens[i].update( _time ) ) {
+                var _tween = tweens.splice(i, 1)[0];
                 if(_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
                 _tween.target = null;
             }
@@ -222,12 +217,12 @@
     }
 
     //function checkUnique(tween){
-    //    var _len = globalTweens.length;
+    //    var _len = tweens.length;
     //    var i, j, k;
     //    for(i = _len-1; i >= 0; i--){
-    //        if(tween.target == globalTweens[i].target){
+    //        if(tween.target == tweens[i].target){
     //            var k1 = keys(tween.fromVars);
-    //            var k2 = keys(globalTweens[i].fromVars);
+    //            var k2 = keys(tweens[i].fromVars);
     //            var isSame = true;
     //            if(k1.length == k2.length){
     //                for(j in k1){
@@ -239,10 +234,10 @@
     //            }
     //            if(!isSame) continue;
     //
-    //            var _tween = globalTweens.splice(i, 1)[0];
+    //            var _tween = tweens.splice(i, 1)[0];
     //            _tween.update(window.performance.now());
     //            for(k in tween.fromVars){
-    //                tween.fromVars[k] = parseFloat(_tween.isDom ? getStyleValue(_tween.target, k) : _tween.target[k]);
+    //                tween.fromVars[k] = parseFloat(_tween.isDom ? getStyle(_tween.target, k) : _tween.target[k]);
     //            }
     //            _tween.target = null;
     //            break;
@@ -285,7 +280,7 @@
 
             this.restart();
             //checkUnique(this);
-            globalTweens.unshift(this);
+            tweens.unshift(this);
 
             if(!isUpdating)
                 globalUpdate();
@@ -321,7 +316,7 @@
 
                 var _n = _start + ( _end - _start ) * _radio;
                 if(this.isDom){
-                    this.target.style[prop] = checkNumberValue(prop, _n);
+                    this.target.style[prop] = checkCssValue(prop, _n);
                 }else{
                     this.target[prop] = _n;
                 }
@@ -357,7 +352,7 @@
             for(var prop in this.fromVars){
                 var _n = this.fromVars[prop];
                 if(this.isDom){
-                    this.target.style[prop] = checkNumberValue(prop, _n);
+                    this.target.style[prop] = checkCssValue(prop, _n);
                 }else{
                     this.target[prop] = _n;
                 }
@@ -368,15 +363,15 @@
             this.isReverse = !this.isReverse;
         },
         kill: function(toEnd){
-            var i = globalTweens.indexOf(this);
+            var i = tweens.indexOf(this);
             if (i !== -1) {
                 if(toEnd){
-                    var _tween = globalTweens.splice(i, 1)[0];
+                    var _tween = tweens.splice(i, 1)[0];
                     _tween.update(_tween.endTime - _tween.curTime + _tween.lastTime);
                     if(_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
                     _tween.target = null;
                 }else{
-                    var _tween = globalTweens.splice(i, 1)[0];
+                    var _tween = tweens.splice(i, 1)[0];
                     _tween.update(window.performance.now());
                     _tween.target = null;
                 }
@@ -392,9 +387,9 @@
                 _target = _target[0];
             }
             if(isDOM(_target)){
-                var _name = checkDomProp(_target, param);
+                var _name = checkCssName(_target, param);
                 if(_name)
-                    return getStyleValue(_target, _name);
+                    return getStyle(_target, _name);
                 else
                     return null;
             }else{
@@ -408,10 +403,14 @@
                 if(isDOM(obj)){
                     var _params = {};
                     for(var j in params){
-                        var _name = checkDomProp(obj, j);
-                        if(_name) _params[_name] = params[j];
+                        var _name = checkCssName(obj, j);
+                        if(_name){
+                            var _n = parseFloat(getStyle(obj, _name));
+                            _params[_name] = calcValue(_n, params[j]);
+                            _params[_name] = checkCssValue(_name, calcValue(getStyle(obj, _name), params[j]));
+                        }
                     }
-                    setStyleValue(obj, _params);
+                    setStyle(obj, _params);
                 }else{
                     for(var j in params){
                         obj[j] = params[j];
@@ -430,9 +429,9 @@
 
                 for(var j in toVars){
                     if(_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)){
-                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]);
-                        _fromVars[j] = checkValue(_n, fromVars[j]);
-                        _toVars[j] = checkValue(_n, toVars[j]);
+                        var _n = _isDom ? getStyle(obj, j) : obj[j];
+                        _fromVars[j] = calcValue(_n, fromVars[j]);
+                        _toVars[j] = calcValue(_n, toVars[j]);
                     }else{
                         _toVars[j] = toVars[j];
                     }
@@ -459,9 +458,9 @@
 
                 for(var j in fromVars){
                     if(_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)){
-                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]);
+                        var _n = _isDom ? getStyle(obj, j) : obj[j];
                         _toVars[j] = _n;
-                        _fromVars[j] = checkValue(_n, fromVars[j]);
+                        _fromVars[j] = calcValue(_n, fromVars[j]);
                     }else{
                         _toVars[j] = fromVars[j];
                     }
@@ -488,9 +487,9 @@
 
                 for(var j in toVars){
                     if(_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)){
-                        var _n = parseFloat(_isDom ? getStyleValue(obj, j) : obj[j]);
+                        var _n = _isDom ? getStyle(obj, j) : obj[j];
                         _fromVars[j] = _n;
-                        _toVars[j] = checkValue(_n, toVars[j]);
+                        _toVars[j] = calcValue(_n, toVars[j]);
                     }else{
                         _toVars[j] = toVars[j];
                     }
@@ -509,10 +508,10 @@
 
         kill: function(target, toEnd){
             var _target = getElement(target);
-            var _len = globalTweens.length;
+            var _len = tweens.length;
             each(_target, function(index, obj){
                 for(var i = _len-1; i >= 0; i--){
-                    var _tween = globalTweens[i];
+                    var _tween = tweens[i];
                     if(_tween.target === obj){
                         _tween.kill(toEnd);
                     }
@@ -522,13 +521,13 @@
 
         killAll: function(toEnd){
             if(!toEnd){
-                globalTweens = [];
+                tweens = [];
                 return;
             }
 
-            var _len = globalTweens.length;
+            var _len = tweens.length;
             for(var i = _len-1; i >= 0; i--){
-                var _tween = globalTweens[i];
+                var _tween = tweens[i];
                 _tween.kill(toEnd);
             }
         },
@@ -568,10 +567,10 @@
 
     function actionProxy(target, action){
         var _target = getElement(target);
-        var _len = globalTweens.length;
+        var _len = tweens.length;
         each(_target, function(index, obj){
             for(var i = _len-1; i >= 0; i--){
-                var _tween = globalTweens[i];
+                var _tween = tweens[i];
                 if(_tween.target === obj){
                     _tween[action]();
                 }
@@ -580,9 +579,9 @@
     }
 
     function actionProxyAll(action){
-        var _len = globalTweens.length;
+        var _len = tweens.length;
         for(var i = _len-1; i >= 0; i--){
-            var _tween = globalTweens[i];
+            var _tween = tweens[i];
             _tween[action]();
         }
     }
@@ -742,6 +741,8 @@
             }
         }
     });
+
+    initPrefix();
 
     return JT;
 }));

@@ -7,6 +7,8 @@ js tween
 API
 ============
 
+全局tween方法  
+
 JT.get(target, param);  
 JT.set(target, params);  
 JT.fromTo(target, duration, fromParams, toParams);  
@@ -41,7 +43,6 @@ onEndParams设置返回函数的参数
 onUpdate设置每帧渲染时的返回函数，  
 onUpdateParams设置每帧渲染时返回函数的参数，  
 
-
 tween实例方法：
 
 tween.play(); 播放  
@@ -50,6 +51,23 @@ tween.reverse(); 倒播
 tween.restart(); 重播  
 tween.kill([toEnd]); 删除，参数设置是否直接去到终点并出发onEnd
 
+
+
+
+全局call方法  
+
+JT.call(delay, callback, callbackParams);  
+JT.killAllCalls();  
+JT.pauseAllCalls();  
+JT.playAllCalls();  
+JT.restartAllCalls();  
+
+call实例方法：
+
+tween.play(); 播放  
+tween.pause(); 暂停  
+tween.restart(); 重播  
+tween.kill(); 删除
 
 
 缓动类

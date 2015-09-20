@@ -225,14 +225,14 @@
 
         var _time = now();
         for (var i = _len - 1; i >= 0; i--) {
-            if (!tweens[i].update(_time)) {
+            if (tweens[i] && !tweens[i].update(_time)) {
                 var _tween = tweens.splice(i, 1)[0];
                 if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
                 _tween.target = null;
             }
         }
         for (var j = _len2 - 1; j >= 0; j--) {
-            if (!calls[j].update(_time)) {
+            if (calls[j] && !calls[j].update(_time)) {
                 var _call = calls.splice(j, 1)[0];
                 if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
                 _call.target = null;
@@ -394,12 +394,12 @@
             if (i !== -1) {
                 if (toEnd) {
                     var _tween = tweens.splice(i, 1)[0];
-                    _tween.update(_tween.endTime - _tween.curTime + _tween.lastTime);
+                    //_tween.update(_tween.endTime - _tween.curTime + _tween.lastTime);
                     if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
                     _tween.target = null;
                 } else {
                     var _tween = tweens.splice(i, 1)[0];
-                    _tween.update(now());
+                    //_tween.update(now());
                     _tween.target = null;
                 }
             }

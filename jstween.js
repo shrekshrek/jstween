@@ -234,7 +234,7 @@
         for (var j = _len2 - 1; j >= 0; j--) {
             if (!calls[j].update(_time)) {
                 var _call = calls.splice(j, 1)[0];
-                if (_call.onEnd) _call.onEnd.apply(window, _call.onEndParams);
+                if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
                 _call.target = null;
             }
         }
@@ -417,12 +417,13 @@
     extend(call.prototype, {
         init: function (time, callback, params) {
             this.delay = time * 1000;
-            this.onEnd = call || null;
+            this.onEnd = callback || null;
             this.onEndParams = params || [];
 
             this.curTime = 0;
             this.lastTime = now();
             this.endTime = this.delay;
+            this.isPlaying = true;
 
             this.restart();
             calls.unshift(this);
@@ -503,6 +504,7 @@
             });
         },
 
+        //---------------------------------------------------------------tween 全局方法
         fromTo: function (target, time, fromVars, toVars) {
             var _target = getElement(target);
             var _tweens = [];
@@ -648,9 +650,9 @@
             actionProxyAllTweens('reverse');
         },
 
+        //---------------------------------------------------------------call 全局方法
         call: function (time, callback, params) {
-            var _call = new call(time, callback, params);
-            calls.push(_call);
+            return new call(time, callback, params);
         },
 
         killAllCalls: function () {

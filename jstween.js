@@ -594,8 +594,8 @@
 
         kill: function (target, toEnd) {
             var _target = getElement(target);
-            var _len = tweens.length;
             each(_target, function (index, obj) {
+                var _len = tweens.length;
                 for (var i = _len - 1; i >= 0; i--) {
                     var _tween = tweens[i];
                     if (_tween.target === obj) {

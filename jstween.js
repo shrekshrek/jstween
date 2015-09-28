@@ -305,13 +305,15 @@
             this.startTime = this.delay;
             this.endTime = this.startTime + this.duration;
 
-            this.restart();
+            //this.restart();
             //checkUnique(this);
+
             tweens.unshift(this);
 
-            this.update(this.lastTime);
             if (!isUpdating)
                 globalUpdate();
+            else
+                this.update(this.lastTime);
         },
         update: function (time) {
             var _time = time - this.lastTime;
@@ -377,14 +379,8 @@
         },
         restart: function () {
             this.curTime = 0;
-            for (var prop in this.fromVars) {
-                var _n = this.fromVars[prop];
-                if (this.isDom) {
-                    this.target.style[prop] = checkCssValue(prop, _n);
-                } else {
-                    this.target[prop] = _n;
-                }
-            }
+            this.lastTime = now();
+            this.update(this.lastTime);
         },
         reverse: function () {
             this.curTime = this.endTime - this.curTime + this.startTime;

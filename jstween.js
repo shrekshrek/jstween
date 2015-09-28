@@ -281,11 +281,11 @@
             this.fromVars = fromVars;
             this.toVars = toVars;
             this.target = target;
-            this.duration = time * 1000;
+            this.duration = Math.max(time, 0) * 1000;
             this.ease = toVars.ease || JT.Linear.None;
-            this.repeat = toVars.repeat || 1;
+            this.repeat = Math.max(toVars.repeat || 1, 1);
             this.yoyo = toVars.yoyo || false;
-            this.delay = (toVars.delay || 0) * 1000;
+            this.delay = Math.max(toVars.delay || 0, 0) * 1000;
             this.onStart = toVars.onStart || null;
             this.onStartParams = toVars.onStartParams || [];
             this.onIteration = toVars.onIteration || null;
@@ -309,6 +309,7 @@
             //checkUnique(this);
             tweens.unshift(this);
 
+            this.update(this.lastTime);
             if (!isUpdating)
                 globalUpdate();
         },

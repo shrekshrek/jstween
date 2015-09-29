@@ -60,25 +60,25 @@
         });
     });
 
-//    JT.call(1.5, function () {
-//        console.log('aaa');
-//        JT.killAll(true);
-//        JT.to('.b1 #box2', 1, {
-//            marginTop: 300, opacity: 1, ease: JT.Quad.InOut, onEnd: function () {
-//                console.log("complete2");
-//                JT.from('.b1 #box2', 1, {
-//                    marginTop: 100, opacity: 0.5, ease: JT.Quad.Out, onEnd: function () {
-//                        console.log("complete3");
-//                        JT.fromTo('.b1 #box2', 2, {marginLeft: 500, opacity: 0.5}, {
-//                            marginLeft: 400, opacity: 1, ease: JT.Quad.Out, onEnd: function (n) {
-//                                console.log("complete", this, n);
-//                            }, onEndParams: [50]
-//                        });
-//                    }
-//                });
-//            }
-//        });
-//    });
+    JT.call(1.5, function () {
+        console.log('aaa');
+        JT.killAll(true);
+        JT.to('.b1 #box2', 1, {
+            marginTop: 300, opacity: 1, ease: JT.Quad.InOut, onEnd: function () {
+                console.log("complete2");
+                JT.from('.b1 #box2', 1, {
+                    marginTop: 100, opacity: 0.5, ease: JT.Quad.Out, onEnd: function () {
+                        console.log("complete3");
+                        JT.fromTo('.b1 #box2', 2, {marginLeft: 500, opacity: 0.5}, {
+                            marginLeft: 400, opacity: 1, ease: JT.Quad.Out, onEnd: function (n) {
+                                console.log("complete", this, n);
+                            }, onEndParams: [50]
+                        });
+                    }
+                });
+            }
+        });
+    });
 
 </script>
 </body>

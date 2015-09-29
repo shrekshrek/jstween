@@ -283,9 +283,10 @@
             this.target = target;
             this.duration = Math.max(time, 0) * 1000;
             this.ease = toVars.ease || JT.Linear.None;
-            this.repeat = Math.max(toVars.repeat || 1, 1);
-            this.yoyo = toVars.yoyo || false;
             this.delay = Math.max(toVars.delay || 0, 0) * 1000;
+            this.yoyo = toVars.yoyo || false;
+            this.repeat = this.curRepeat = Math.max(toVars.repeat || 0, 0);
+            this.repeatDelay = Math.max(toVars.repeatDelay || 0, 0) * 1000;
             this.onStart = toVars.onStart || null;
             this.onStartParams = toVars.onStartParams || [];
             this.onIteration = toVars.onIteration || null;
@@ -303,7 +304,7 @@
             this.lastTime = now();
             this.isStart = false;
             this.startTime = this.delay;
-            this.endTime = this.startTime + this.duration;
+            this.endTime = this.startTime + this.repeatDelay + this.duration;
 
             //this.restart();
             //checkUnique(this);
@@ -332,7 +333,10 @@
                 if (this.onStart) this.onStart.apply(this.target, this.onStartParams);
             }
 
-            var _elapsed = (this.curTime - this.startTime) / this.duration;
+            if(this.curTime < this.startTime + this.repeatDelay)
+                return true;
+
+            var _elapsed = (this.curTime - this.startTime - this.repeatDelay) / this.duration;
             _elapsed = _elapsed > 1 ? 1 : _elapsed;
 
             if (this.isReverse)
@@ -355,14 +359,14 @@
             if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
 
             if (this.curTime >= this.endTime) {
-                if (this.repeat == 1) {
+                if (this.curRepeat == 0) {
                     return false;
-                } else if (this.repeat > 1) {
+                } else if (this.curRepeat > 0) {
                     if (this.onIteration) this.onIteration.apply(this.target, this.onIterationParams);
-                    this.repeat--;
+                    this.curRepeat--;
                 }
 
-                this.curTime = this.startTime;
+                this.curTime = this.curTime - this.duration - this.repeatDelay;
 
                 if (this.yoyo) {
                     this.isReverse = !this.isReverse;
@@ -379,6 +383,7 @@
         },
         restart: function () {
             this.curTime = 0;
+            this.curRepeat = this.repeat;
             this.lastTime = now();
             this.update(this.lastTime);
         },
@@ -848,7 +853,7 @@
         },
         Bounce: {
             In: function (k) {
-                return 1 - TWEEN.Easing.Bounce.Out(1 - k);
+                return 1 - JT.Bounce.Out(1 - k);
             },
             Out: function (k) {
                 if (k < ( 1 / 2.75 )) {
@@ -862,8 +867,8 @@
                 }
             },
             InOut: function (k) {
-                if (k < 0.5) return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
-                return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+                if (k < 0.5) return JT.Bounce.In(k * 2) * 0.5;
+                return JT.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
             }
         }
     });

@@ -32,6 +32,7 @@ Params为数组，
 ease设置缓动，  
 delay设置延时时间，  
 repeat设置重复次数，  
+repeatDelay设置每次重复的间隔延时时间，  
 yoyo设置重复时反向，  
 isPlaying设置是否立即播放，  
 onStart设置运动开始的返回函数，  

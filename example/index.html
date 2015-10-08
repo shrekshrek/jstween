@@ -46,7 +46,7 @@
 
 <script>
     JT.fromTo('.box', 1, {marginLeft: 400, opacity: 0.5}, {
-        marginLeft: 200, opacity: 1, ease: JT.Quad.Out, onEnd: function () {
+        marginLeft: 200, opacity: 1, repeat:-1, yoyo:true, ease: JT.Quad.Out, onEnd: function () {
             console.log("1 complete");
         }
     });

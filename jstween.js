@@ -285,7 +285,7 @@
             this.ease = toVars.ease || JT.Linear.None;
             this.delay = Math.max(toVars.delay || 0, 0) * 1000;
             this.yoyo = toVars.yoyo || false;
-            this.repeat = this.curRepeat = Math.max(toVars.repeat || 0, 0);
+            this.repeat = this.curRepeat = Math.floor(toVars.repeat || 0);
             this.repeatDelay = Math.max(toVars.repeatDelay || 0, 0) * 1000;
             this.onStart = toVars.onStart || null;
             this.onStartParams = toVars.onStartParams || [];

@@ -227,6 +227,7 @@
         for (var i = _len - 1; i >= 0; i--) {
             if (tweens[i] && !tweens[i].update(_time)) {
                 var _tween = tweens.splice(i, 1)[0];
+                if (_tween.onUpdate) _tween.onUpdate.apply(_tween.target, _tween.onUpdateParams);
                 if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
                 _tween.target = null;
             }
@@ -356,8 +357,6 @@
                 }
             }
 
-            if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
-
             if (this.curTime >= this.endTime) {
                 if (this.curRepeat == 0) {
                     return false;
@@ -372,6 +371,8 @@
                     this.isReverse = !this.isReverse;
                 }
             }
+
+            if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
 
             return true;
         },

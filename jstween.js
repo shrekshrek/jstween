@@ -290,8 +290,8 @@
             this.repeatDelay = Math.max(toVars.repeatDelay || 0, 0) * 1000;
             this.onStart = toVars.onStart || null;
             this.onStartParams = toVars.onStartParams || [];
-            this.onIteration = toVars.onIteration || null;
-            this.onIterationParams = toVars.onIterationParams || [];
+            this.onRepeat = toVars.onRepeat || null;
+            this.onRepeatParams = toVars.onRepeatParams || [];
             this.onEnd = toVars.onEnd || null;
             this.onEndParams = toVars.onEndParams || [];
             this.onUpdate = toVars.onUpdate || null;
@@ -334,11 +334,11 @@
                 if (this.onStart) this.onStart.apply(this.target, this.onStartParams);
             }
 
-            if(this.curTime < this.startTime + this.repeatDelay)
+            if (this.curTime < this.startTime + this.repeatDelay)
                 return true;
 
-            var _elapsed = (this.curTime - this.startTime - this.repeatDelay) / this.duration;
-            _elapsed = _elapsed > 1 ? 1 : _elapsed;
+            var _elapsed = this.duration == 0 ? 1 : ((this.curTime - this.startTime - this.repeatDelay) / this.duration);
+            _elapsed = Math.min(1, _elapsed);
 
             if (this.isReverse)
                 _elapsed = 1 - _elapsed;
@@ -360,9 +360,10 @@
             if (this.curTime >= this.endTime) {
                 if (this.curRepeat == 0) {
                     return false;
-                } else if (this.curRepeat > 0) {
-                    if (this.onIteration) this.onIteration.apply(this.target, this.onIterationParams);
-                    this.curRepeat--;
+                } else {
+                    if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
+                    if (this.onRepeat) this.onRepeat.apply(this.target, this.onRepeatParams);
+                    if (this.curRepeat > 0) this.curRepeat--;
                 }
 
                 this.curTime = this.curTime - this.duration - this.repeatDelay;
@@ -370,9 +371,10 @@
                 if (this.yoyo) {
                     this.isReverse = !this.isReverse;
                 }
+            } else {
+                if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
             }
 
-            if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
 
             return true;
         },

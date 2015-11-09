@@ -228,7 +228,11 @@
             if (tweens[i] && !tweens[i].update(_time)) {
                 var _tween = tweens.splice(i, 1)[0];
                 if (_tween.onUpdate) _tween.onUpdate.apply(_tween.target, _tween.onUpdateParams);
-                if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
+                if (!_tween.isReverse) {
+                    if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
+                } else {
+                    if (_tween.onStart) _tween.onStart.apply(_tween.target, _tween.onStartParams);
+                }
                 _tween.target = null;
             }
         }
@@ -329,7 +333,7 @@
             if (this.curTime < this.startTime)
                 return true;
 
-            if (!this.isStart) {
+            if (!this.isStart && !this.isReverse) {
                 this.isStart = true;
                 if (this.onStart) this.onStart.apply(this.target, this.onStartParams);
             }
@@ -392,6 +396,7 @@
         },
         reverse: function () {
             this.curTime = this.endTime - this.curTime + this.startTime;
+            if (this.repeat > 0) this.curRepeat = this.repeat - this.curRepeat;
             this.isReverse = !this.isReverse;
         },
         kill: function (toEnd) {
@@ -399,12 +404,10 @@
             if (i !== -1) {
                 if (toEnd) {
                     var _tween = tweens.splice(i, 1)[0];
-                    //_tween.update(_tween.endTime - _tween.curTime + _tween.lastTime);
                     if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
                     _tween.target = null;
                 } else {
                     var _tween = tweens.splice(i, 1)[0];
-                    //_tween.update(now());
                     _tween.target = null;
                 }
             }

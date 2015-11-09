@@ -23,7 +23,7 @@
 }(function (root, JT) {
     var previousJsTween = root.JT;
 
-    JT.VERSION = '0.1.0';
+    JT.VERSION = '0.2.0';
 
     JT.noConflict = function () {
         root.JT = previousJsTween;

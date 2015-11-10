@@ -51,7 +51,7 @@
         }
     });
 
-    JT.call(0.9, function(){
+    JT.delayCall(0.9, function(){
         JT.kill('.box');
         JT.to('.box', 3, {
             marginLeft: 100, onEnd: function () {
@@ -60,7 +60,7 @@
         });
     });
 
-    JT.call(1.5, function () {
+    JT.delayCall(1.5, function () {
         console.log('aaa');
         JT.killAll(true);
         JT.to('.b1 #box2', 1, {

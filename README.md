@@ -11,19 +11,25 @@ API
 
 JT.get(target, param);  
 JT.set(target, params);  
+
 JT.fromTo(target, duration, fromParams, toParams);  
 JT.from(target, duration, fromParams);  
 JT.to(target, duration, toParams);  
-JT.kill(target, [toEnd]);  
-JT.killAll([toEnd]);  
-JT.pause(target);  
-JT.pauseAll();  
+
 JT.play(target);  
 JT.playAll();  
-JT.reverse(target);  
-JT.reverseAll();  
+
+JT.pause(target);  
+JT.pauseAll();  
+
 JT.restart(target);  
 JT.restartAll();  
+
+JT.reverse(target);  
+JT.reverseAll();  
+
+JT.kill(target, [toEnd]);  
+JT.killAll([toEnd]);  
 
 param为字符串，  
 Params为数组，
@@ -44,12 +50,13 @@ onEndParams设置返回函数的参数
 onUpdate设置每帧渲染时的返回函数，  
 onUpdateParams设置每帧渲染时返回函数的参数，  
 
+
 tween实例方法：
 
 tween.play(); 播放  
 tween.pause(); 暂停  
-tween.reverse(); 倒播  
 tween.restart(); 重播  
+tween.reverse(); 倒播  
 tween.kill([toEnd]); 删除，参数设置是否直接去到终点并出发onEnd
 
 
@@ -57,18 +64,30 @@ tween.kill([toEnd]); 删除，参数设置是否直接去到终点并出发onEnd
 
 全局call方法  
 
-JT.call(delay, callback, callbackParams);  
-JT.killAllCalls();  
-JT.pauseAllCalls();  
+JT.call(delay, callback, callbackParams);
+
+JT.playCall(callback);  
 JT.playAllCalls();  
+
+JT.pauseCall(callback);  
+JT.pauseAllCalls();  
+
+JT.restartCall(callback);  
 JT.restartAllCalls();  
+
+JT.killCall(callback, [toEnd]);  
+JT.killAllCalls();  
+
 
 call实例方法：
 
-tween.play(); 播放  
-tween.pause(); 暂停  
-tween.restart(); 重播  
-tween.kill(); 删除
+call.play(); 播放  
+call.pause(); 暂停  
+call.restart(); 重播  
+call.reverse(); 倒播  
+call.kill(); 删除
+
+
 
 
 缓动类

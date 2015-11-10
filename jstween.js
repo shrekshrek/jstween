@@ -38,7 +38,9 @@
     }
 
     function each(obj, callback) {
-        if (obj.length === undefined) {
+        if (typeof(obj) === 'function') {
+            callback.call(obj, 0, obj);
+        } else if (obj.length === undefined) {
             callback.call(obj, 0, obj);
         } else {
             for (var i = 0; i < obj.length; i++) {
@@ -61,18 +63,13 @@
 
 
     // --------------------------------------------------------------------time fix
-    var now, nowOffset;
+    var nowOffset = Date.now();
 
-    (function () {
-        Date.now = (Date.now || function () {  // thanks IE8
-            return new Date().getTime();
-        });
+    var now = function () {
+        return Date.now() - nowOffset;
+    };
 
-        nowOffset = Date.now();
-        now = function () {
-            return Date.now() - nowOffset;
-        }
-    }());
+    JT.now = now;
 
     //(function(){
     //    if ("performance" in window == false) {
@@ -113,7 +110,7 @@
             window.setTimeout(callback, 1000 / 60);
         };
 
-    JT.requestAnimationFrame = requestFrame;
+    JT.requestFrame = requestFrame;
 
     function browserPrefix(str) {
         if (str) {
@@ -230,7 +227,7 @@
                 if (_tween.onUpdate) _tween.onUpdate.apply(_tween.target, _tween.onUpdateParams);
                 if (!_tween.isReverse) {
                     if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
-                } else {
+                } else if (_tween.isStart) {
                     if (_tween.onStart) _tween.onStart.apply(_tween.target, _tween.onStartParams);
                 }
                 _tween.target = null;
@@ -239,7 +236,9 @@
         for (var j = _len2 - 1; j >= 0; j--) {
             if (calls[j] && !calls[j].update(_time)) {
                 var _call = calls.splice(j, 1)[0];
-                if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
+                if (!_call.isReverse) {
+                    if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
+                }
                 _call.target = null;
             }
         }
@@ -310,9 +309,6 @@
             this.isStart = false;
             this.startTime = this.delay;
             this.endTime = this.startTime + this.repeatDelay + this.duration;
-
-            //this.restart();
-            //checkUnique(this);
 
             tweens.unshift(this);
 
@@ -415,64 +411,7 @@
     });
 
 
-    // --------------------------------------------------------------------call
-    var calls = [];
-
-    function call() {
-        this.init.apply(this, arguments);
-    }
-
-    extend(call.prototype, {
-        init: function (time, callback, params) {
-            this.delay = time * 1000;
-            this.onEnd = callback || null;
-            this.onEndParams = params || [];
-
-            this.curTime = 0;
-            this.lastTime = now();
-            this.endTime = this.delay;
-            this.isPlaying = true;
-
-            this.restart();
-            calls.unshift(this);
-
-            if (!isUpdating)
-                globalUpdate();
-        },
-        update: function (time) {
-            var _time = time - this.lastTime;
-            this.lastTime = time;
-
-            if (!this.isPlaying)
-                return true;
-
-            this.curTime += _time;
-
-            if (this.curTime < this.endTime)
-                return true;
-
-            return false;
-        },
-        play: function () {
-            this.isPlaying = true;
-        },
-        pause: function () {
-            this.isPlaying = false;
-        },
-        restart: function () {
-            this.curTime = 0;
-        },
-        kill: function () {
-            var i = calls.indexOf(this);
-            if (i !== -1) {
-                var _call = calls.splice(i, 1)[0];
-                _call.target = null;
-            }
-        }
-    });
-
-
-    // --------------------------------------------------------------------主要方法
+    // --------------------------------------------------------------------tween 全局方法
     extend(JT, {
         get: function (target, param) {
             var _target = getElement(target);
@@ -512,7 +451,6 @@
             });
         },
 
-        //---------------------------------------------------------------tween 全局方法
         fromTo: function (target, time, fromVars, toVars) {
             var _target = getElement(target);
             var _tweens = [];
@@ -656,31 +594,6 @@
 
         reverseAll: function () {
             actionProxyAllTweens('reverse');
-        },
-
-        //---------------------------------------------------------------call 全局方法
-        call: function (time, callback, params) {
-            return new call(time, callback, params);
-        },
-
-        killAllCalls: function () {
-            var _len = calls.length;
-            for (var i = _len - 1; i >= 0; i--) {
-                var _call = calls[i];
-                _call.kill();
-            }
-        },
-
-        playAllCalls: function () {
-            actionProxyAllCalls('play');
-        },
-
-        pauseAllCalls: function () {
-            actionProxyAllCalls('pause');
-        },
-
-        restartAllCalls: function () {
-            actionProxyAllCalls('restart');
         }
 
     });
@@ -704,6 +617,148 @@
             var _tween = tweens[i];
             _tween[action]();
         }
+    }
+
+
+    // --------------------------------------------------------------------call
+    var calls = [];
+
+    function call() {
+        this.init.apply(this, arguments);
+    }
+
+    extend(call.prototype, {
+        init: function (time, callback, params) {
+            this.delay = time * 1000;
+            this.onEnd = callback || null;
+            this.onEndParams = params || [];
+
+            this.isReverse = false;
+
+            this.curTime = 0;
+            this.lastTime = now();
+            this.endTime = this.delay;
+            this.isPlaying = true;
+
+            calls.unshift(this);
+
+            if (!isUpdating)
+                globalUpdate();
+            else
+                this.update(this.lastTime);
+        },
+        update: function (time) {
+            var _time = time - this.lastTime;
+            this.lastTime = time;
+
+            if (!this.isPlaying)
+                return true;
+
+            this.curTime += _time;
+
+            if (this.curTime < this.endTime)
+                return true;
+
+            return false;
+        },
+        play: function () {
+            this.isPlaying = true;
+        },
+        pause: function () {
+            this.isPlaying = false;
+        },
+        restart: function () {
+            this.curTime = 0;
+        },
+        reverse: function () {
+            this.curTime = this.endTime - this.curTime;
+            this.isReverse = !this.isReverse;
+        },
+        kill: function (toEnd) {
+            var i = calls.indexOf(this);
+            if (i !== -1) {
+                if (toEnd) {
+                    var _call = calls.splice(i, 1)[0];
+                    if (_call.onEnd) _call.onEnd.apply(_call.target, _call.onEndParams);
+                    _call.target = null;
+                } else {
+                    var _call = calls.splice(i, 1)[0];
+                    _call.target = null;
+                }
+            }
+        }
+    });
+
+
+    //---------------------------------------------------------------call 全局方法
+    extend(JT, {
+        call: function (time, callback, params) {
+            return new call(time, callback, params);
+        },
+
+        killCall: function (callback, toEnd) {
+            var _target = getElement(callback);
+            var _len = calls.length;
+            each(_target, function (index, obj) {
+                for (var i = _len - 1; i >= 0; i--) {
+                    var _call = calls[i];
+                    if (_call.onEnd === obj) {
+                        _call.kill(toEnd);
+                    }
+                }
+            });
+        },
+
+        killAllCalls: function (toEnd) {
+            if (!toEnd) {
+                calls = [];
+                return;
+            }
+
+            var _len = calls.length;
+            for (var i = _len - 1; i >= 0; i--) {
+                var _call = calls[i];
+                _call.kill(toEnd);
+            }
+        },
+
+        playCall: function (callback) {
+            actionProxyCall(callback, 'play');
+        },
+
+        playAllCalls: function () {
+            actionProxyAllCalls('play');
+        },
+
+        pauseCall: function (callback) {
+            actionProxyCall(callback, 'pause');
+        },
+
+        pauseAllCalls: function () {
+            actionProxyAllCalls('pause');
+        },
+
+        restartCall: function (callback) {
+            actionProxyCall(callback, 'restart');
+        },
+
+        restartAllCalls: function () {
+            actionProxyAllCalls('restart');
+        }
+
+    });
+
+    function actionProxyCall(callback, action) {
+        var _target = getElement(callback);
+        var _len = calls.length;
+        each(_target, function (index, obj) {
+            for (var i = _len - 1; i >= 0; i--) {
+                var _call = calls[i];
+                if (_call.onEnd === obj) {
+                    _call[action]();
+                }
+            }
+        });
     }
 
     function actionProxyAllCalls(action) {

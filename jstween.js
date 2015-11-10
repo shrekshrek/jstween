@@ -744,6 +744,14 @@
 
         restartAllCalls: function () {
             actionProxyAllCalls('restart');
+        },
+
+        reverseCall: function (callback) {
+            actionProxyCall(callback, 'reverse');
+        },
+
+        reverseAllCalls: function () {
+            actionProxyAllCalls('reverse');
         }
 
     });

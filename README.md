@@ -75,6 +75,9 @@ JT.pauseAllCalls();
 JT.restartCall(callback);  
 JT.restartAllCalls();  
 
+JT.reverseCall(callback);  
+JT.reverseAllCalls();  
+
 JT.killCall(callback, [toEnd]);  
 JT.killAllCalls();  
 

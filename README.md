@@ -25,9 +25,6 @@ JT.pauseAll();
 JT.restart(target);  
 JT.restartAll();  
 
-JT.reverse(target);  
-JT.reverseAll();  
-
 JT.kill(target, [toEnd]);  
 JT.killAll([toEnd]);  
 
@@ -56,7 +53,6 @@ tween实例方法：
 tween.play(); 播放  
 tween.pause(); 暂停  
 tween.restart(); 重播  
-tween.reverse(); 倒播  
 tween.kill([toEnd]); 删除，参数设置是否直接去到终点并出发onEnd
 
 
@@ -75,9 +71,6 @@ JT.pauseAllCalls();
 JT.restartCall(callback);  
 JT.restartAllCalls();  
 
-JT.reverseCall(callback);  
-JT.reverseAllCalls();  
-
 JT.killCall(callback, [toEnd]);  
 JT.killAllCalls();  
 
@@ -87,7 +80,6 @@ call实例方法：
 call.play(); 播放  
 call.pause(); 暂停  
 call.restart(); 重播  
-call.reverse(); 倒播  
 call.kill(); 删除
 
 

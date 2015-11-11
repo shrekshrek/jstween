@@ -225,21 +225,14 @@
             if (tweens[i] && !tweens[i].update(_time)) {
                 var _tween = tweens.splice(i, 1)[0];
                 if (_tween.onUpdate) _tween.onUpdate.apply(_tween.target, _tween.onUpdateParams);
-                if (!_tween.isReverse) {
-                    if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
-                } else if (_tween.isStart) {
-                    if (_tween.onStart) _tween.onStart.apply(_tween.target, _tween.onStartParams);
-                }
+                if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
                 _tween.target = null;
             }
         }
         for (var j = _len2 - 1; j >= 0; j--) {
             if (calls[j] && !calls[j].update(_time)) {
                 var _call = calls.splice(j, 1)[0];
-                if (!_call.isReverse) {
-                    if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
-                }
-                _call.target = null;
+                if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
             }
         }
 
@@ -277,11 +270,11 @@
 
     // --------------------------------------------------------------------tween
     function tween() {
-        this.init.apply(this, arguments);
+        this.initialize.apply(this, arguments);
     }
 
     extend(tween.prototype, {
-        init: function (target, time, fromVars, toVars, isDom) {
+        initialize: function (target, time, fromVars, toVars, isDom) {
             this.fromVars = fromVars;
             this.toVars = toVars;
             this.target = target;
@@ -329,7 +322,7 @@
             if (this.curTime < this.startTime)
                 return true;
 
-            if (!this.isStart && !this.isReverse) {
+            if (!this.isStart) {
                 this.isStart = true;
                 if (this.onStart) this.onStart.apply(this.target, this.onStartParams);
             }
@@ -389,11 +382,6 @@
             this.curRepeat = this.repeat;
             this.lastTime = now();
             this.update(this.lastTime);
-        },
-        reverse: function () {
-            this.curTime = this.endTime - this.curTime + this.startTime;
-            if (this.repeat > 0) this.curRepeat = this.repeat - this.curRepeat;
-            this.isReverse = !this.isReverse;
         },
         kill: function (toEnd) {
             var i = tweens.indexOf(this);
@@ -586,14 +574,6 @@
 
         restartAll: function () {
             actionProxyAllTweens('restart');
-        },
-
-        reverse: function (target) {
-            actionProxyTween(target, 'reverse');
-        },
-
-        reverseAll: function () {
-            actionProxyAllTweens('reverse');
         }
 
     });
@@ -624,21 +604,19 @@
     var calls = [];
 
     function call() {
-        this.init.apply(this, arguments);
+        this.initialize.apply(this, arguments);
     }
 
     extend(call.prototype, {
-        init: function (time, callback, params) {
+        initialize: function (time, callback, params, isPlaying) {
             this.delay = time * 1000;
             this.onEnd = callback || null;
             this.onEndParams = params || [];
 
-            this.isReverse = false;
-
             this.curTime = 0;
             this.lastTime = now();
             this.endTime = this.delay;
-            this.isPlaying = true;
+            this.isPlaying = isPlaying || true;
 
             calls.unshift(this);
 
@@ -670,20 +648,14 @@
         restart: function () {
             this.curTime = 0;
         },
-        reverse: function () {
-            this.curTime = this.endTime - this.curTime;
-            this.isReverse = !this.isReverse;
-        },
         kill: function (toEnd) {
             var i = calls.indexOf(this);
             if (i !== -1) {
                 if (toEnd) {
                     var _call = calls.splice(i, 1)[0];
-                    if (_call.onEnd) _call.onEnd.apply(_call.target, _call.onEndParams);
-                    _call.target = null;
+                    if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
                 } else {
-                    var _call = calls.splice(i, 1)[0];
-                    _call.target = null;
+                    calls.splice(i, 1)[0];
                 }
             }
         }
@@ -697,7 +669,7 @@
         },
 
         killCall: function (callback, toEnd) {
-            var _target = getElement(callback);
+            var _target = callback;
             var _len = calls.length;
             each(_target, function (index, obj) {
                 for (var i = _len - 1; i >= 0; i--) {
@@ -744,20 +716,12 @@
 
         restartAllCalls: function () {
             actionProxyAllCalls('restart');
-        },
-
-        reverseCall: function (callback) {
-            actionProxyCall(callback, 'reverse');
-        },
-
-        reverseAllCalls: function () {
-            actionProxyAllCalls('reverse');
         }
 
     });
 
     function actionProxyCall(callback, action) {
-        var _target = getElement(callback);
+        var _target = callback;
         var _len = calls.length;
         each(_target, function (index, obj) {
             for (var i = _len - 1; i >= 0; i--) {

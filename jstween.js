@@ -101,17 +101,6 @@
         }
     }());
 
-    var requestFrame = window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.oRequestAnimationFrame ||
-        window.msRequestAnimationFrame ||
-        function (callback) {
-            window.setTimeout(callback, 1000 / 60);
-        };
-
-    JT.requestFrame = requestFrame;
-
     function browserPrefix(str) {
         if (str) {
             return prefix + firstUper(str);
@@ -119,6 +108,12 @@
             return prefix;
         }
     }
+
+    var requestFrame = window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame;
 
 
     // --------------------------------------------------------------------dom style相关方法
@@ -655,7 +650,7 @@
                     var _call = calls.splice(i, 1)[0];
                     if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
                 } else {
-                    calls.splice(i, 1)[0];
+                    calls.splice(i, 1);
                 }
             }
         }

@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="js/TweenMax.min.js"></script>
+    <script src="js/stats.min.js"></script>
+    <style>
+        body {
+            background: #000;
+            font-size: 14px;
+        }
+
+        #main{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0px;
+            top:0px;
+            overflow: hidden;
+        }
+
+        .dot {
+            width: 1px;
+            height: 1px;
+            position: absolute;
+            background: #fff;
+        }
+
+    </style>
+</head>
+<body>
+<div id="main"></div>
+<script>
+    var main = document.getElementById('main');
+    var stats;
+    function init() {
+        stats = new Stats();
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.top = '0px';
+        stats.domElement.style.zIndex = 100;
+        main.appendChild(stats.domElement);
+
+        setInterval(function () {
+            for (var i = 0; i < 10; i++) {
+                var _dot = document.createElement('div');
+                _dot.className = 'dot';
+                main.appendChild(_dot);
+
+                TweenMax.fromTo(_dot, 2, {left: 0, top: Math.random() * window.innerHeight}, {
+                    left: window.innerWidth, top: Math.random() * window.innerHeight, ease:Quad.easeInOut, onComplete: function () {
+                        main.removeChild(this.target);
+                    }
+                });
+            }
+        }, 1000 / 60);
+
+    }
+
+    function animate() {
+        requestAnimationFrame( animate );
+        stats.update();
+    }
+
+    init();
+    animate();
+
+
+</script>
+</body>
+</html>

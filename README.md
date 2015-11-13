@@ -104,4 +104,9 @@ JT.Bounce
 
 以上方法和参数均是参考TweenLite的方式，有使用经验者会很容易上手。
 
+example中有和tweenmax的效率对比,数据差不多,所以不用担心效率会差.
+
+如果有大量基于时间线的tween动画需求,可以使用扩展库jstimeline
+https://github.com/shrekshrek/jstimeline
+
 

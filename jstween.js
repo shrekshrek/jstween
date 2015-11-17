@@ -158,15 +158,18 @@
         return value2;
     }
 
-    var numberNames = ['fontWeight', 'lineHeight', 'opacity', 'zoom'];
-
     function checkCssValue(name, value) {
-        for (var i in numberNames) {
-            if (name === numberNames[i]) {
+        switch(name){
+            case 'opacity':
+            case 'fontWeight':
+            case 'lineHeight':
+            case 'zoom':
                 return value;
-            }
+                break;
+            default:
+                return value + 'px';
+                break;
         }
-        return typeof(value) === 'number' ? value + 'px' : value;
     }
 
     function getStyle(target, name) {
@@ -233,35 +236,6 @@
 
         requestFrame(globalUpdate);
     }
-
-    //function checkUnique(tween){
-    //    var _len = tweens.length;
-    //    var i, j, k;
-    //    for(i = _len-1; i >= 0; i--){
-    //        if(tween.target == tweens[i].target){
-    //            var k1 = keys(tween.fromVars);
-    //            var k2 = keys(tweens[i].fromVars);
-    //            var isSame = true;
-    //            if(k1.length == k2.length){
-    //                for(j in k1){
-    //                    if(k1[j] != k2[j]){
-    //                        isSame = false;
-    //                        break;
-    //                    }
-    //                }
-    //            }
-    //            if(!isSame) continue;
-    //
-    //            var _tween = tweens.splice(i, 1)[0];
-    //            _tween.update(now());
-    //            for(k in tween.fromVars){
-    //                tween.fromVars[k] = parseFloat(_tween.isDom ? getStyle(_tween.target, k) : _tween.target[k]);
-    //            }
-    //            _tween.target = null;
-    //            break;
-    //        }
-    //    }
-    //}
 
     // --------------------------------------------------------------------tween
     function tween() {
@@ -331,7 +305,7 @@
             if (this.isReverse)
                 _elapsed = 1 - _elapsed;
 
-            var _radio = parseFloat(this.ease(_elapsed));
+            var _radio = this.ease(_elapsed);
 
             for (var prop in this.fromVars) {
                 var _start = this.fromVars[prop];
@@ -362,7 +336,6 @@
             } else {
                 if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
             }
-
 
             return true;
         },

@@ -161,13 +161,9 @@
     function checkCssValue(name, value) {
         switch(name){
             case 'opacity':
-            case 'fontWeight':
-            case 'lineHeight':
-            case 'zoom':
-                return value;
-                break;
+                return parseInt(value*10)/10;
             default:
-                return value + 'px';
+                return parseInt(value) + 'px';
                 break;
         }
     }
@@ -211,15 +207,15 @@
 
     function globalUpdate() {
         isUpdating = true;
-        var _len = tweens.length;
-        var _len2 = calls.length;
+        var _len = tweens.length,i;
+        var _len2 = calls.length,j;
         if (_len === 0 && _len2 === 0) {
             isUpdating = false;
             return;
         }
 
         var _time = now();
-        for (var i = _len - 1; i >= 0; i--) {
+        for (i = _len - 1; i >= 0; i--) {
             if (tweens[i] && !tweens[i].update(_time)) {
                 var _tween = tweens.splice(i, 1)[0];
                 if (_tween.onUpdate) _tween.onUpdate.apply(_tween.target, _tween.onUpdateParams);
@@ -227,7 +223,7 @@
                 _tween.target = null;
             }
         }
-        for (var j = _len2 - 1; j >= 0; j--) {
+        for (j = _len2 - 1; j >= 0; j--) {
             if (calls[j] && !calls[j].update(_time)) {
                 var _call = calls.splice(j, 1)[0];
                 if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);

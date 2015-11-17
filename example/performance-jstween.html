@@ -46,8 +46,9 @@
                 _dot.className = 'dot';
                 main.appendChild(_dot);
 
-                JT.fromTo(_dot, 2, {left: 0, top: Math.random() * window.innerHeight}, {
+                JT.fromTo(_dot, 2, {opacity: 1, left: 0, top: Math.random() * window.innerHeight}, {
                     repeat: -1,
+                    opacity: 0,
                     left: window.innerWidth,
                     top: Math.random() * window.innerHeight,
                     ease: JT.Linear.None

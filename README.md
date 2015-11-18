@@ -112,7 +112,7 @@ JT.Bounce
 19-21fps:http://shrek.imdevsh.com/demo/performance/test1/tweenmax.html  
 17-18fps:http://shrek.imdevsh.com/demo/performance/test1/csstween.html  
 
-测试2:无限创建测试,每10ms生成10个div白点,运动2s后结束自删除,峰值全屏1200个白点  
+测试2:无限创建测试,每秒60帧,每帧生成10个div白点,运动2s后结束自删除,峰值全屏1200个白点  
 28-30fps:http://shrek.imdevsh.com/demo/performance/test2/jstween.html  
 26-28fps:http://shrek.imdevsh.com/demo/performance/test2/tweenmax.html  
 0-11fps:http://shrek.imdevsh.com/demo/performance/test2/csstween.html  

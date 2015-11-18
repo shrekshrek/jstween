@@ -159,19 +159,23 @@
     }
 
     function checkCssValue(name, value) {
-        switch(name){
+        switch (name) {
             case 'opacity':
-                return parseInt(value*10)/10;
+            case 'fontWeight':
+            case 'lineHeight':
+            case 'zoom':
+                return value;
             default:
-                return parseInt(value) + 'px';
+                return Math.round(value) + 'px';
                 break;
         }
     }
 
     function getStyle(target, name) {
-        if (target.style[name]) {
-            return target.style[name];
-        } else if (document.defaultView && document.defaultView.getComputedStyle) {
+        //if (target.style[name]) {
+        //    return target.style[name];
+        //} else
+        if (document.defaultView && document.defaultView.getComputedStyle) {
             var _p = hyphenize(name);
             var _s = document.defaultView.getComputedStyle(target, '');
             return _s && _s.getPropertyValue(_p);
@@ -207,8 +211,8 @@
 
     function globalUpdate() {
         isUpdating = true;
-        var _len = tweens.length,i;
-        var _len2 = calls.length,j;
+        var _len = tweens.length, i;
+        var _len2 = calls.length, j;
         if (_len === 0 && _len2 === 0) {
             isUpdating = false;
             return;
@@ -308,6 +312,8 @@
                 var _end = this.toVars[prop] || 0;
 
                 var _n = _start + ( _end - _start ) * _radio;
+                _n = Math.round(_n * 100) / 100;
+
                 if (this.isDom) {
                     this.target.style[prop] = checkCssValue(prop, _n);
                 } else {

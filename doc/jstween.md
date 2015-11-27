@@ -108,7 +108,7 @@ JT.Bounce
 性能测试
 ============
 测试1:repeat无限循环测试,全屏1200个div白点  
-19-21fps:http://shrek.imdevsh.com/demo/performance/test1/jstween.html  
+18-19fps:http://shrek.imdevsh.com/demo/performance/test1/jstween.html  
 19-21fps:http://shrek.imdevsh.com/demo/performance/test1/tweenmax.html  
 17-18fps:http://shrek.imdevsh.com/demo/performance/test1/csstween.html  
 

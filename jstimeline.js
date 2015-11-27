@@ -58,7 +58,7 @@
 
         var _time = JT.now();
         for (var i = _len - 1; i >= 0; i--) {
-            timelines[i].update(_time);
+            timelines[i]._update(_time);
         }
 
         requestFrame(globalUpdate);
@@ -85,7 +85,7 @@
 
         },
 
-        update: function (time) {
+        _update: function (time) {
             var _time = time - this.lastTime;
             this.lastTime = time;
 
@@ -102,7 +102,7 @@
             if (!isUpdating)
                 globalUpdate();
             else
-                this.update(this.lastTime);
+                this._update(this.lastTime);
         },
 
         _removeSelf: function () {
@@ -272,7 +272,7 @@
 
             if (position !== undefined) {
                 this.seek(position);
-                this.update(this.lastTime);
+                this._update(this.lastTime);
             }
         },
 

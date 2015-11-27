@@ -1,6 +1,6 @@
 /*!
- * VERSION: 0.2.0
- * DATE: 2015-09-20
+ * VERSION: 0.3.0
+ * DATE: 2015-11-28
  * GIT:https://github.com/shrekshrek/jstween
  *
  * @author: Shrek.wang, shrekshrek@gmail.com
@@ -23,7 +23,7 @@
 }(function (root, JT) {
     var previousJsTween = root.JT;
 
-    JT.VERSION = '0.2.0';
+    JT.VERSION = '0.3.0';
 
     JT.noConflict = function () {
         root.JT = previousJsTween;
@@ -324,15 +324,6 @@
             this.isPlaying = false;
         },
 
-        restart: function () {
-            if (!this.target) throw 'this tween is over!';
-
-            this.curTime = 0;
-            this.curRepeat = this.repeat;
-            this.lastTime = now();
-            this._update(this.lastTime);
-        },
-
         kill: function (toEnd) {
             if (!this.target) throw 'this tween is over!';
 
@@ -513,14 +504,6 @@
 
         pauseAll: function () {
             actionProxyAllTweens('pause');
-        },
-
-        restart: function (target) {
-            actionProxyTween(target, 'restart');
-        },
-
-        restartAll: function () {
-            actionProxyAllTweens('restart');
         }
 
     });
@@ -587,9 +570,6 @@
         pause: function () {
             this.isPlaying = false;
         },
-        restart: function () {
-            this.curTime = 0;
-        },
         kill: function (toEnd) {
             var i = calls.indexOf(this);
             if (i !== -1) {
@@ -646,14 +626,6 @@
 
         pauseAllCalls: function () {
             actionProxyAllCalls('pause');
-        },
-
-        restartCall: function (callback) {
-            actionProxyCall(callback, 'restart');
-        },
-
-        restartAllCalls: function () {
-            actionProxyAllCalls('restart');
         }
 
     });

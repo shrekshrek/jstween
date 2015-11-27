@@ -52,7 +52,6 @@ tween实例方法：
 
 tween.play(); 播放  
 tween.pause(); 暂停  
-tween.restart(); 重播  
 tween.kill([toEnd]); 删除，参数设置是否直接去到终点并出发onEnd
 
 
@@ -68,9 +67,6 @@ JT.playAllCalls();
 JT.pauseCall(callback);  
 JT.pauseAllCalls();  
 
-JT.restartCall(callback);  
-JT.restartAllCalls();  
-
 JT.killCall(callback, [toEnd]);  
 JT.killAllCalls();  
 
@@ -79,7 +75,6 @@ call实例方法：
 
 call.play(); 播放  
 call.pause(); 暂停  
-call.restart(); 重播  
 call.kill(); 删除
 
 

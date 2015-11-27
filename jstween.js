@@ -71,21 +71,6 @@
 
     JT.now = now;
 
-    //(function(){
-    //    if ("performance" in window == false) {
-    //        window.performance = {};
-    //    }
-    //    Date.now = (Date.now || function () {  // thanks IE8
-    //        return new Date().getTime();
-    //    });
-    //    if ("now" in window.performance == false){
-    //        var nowOffset = Date.now();
-    //        now = function now(){
-    //            return Date.now() - nowOffset;
-    //        }
-    //    }
-    //}());
-
     // --------------------------------------------------------------------prefix
     var prefix = '';
 
@@ -172,9 +157,6 @@
     }
 
     function getStyle(target, name) {
-        //if (target.style[name]) {
-        //    return target.style[name];
-        //} else
         if (document.defaultView && document.defaultView.getComputedStyle) {
             var _p = hyphenize(name);
             var _s = document.defaultView.getComputedStyle(target, '');
@@ -191,14 +173,6 @@
             target.style[i] = params[i];
         }
     }
-
-    //var isDOM = (typeof HTMLElement === 'object')?
-    //    function(obj){
-    //        return obj instanceof HTMLElement;
-    //    }:
-    //    function(obj){
-    //        return obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
-    //    };
 
     function isDOM(obj) {
         return obj.style !== undefined;
@@ -220,7 +194,7 @@
 
         var _time = now();
         for (i = _len - 1; i >= 0; i--) {
-            if (tweens[i] && !tweens[i].update(_time)) {
+            if (tweens[i] && !tweens[i]._update(_time)) {
                 var _tween = tweens.splice(i, 1)[0];
                 if (_tween.onUpdate) _tween.onUpdate.apply(_tween.target, _tween.onUpdateParams);
                 if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
@@ -228,7 +202,7 @@
             }
         }
         for (j = _len2 - 1; j >= 0; j--) {
-            if (calls[j] && !calls[j].update(_time)) {
+            if (calls[j] && !calls[j]._update(_time)) {
                 var _call = calls.splice(j, 1)[0];
                 if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
             }
@@ -273,37 +247,56 @@
             this.endTime = this.startTime + this.repeatDelay + this.duration;
 
             tweens.unshift(this);
-
-            if (!isUpdating)
-                globalUpdate();
-            else
-                this.update(this.lastTime);
+            if (!isUpdating) globalUpdate();
+            else this._update(this.lastTime);
         },
-        update: function (time) {
+        _update: function (time) {
             var _time = time - this.lastTime;
             this.lastTime = time;
 
-            if (!this.isPlaying)
-                return true;
+            if (!this.isPlaying) return true;
 
             this.curTime += _time;
 
-            if (this.curTime < this.startTime)
-                return true;
+            if (this.curTime < this.startTime) return true;
 
             if (!this.isStart) {
                 this.isStart = true;
                 if (this.onStart) this.onStart.apply(this.target, this.onStartParams);
             }
 
-            if (this.curTime < this.startTime + this.repeatDelay)
-                return true;
+            if (this.curTime < this.startTime + this.repeatDelay) return true;
 
+            //this._updateProp();
+
+            if (this.curTime < this.endTime){
+                this._updateProp();
+                if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
+            }else{
+                if (this.curRepeat == 0){
+                    this._updateProp();
+                    return false;
+                }
+
+                this.curTime = this.curTime - this.duration - this.repeatDelay;
+
+                if (this.yoyo) this.isReverse = !this.isReverse;
+
+                this._updateProp();
+
+                if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
+                if (this.onRepeat) this.onRepeat.apply(this.target, this.onRepeatParams);
+                if (this.curRepeat > 0) this.curRepeat--;
+            }
+
+            return true;
+        },
+
+        _updateProp: function () {
             var _elapsed = this.duration == 0 ? 1 : ((this.curTime - this.startTime - this.repeatDelay) / this.duration);
             _elapsed = Math.min(1, _elapsed);
 
-            if (this.isReverse)
-                _elapsed = 1 - _elapsed;
+            if (this.isReverse) _elapsed = 1 - _elapsed;
 
             var _radio = this.ease(_elapsed);
 
@@ -314,56 +307,40 @@
                 var _n = _start + ( _end - _start ) * _radio;
                 _n = Math.round(_n * 100) / 100;
 
-                if (this.isDom) {
-                    this.target.style[prop] = checkCssValue(prop, _n);
-                } else {
-                    this.target[prop] = _n;
-                }
+                if (this.isDom) this.target.style[prop] = checkCssValue(prop, _n);
+                else this.target[prop] = _n;
             }
-
-            if (this.curTime >= this.endTime) {
-                if (this.curRepeat == 0) {
-                    return false;
-                } else {
-                    if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
-                    if (this.onRepeat) this.onRepeat.apply(this.target, this.onRepeatParams);
-                    if (this.curRepeat > 0) this.curRepeat--;
-                }
-
-                this.curTime = this.curTime - this.duration - this.repeatDelay;
-
-                if (this.yoyo) {
-                    this.isReverse = !this.isReverse;
-                }
-            } else {
-                if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
-            }
-
-            return true;
         },
+
         play: function () {
+            if (!this.target) throw 'this tween is over!';
+
             this.isPlaying = true;
         },
+
         pause: function () {
+            if (!this.target) throw 'this tween is over!';
+
             this.isPlaying = false;
         },
+
         restart: function () {
+            if (!this.target) throw 'this tween is over!';
+
             this.curTime = 0;
             this.curRepeat = this.repeat;
             this.lastTime = now();
-            this.update(this.lastTime);
+            this._update(this.lastTime);
         },
+
         kill: function (toEnd) {
+            if (!this.target) throw 'this tween is over!';
+
             var i = tweens.indexOf(this);
             if (i !== -1) {
-                if (toEnd) {
-                    var _tween = tweens.splice(i, 1)[0];
-                    if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
-                    _tween.target = null;
-                } else {
-                    var _tween = tweens.splice(i, 1)[0];
-                    _tween.target = null;
-                }
+                var _tween = tweens.splice(i, 1)[0];
+                if (toEnd && _tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
+                this.target = null;
             }
         }
     });
@@ -589,23 +566,18 @@
             this.isPlaying = isPlaying || true;
 
             calls.unshift(this);
-
-            if (!isUpdating)
-                globalUpdate();
-            else
-                this.update(this.lastTime);
+            if (!isUpdating) globalUpdate();
+            else this._update(this.lastTime);
         },
-        update: function (time) {
+        _update: function (time) {
             var _time = time - this.lastTime;
             this.lastTime = time;
 
-            if (!this.isPlaying)
-                return true;
+            if (!this.isPlaying) return true;
 
             this.curTime += _time;
 
-            if (this.curTime < this.endTime)
-                return true;
+            if (this.curTime < this.endTime) return true;
 
             return false;
         },
@@ -621,12 +593,8 @@
         kill: function (toEnd) {
             var i = calls.indexOf(this);
             if (i !== -1) {
-                if (toEnd) {
-                    var _call = calls.splice(i, 1)[0];
-                    if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
-                } else {
-                    calls.splice(i, 1);
-                }
+                var _call = calls.splice(i, 1)[0];
+                if (toEnd && _call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
             }
         }
     });

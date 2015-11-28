@@ -313,19 +313,19 @@
         },
 
         play: function () {
-            if (!this.target) throw 'this tween is over!';
+            if (!this.target) return;
 
             this.isPlaying = true;
         },
 
         pause: function () {
-            if (!this.target) throw 'this tween is over!';
+            if (!this.target) return;
 
             this.isPlaying = false;
         },
 
         kill: function (toEnd) {
-            if (!this.target) throw 'this tween is over!';
+            if (!this.target) return;
 
             var i = tweens.indexOf(this);
             if (i !== -1) {

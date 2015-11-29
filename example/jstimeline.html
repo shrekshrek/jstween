@@ -49,8 +49,10 @@
     var tl = JTL.create();
 
     tl.from('#box1', 1, {marginLeft:300});
-    tl.to('#box2', 1, {marginLeft:300}, '+=0.5');
-    tl.fromTo('#box3', 1, {marginLeft:300}, {marginLeft:500}, '-=0.5');
+    tl.from('#box2', 1, {marginLeft:300}, '+=0.5');
+    tl.fromTo('#box3', 3, {marginLeft:300}, {marginLeft:500, onEnd:function(){
+        console.log(this.target);
+    }}, '-=0.5');
     tl.add(function(){
         JT.to('#box1', 1, {marginLeft:0});
     }, '+=1');
@@ -58,9 +60,17 @@
     tl.fromTo('#box2', 1, {marginLeft:500}, {marginLeft:600}, 'l1');
     tl.fromTo('#box3', 1, {marginLeft:300}, {marginLeft:500});
     tl.add(function(){
+        console.log('pause');
+        tl.pause();
+        setTimeout(function(){
+            console.log('play');
+            tl.play();
+        },2000);
+    }, '-=1.5');
+    tl.add(function(){
         console.log('again');
         tl.play(0);
-    }, '+=1.5');
+    }, '+=4.5');
 
     tl.play();
 

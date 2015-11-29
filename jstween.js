@@ -196,15 +196,15 @@
         for (i = _len - 1; i >= 0; i--) {
             if (tweens[i] && !tweens[i]._update(_time)) {
                 var _tween = tweens.splice(i, 1)[0];
-                if (_tween.onUpdate) _tween.onUpdate.apply(_tween.target, _tween.onUpdateParams);
-                if (_tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
+                if (_tween.onUpdate) _tween.onUpdate.apply(_tween, _tween.onUpdateParams);
+                if (_tween.onEnd) _tween.onEnd.apply(_tween, _tween.onEndParams);
                 _tween.target = null;
             }
         }
         for (j = _len2 - 1; j >= 0; j--) {
             if (calls[j] && !calls[j]._update(_time)) {
                 var _call = calls.splice(j, 1)[0];
-                if (_call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
+                if (_call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
             }
         }
 
@@ -262,7 +262,7 @@
 
             if (!this.isStart) {
                 this.isStart = true;
-                if (this.onStart) this.onStart.apply(this.target, this.onStartParams);
+                if (this.onStart) this.onStart.apply(this, this.onStartParams);
             }
 
             if (this.curTime < this.startTime + this.repeatDelay) return true;
@@ -271,7 +271,7 @@
 
             if (this.curTime < this.endTime){
                 this._updateProp();
-                if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
+                if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
             }else{
                 if (this.curRepeat == 0){
                     this._updateProp();
@@ -284,8 +284,8 @@
 
                 this._updateProp();
 
-                if (this.onUpdate) this.onUpdate.apply(this.target, this.onUpdateParams);
-                if (this.onRepeat) this.onRepeat.apply(this.target, this.onRepeatParams);
+                if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
+                if (this.onRepeat) this.onRepeat.apply(this, this.onRepeatParams);
                 if (this.curRepeat > 0) this.curRepeat--;
             }
 
@@ -330,7 +330,7 @@
             var i = tweens.indexOf(this);
             if (i !== -1) {
                 var _tween = tweens.splice(i, 1)[0];
-                if (toEnd && _tween.onEnd) _tween.onEnd.apply(_tween.target, _tween.onEndParams);
+                if (toEnd && _tween.onEnd) _tween.onEnd.apply(_tween, _tween.onEndParams);
                 this.target = null;
             }
         }
@@ -471,7 +471,10 @@
                 for (var i = _len - 1; i >= 0; i--) {
                     var _tween = tweens[i];
                     if (_tween.target === obj) {
-                        _tween.kill(toEnd);
+                        //_tween.kill(toEnd);
+                        tweens.splice(i, 1);
+                        if (toEnd && _tween.onEnd) _tween.onEnd.apply(_tween, _tween.onEndParams);
+                        _tween.target = null;
                     }
                 }
             });
@@ -485,8 +488,9 @@
 
             var _len = tweens.length;
             for (var i = _len - 1; i >= 0; i--) {
-                var _tween = tweens[i];
-                _tween.kill(toEnd);
+                var _tween = tweens.splice(i, 1);
+                if (toEnd && _tween.onEnd) _tween.onEnd.apply(_tween, _tween.onEndParams);
+                _tween.target = null;
             }
         },
 
@@ -574,7 +578,7 @@
             var i = calls.indexOf(this);
             if (i !== -1) {
                 var _call = calls.splice(i, 1)[0];
-                if (toEnd && _call.onEnd) _call.onEnd.apply(_call.onEnd, _call.onEndParams);
+                if (toEnd && _call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
             }
         }
     });
@@ -593,7 +597,9 @@
                 for (var i = _len - 1; i >= 0; i--) {
                     var _call = calls[i];
                     if (_call.onEnd === obj) {
-                        _call.kill(toEnd);
+                        //_call.kill(toEnd);
+                        calls.splice(i, 1);
+                        if (toEnd && _call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
                     }
                 }
             });
@@ -607,8 +613,8 @@
 
             var _len = calls.length;
             for (var i = _len - 1; i >= 0; i--) {
-                var _call = calls[i];
-                _call.kill(toEnd);
+                var _call = calls.splice(i, 1);
+                if (toEnd && _call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
             }
         },
 

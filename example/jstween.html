@@ -71,7 +71,7 @@
                         console.log("complete3");
                         JT.fromTo('.b1 #box2', 2, {marginLeft: 500, opacity: 0.5}, {
                             marginLeft: 400, opacity: 1, ease: JT.Quad.Out, onEnd: function (n) {
-                                console.log("complete", this, n);
+                                console.log("complete", this.target, n);
                             }, onEndParams: [50]
                         });
                     }

@@ -1,4 +1,4 @@
-jstween为简单好用的tween类，api参考tweenmax。可对一般对象或者Dom对象使用。
+jstween为简单好用的tween类，api参考tweenlite。可对一般对象或者Dom对象使用。
 
 jstimeline为jstween的扩展库,类似于greensock的TimelineLite,不过功能比较简单,方便编写大量基于时间线的jstween
 

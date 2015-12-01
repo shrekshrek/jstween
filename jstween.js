@@ -69,7 +69,6 @@
         return Date.now() - nowOffset;
     };
 
-    JT.now = now;
 
     // --------------------------------------------------------------------prefix
     var prefix = '';
@@ -324,7 +323,7 @@
             this.isPlaying = false;
         },
 
-        kill: function (toEnd) {
+        destroy: function (toEnd) {
             if (!this.target) return;
 
             var i = tweens.indexOf(this);
@@ -574,7 +573,7 @@
         pause: function () {
             this.isPlaying = false;
         },
-        kill: function (toEnd) {
+        destroy: function (toEnd) {
             var i = calls.indexOf(this);
             if (i !== -1) {
                 var _call = calls.splice(i, 1)[0];
@@ -821,6 +820,8 @@
             }
         }
     });
+
+    JT.now = now;
 
     return JT;
 }));

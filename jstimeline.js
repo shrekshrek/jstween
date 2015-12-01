@@ -248,6 +248,15 @@
             return this;
         },
 
+        kill: function(target, position){
+            var _handler = function () {
+                JT.kill(target);
+            };
+            var _time = this._parseTweenTime(0, {}, position);
+            this._addAnchor(_handler, _time);
+            return this;
+        },
+
         add: function (obj, position) {
             var _time = this._parsePosition(position);
             switch (typeof(obj)) {
@@ -346,7 +355,7 @@
             this.anchors = [];
         },
 
-        kill: function () {
+        destroy: function () {
             this.pause();
             this.clear();
         }
@@ -360,7 +369,7 @@
             return new timeline();
         },
         kill: function (tl) {
-            tl.kill();
+            tl.destroy();
         }
     });
 

@@ -17,6 +17,7 @@ JTL.kill();
 fromTo();  
 from();  
 to();  
+kill();  
 add();  
 addLabel();  
 removeLabel();  
@@ -26,7 +27,7 @@ play();
 pause();  
 seek();  
 clear();  
-kill();  
+destroy();  
 
 
 

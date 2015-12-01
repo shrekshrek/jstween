@@ -175,7 +175,7 @@
     }
 
     function isDOM(obj) {
-        return obj.style !== undefined;
+        return typeof(obj) === 'object' && obj.nodeType === 1;
     }
 
 

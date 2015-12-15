@@ -119,7 +119,7 @@
             if (this.anchorId >= _len) return;
 
             var _handler = this.anchors[this.anchorId];
-            if (this.curTime >= _handler.time) {
+            if (this.curTime >= _handler.time * 1000) {
                 if (this.anchorId == _len - 1) {
                     this._removeSelf();
                     this.isPlaying = false;
@@ -135,10 +135,10 @@
         },
 
         _parseTweenTime: function (time, vars, position) {
-            var _duration = Math.max(time, 0) * 1000;
-            var _delay = Math.max(vars.delay || 0, 0) * 1000;
+            var _duration = Math.max(time, 0);
+            var _delay = Math.max(vars.delay || 0, 0);
             var _repeat = Math.max(0, Math.floor(vars.repeat || 0));
-            var _repeatDelay = Math.max(vars.repeatDelay || 0, 0) * 1000;
+            var _repeatDelay = Math.max(vars.repeatDelay || 0, 0);
             var _totalDuration = _delay + (_repeatDelay + _duration) * (_repeat + 1);
 
             var _startTime = this._parsePosition(position);
@@ -158,7 +158,7 @@
                     if (_a != -1) {
                         var _t = position.substr(0, _a);
                         var _s = position.substr(_a, 2);
-                        var _n = parseInt(parseFloat(position.substr(_a + 2)) * 1000);
+                        var _n = parseFloat(position.substr(_a + 2));
                         switch (_s) {
                             case '+=':
                                 _time = this.getLabelTime(_t) + _n;

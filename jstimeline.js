@@ -154,18 +154,21 @@
             var _time = 0;
             switch (typeof(position)) {
                 case 'string':
-                    var _s = position.substr(0, 2);
-                    var _n = parseInt(parseFloat(position.substr(2)) * 1000);
-                    switch (_s) {
-                        case '+=':
-                            _time = this.labelTime + _n;
-                            break;
-                        case '-=':
-                            _time = this.labelTime - _n;
-                            break;
-                        default:
-                            _time = this.getLabelTime(position);
-                            break;
+                    var _a = Math.max(position.indexOf('+='), position.indexOf('-='));
+                    if (_a != -1) {
+                        var _t = position.substr(0, _a);
+                        var _s = position.substr(_a, 2);
+                        var _n = parseInt(parseFloat(position.substr(_a + 2)) * 1000);
+                        switch (_s) {
+                            case '+=':
+                                _time = this.getLabelTime(_t) + _n;
+                                break;
+                            case '-=':
+                                _time = this.getLabelTime(_t) - _n;
+                                break;
+                        }
+                    } else {
+                        _time = this.getLabelTime(position);
                     }
                     break;
                 case 'number':
@@ -191,11 +194,11 @@
             }
         },
 
-        _addTween: function(tween){
+        _addTween: function (tween) {
             this.tweens.unshift(tween);
         },
 
-        _removeTween: function(tween){
+        _removeTween: function (tween) {
             var i = this.tweens.indexOf(tween);
             if (i !== -1) this.tweens.splice(i, 1);
         },
@@ -203,9 +206,9 @@
         fromTo: function (target, time, fromVars, toVars, position) {
             var _self = this;
             var _end = toVars.onEnd;
-            toVars.onEnd = function(params){
+            toVars.onEnd = function (params) {
                 _self._removeTween(this);
-                if(_end) _end.apply(this, params);
+                if (_end) _end.apply(this, params);
             };
             var _handler = function () {
                 var _tween = JT.fromTo(target, time, fromVars, toVars);
@@ -219,9 +222,9 @@
         from: function (target, time, fromVars, position) {
             var _self = this;
             var _end = fromVars.onEnd;
-            fromVars.onEnd = function(params){
+            fromVars.onEnd = function (params) {
                 _self._removeTween(this);
-                if(_end) _end.apply(this, params);
+                if (_end) _end.apply(this, params);
             };
             var _handler = function () {
                 var _tween = JT.from(target, time, fromVars);
@@ -235,9 +238,9 @@
         to: function (target, time, toVars, position) {
             var _self = this;
             var _end = toVars.onEnd;
-            toVars.onEnd = function(params){
+            toVars.onEnd = function (params) {
                 _self._removeTween(this);
-                if(_end) _end.apply(this, params);
+                if (_end) _end.apply(this, params);
             };
             var _handler = function () {
                 var _tween = JT.to(target, time, toVars);
@@ -248,7 +251,7 @@
             return this;
         },
 
-        kill: function(target, position){
+        kill: function (target, position) {
             var _handler = function () {
                 JT.kill(target);
             };
@@ -300,6 +303,7 @@
                     return _label.time;
                 }
             }
+            return this.labelTime;
         },
 
         totalTime: function () {

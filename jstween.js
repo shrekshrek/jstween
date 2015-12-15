@@ -363,7 +363,7 @@
                         var _name = checkCssName(obj, j);
                         if (_name) {
                             var _n = parseFloat(getStyle(obj, _name));
-                            _params[_name] = calcValue(_n, params[j]);
+                            //_params[_name] = calcValue(_n, params[j]);
                             _params[_name] = checkCssValue(_name, calcValue(getStyle(obj, _name), params[j]));
                         }
                     }

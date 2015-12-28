@@ -277,11 +277,15 @@
                     return false;
                 }
 
-                this.curTime = this.curTime - this.duration - this.repeatDelay;
-
                 if (this.yoyo) this.isReverse = !this.isReverse;
 
-                this._updateProp();
+                if(this.repeatDelay == 0){
+                    this.curTime = this.curTime - this.duration - this.repeatDelay;
+                    this._updateProp();
+                }else{
+                    this._updateProp();
+                    this.curTime = this.curTime - this.duration - this.repeatDelay;
+                }
 
                 if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
                 if (this.onRepeat) this.onRepeat.apply(this, this.onRepeatParams);
@@ -293,7 +297,7 @@
 
         _updateProp: function () {
             var _elapsed = this.duration == 0 ? 1 : ((this.curTime - this.startTime - this.repeatDelay) / this.duration);
-            _elapsed = Math.min(1, _elapsed);
+            _elapsed = Math.max(0, Math.min(1, _elapsed));
 
             if (this.isReverse) _elapsed = 1 - _elapsed;
 

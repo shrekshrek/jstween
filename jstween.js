@@ -370,7 +370,7 @@
                     setStyle(obj, _params);
                 } else {
                     for (var j in params) {
-                        obj[j] = params[j];
+                        obj[j] = calcValue(obj[j], params[j]);
                     }
                 }
             });

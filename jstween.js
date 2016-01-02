@@ -21,15 +21,6 @@
     }
 
 }(function (root, JT) {
-    var previousJsTween = root.JT;
-
-    JT.VERSION = '0.3.0';
-
-    JT.noConflict = function () {
-        root.JT = previousJsTween;
-        return this;
-    };
-
     // --------------------------------------------------------------------辅助方法
     function extend(obj, obj2) {
         for (var prop in obj2) {
@@ -111,15 +102,11 @@
         }
     }
 
-    function checkCssName(dom, name) {
-        if (dom.style[name] !== undefined) {
-            return name;
-        }
+    function checkCssName(target, name) {
+        if (target.style[name] !== undefined) return name;
 
         name = browserPrefix(name);
-        if (dom.style[name] !== undefined) {
-            return name;
-        }
+        if (target.style[name] !== undefined) return name;
 
         return null;
     }
@@ -135,8 +122,6 @@
                 case '-=':
                     value2 = value - _n;
                     break;
-                default:
-                    break;
             }
         }
         return value2;
@@ -150,7 +135,8 @@
             case 'zoom':
                 return value;
             default:
-                return Math.round(value) + 'px';
+                //return Math.round(value) + 'px';
+                return typeof(value) === 'number' ? Math.round(value) + 'px' : value;
                 break;
         }
     }
@@ -169,7 +155,8 @@
 
     function setStyle(target, params) {
         for (var i in params) {
-            target.style[i] = params[i];
+            //target.style[i] = params[i];
+            if(target.style[i] != undefined) target.style[i] = checkCssValue(i, params[i]);
         }
     }
 
@@ -366,8 +353,6 @@
                     for (var j in params) {
                         var _name = checkCssName(obj, j);
                         if (_name) {
-                            var _n = parseFloat(getStyle(obj, _name));
-                            //_params[_name] = calcValue(_n, params[j]);
                             _params[_name] = checkCssValue(_name, calcValue(getStyle(obj, _name), params[j]));
                         }
                     }

@@ -22,15 +22,6 @@
     }
 
 }(function (root, JTL, JT) {
-    var previousJsTimeline = root.JTL;
-
-    JTL.VERSION = '0.1.0';
-
-    JTL.noConflict = function () {
-        root.JTL = previousJsTimeline;
-        return this;
-    };
-
     // --------------------------------------------------------------------辅助方法
     function extend(obj, obj2) {
         for (var prop in obj2) {

@@ -186,7 +186,11 @@
         },
 
         _addTween: function (tween) {
-            this.tweens.unshift(tween);
+            if(tween.length != undefined){
+                for(var i in tween) this.tweens.unshift(tween[i]);
+            }else{
+                this.tweens.unshift(tween);
+            }
         },
 
         _removeTween: function (tween) {
@@ -244,7 +248,7 @@
 
         kill: function (target, position) {
             var _handler = function () {
-                JT.kill(target);
+                JT.kill(target, true);
             };
             var _time = this._parseTweenTime(0, {}, position);
             this._addAnchor(_handler, _time);

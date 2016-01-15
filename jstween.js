@@ -103,7 +103,7 @@
     }
 
     function checkPropName(target, name) {
-        if (target._jtobj_[name] !== undefined) return name;
+        if (target._jt_obj[name] !== undefined) return name;
 
         if (target.style[name] !== undefined) return name;
 
@@ -144,8 +144,8 @@
     }
 
     function checkJtobj(target){
-        if (target._jtobj_ == undefined)
-            target._jtobj_ = {x:0, y:0, z:0, rotationX:0, rotationY:0, rotationZ:0, scaleX:1, scaleY:1, scaleZ:1};
+        if (target._jt_obj == undefined)
+            target._jt_obj = {x:0, y:0, z:0, rotationX:0, rotationY:0, rotationZ:0, scaleX:1, scaleY:1, scaleZ:1};
     }
 
     function getProp(target, name) {
@@ -159,7 +159,7 @@
             case 'scaleX':
             case 'scaleY':
             case 'scaleZ':
-                return target._jtobj_[name];
+                return target._jt_obj[name];
             default:
                 return getStyle(target, name);
         }
@@ -188,7 +188,7 @@
             case 'scaleX':
             case 'scaleY':
             case 'scaleZ':
-                target._jtobj_[name] = value;
+                target._jt_obj[name] = value;
                 return true;
             default:
                 setStyle(target, name, value);
@@ -298,8 +298,6 @@
 
             if (this.curTime < this.startTime + this.repeatDelay) return true;
 
-            //this._updateProp();
-
             if (this.curTime < this.endTime){
                 this._updateProp();
                 if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
@@ -352,7 +350,7 @@
             }
 
             if (_trans)
-                this.target.style[browserPrefix('transform')] = 'translate3d(' + this.target._jtobj_.x + 'px,' + this.target._jtobj_.y + 'px,' + this.target._jtobj_.z + 'px) ' + 'rotateX(' + this.target._jtobj_.rotationX % 360 + 'deg) ' + 'rotateY(' + this.target._jtobj_.rotationY % 360 + 'deg) ' + 'rotateZ(' + this.target._jtobj_.rotationZ % 360 + 'deg) ' + 'scale3d(' + this.target._jtobj_.scaleX + ', ' + this.target._jtobj_.scaleY + ', ' + this.target._jtobj_.scaleZ + ') ';
+                this.target.style[browserPrefix('transform')] = 'translate3d(' + this.target._jt_obj.x + 'px,' + this.target._jt_obj.y + 'px,' + this.target._jt_obj.z + 'px) ' + 'rotateX(' + this.target._jt_obj.rotationX % 360 + 'deg) ' + 'rotateY(' + this.target._jt_obj.rotationY % 360 + 'deg) ' + 'rotateZ(' + this.target._jt_obj.rotationZ % 360 + 'deg) ' + 'scale3d(' + this.target._jt_obj.scaleX + ', ' + this.target._jt_obj.scaleY + ', ' + this.target._jt_obj.scaleZ + ') ';
 
         },
 
@@ -413,7 +411,7 @@
                     }
 
                     if(_trans)
-                        obj.style[browserPrefix('transform')] = 'translate3d(' + obj._jtobj_.x + 'px,' + obj._jtobj_.y + 'px,' + obj._jtobj_.z + 'px) ' + 'rotateX(' + obj._jtobj_.rotationX % 360 + 'deg) ' + 'rotateY(' + obj._jtobj_.rotationY % 360 + 'deg) ' + 'rotateZ(' + obj._jtobj_.rotationZ % 360 + 'deg) ' + 'scale3d(' + obj._jtobj_.scaleX + ', ' + obj._jtobj_.scaleY + ', ' + obj._jtobj_.scaleZ + ') ';
+                        obj.style[browserPrefix('transform')] = 'translate3d(' + obj._jt_obj.x + 'px,' + obj._jt_obj.y + 'px,' + obj._jt_obj.z + 'px) ' + 'rotateX(' + obj._jt_obj.rotationX % 360 + 'deg) ' + 'rotateY(' + obj._jt_obj.rotationY % 360 + 'deg) ' + 'rotateZ(' + obj._jt_obj.rotationZ % 360 + 'deg) ' + 'scale3d(' + obj._jt_obj.scaleX + ', ' + obj._jt_obj.scaleY + ', ' + obj._jt_obj.scaleZ + ') ';
 
                 } else {
                     for (var j in params) {

@@ -102,7 +102,9 @@
         }
     }
 
-    function checkCssName(target, name) {
+    function checkPropName(target, name) {
+        if (target._jtobj_[name] !== undefined) return name;
+
         if (target.style[name] !== undefined) return name;
 
         name = browserPrefix(name);
@@ -141,6 +143,28 @@
         }
     }
 
+    function checkJtobj(target){
+        if (target._jtobj_ == undefined)
+            target._jtobj_ = {x:0, y:0, z:0, rotationX:0, rotationY:0, rotationZ:0, scaleX:1, scaleY:1, scaleZ:1};
+    }
+
+    function getProp(target, name) {
+        switch(name){
+            case 'x':
+            case 'y':
+            case 'z':
+            case 'rotationX':
+            case 'rotationY':
+            case 'rotationZ':
+            case 'scaleX':
+            case 'scaleY':
+            case 'scaleZ':
+                return target._jtobj_[name];
+            default:
+                return getStyle(target, name);
+        }
+    }
+
     function getStyle(target, name) {
         if (document.defaultView && document.defaultView.getComputedStyle) {
             var _p = hyphenize(name);
@@ -153,11 +177,27 @@
         }
     }
 
-    function setStyle(target, params) {
-        for (var i in params) {
-            //target.style[i] = params[i];
-            if(target.style[i] != undefined) target.style[i] = checkCssValue(i, params[i]);
+    function setProp(target, name, value) {
+        switch(name){
+            case 'x':
+            case 'y':
+            case 'z':
+            case 'rotationX':
+            case 'rotationY':
+            case 'rotationZ':
+            case 'scaleX':
+            case 'scaleY':
+            case 'scaleZ':
+                target._jtobj_[name] = value;
+                return true;
+            default:
+                setStyle(target, name, value);
+                return false;
         }
+    }
+
+    function setStyle(target, name, value) {
+        target.style[name] = checkCssValue(name, value);
     }
 
     function isDOM(obj) {
@@ -290,6 +330,8 @@
 
             var _radio = this.ease(_elapsed);
 
+            var _trans = false;
+
             for (var prop in this.fromVars) {
                 var _start = this.fromVars[prop];
                 var _end = this.toVars[prop] || 0;
@@ -297,9 +339,17 @@
                 var _n = _start + ( _end - _start ) * _radio;
                 _n = Math.round(_n * 100) / 100;
 
-                if (this.isDom) this.target.style[prop] = checkCssValue(prop, _n);
-                else this.target[prop] = _n;
+                if (this.isDom){
+                    if(setProp(this.target, prop, _n)) _trans = true;
+                } else {
+                    this.target[prop] = _n;
+                }
             }
+
+            if (_trans){
+                this.target.style[prefix + 'Transform'] = 'translate3d(' + this.target._jtobj_.x + 'px,' + this.target._jtobj_.y + 'px,' + this.target._jtobj_.z + 'px) ' + 'rotateX(' + this.target._jtobj_.rotationX % 360 + 'deg) ' + 'rotateY(' + this.target._jtobj_.rotationY % 360 + 'deg) ' + 'rotateZ(' + this.target._jtobj_.rotationZ % 360 + 'deg) ' + 'scale3d(' + this.target._jtobj_.scaleX + ', ' + this.target._jtobj_.scaleY + ', ' + this.target._jtobj_.scaleZ + ') ';
+            }
+
         },
 
         play: function () {
@@ -335,11 +385,10 @@
                 _target = _target[0];
             }
             if (isDOM(_target)) {
-                var _name = checkCssName(_target, param);
-                if (_name)
-                    return getStyle(_target, _name);
-                else
-                    return null;
+                checkJtobj(_target);
+                var _name = checkPropName(_target, param);
+                if (_name) return getProp(_target, _name);
+                else return null;
             } else {
                 return _target[param];
             }
@@ -349,14 +398,26 @@
             var _target = getElement(target);
             each(_target, function (index, obj) {
                 if (isDOM(obj)) {
+                    checkJtobj(obj);
                     var _params = {};
-                    for (var j in params) {
-                        var _name = checkCssName(obj, j);
+                    for (var i in params) {
+                        var _name = checkPropName(obj, i);
                         if (_name) {
-                            _params[_name] = checkCssValue(_name, calcValue(getStyle(obj, _name), params[j]));
+                            _params[_name] = checkCssValue(_name, calcValue(getStyle(obj, _name), params[i]));
                         }
                     }
-                    setStyle(obj, _params);
+
+                    var _trans = false;
+
+                    for (var j in params) {
+                        if(obj._jtobj_[j] !== undefined || obj.style[j] !== undefined)
+                            if(setProp(obj, j, params[j])) _trans = true;
+                    }
+
+                    if(_trans){
+                        this.target.style[prefix + 'Transform'] = 'translate3d(' + this.target._jtobj_.x + 'px,' + this.target._jtobj_.y + 'px,' + this.target._jtobj_.z + 'px) ' + 'rotateX(' + this.target._jtobj_.rotationX % 360 + 'deg) ' + 'rotateY(' + this.target._jtobj_.rotationY % 360 + 'deg) ' + 'rotateZ(' + this.target._jtobj_.rotationZ % 360 + 'deg) ' + 'scale3d(' + this.target._jtobj_.scaleX + ', ' + this.target._jtobj_.scaleY + ', ' + this.target._jtobj_.scaleZ + ') ';
+                    }
+
                 } else {
                     for (var j in params) {
                         obj[j] = calcValue(obj[j], params[j]);
@@ -372,10 +433,11 @@
                 var _fromVars = {};
                 var _toVars = {};
                 var _isDom = isDOM(obj);
+                if (_isDom) checkJtobj(obj);
 
                 for (var j in toVars) {
-                    if (_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)) {
-                        var _n = _isDom ? parseFloat(getStyle(obj, j)) : obj[j];
+                    if (_isDom ? (obj._jtobj_[j] !== undefined || obj.style[j] !== undefined) : (obj[j] !== undefined)) {
+                        var _n = _isDom ? parseFloat(getProp(obj, j)) : obj[j];
                         _fromVars[j] = calcValue(_n, fromVars[j]);
                         _toVars[j] = calcValue(_n, toVars[j]);
                     } else {
@@ -401,10 +463,11 @@
                 var _fromVars = {};
                 var _toVars = {};
                 var _isDom = isDOM(obj);
+                if (_isDom) checkJtobj(obj);
 
                 for (var j in fromVars) {
-                    if (_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)) {
-                        var _n = _isDom ? parseFloat(getStyle(obj, j)) : obj[j];
+                    if (_isDom ? (obj._jtobj_[j] !== undefined || obj.style[j] !== undefined) : (obj[j] !== undefined)) {
+                        var _n = _isDom ? parseFloat(getProp(obj, j)) : obj[j];
                         _toVars[j] = _n;
                         _fromVars[j] = calcValue(_n, fromVars[j]);
                     } else {
@@ -430,10 +493,11 @@
                 var _fromVars = {};
                 var _toVars = {};
                 var _isDom = isDOM(obj);
+                if (_isDom) checkJtobj(obj);
 
                 for (var j in toVars) {
-                    if (_isDom ? (obj.style[j] !== undefined) : (obj[j] !== undefined)) {
-                        var _n = _isDom ? parseFloat(getStyle(obj, j)) : obj[j];
+                    if (_isDom ? (obj._jtobj_[j] !== undefined || obj.style[j] !== undefined) : (obj[j] !== undefined)) {
+                        var _n = _isDom ? parseFloat(getProp(obj, j)) : obj[j];
                         _fromVars[j] = _n;
                         _toVars[j] = calcValue(_n, toVars[j]);
                     } else {

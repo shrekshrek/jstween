@@ -1,6 +1,6 @@
 /*!
- * VERSION: 0.3.0
- * DATE: 2015-11-28
+ * VERSION: 0.4.0
+ * DATE: 2016-1-16
  * GIT:https://github.com/shrekshrek/jstween
  *
  * @author: Shrek.wang, shrekshrek@gmail.com
@@ -110,7 +110,7 @@
         name = browserPrefix(name);
         if (target.style[name] !== undefined) return name;
 
-        return null;
+        return undefined;
     }
 
     function calcValue(value, value2) {
@@ -272,6 +272,11 @@
             this.startTime = this.delay;
             this.endTime = this.startTime + this.repeatDelay + this.duration;
 
+            if(this.delay != 0){
+                this._updateProp();
+                if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
+            }
+
             tweens.unshift(this);
             if (!isUpdating) globalUpdate();
             else this._update(this.lastTime);
@@ -346,9 +351,8 @@
                 }
             }
 
-            if (_trans){
-                this.target.style[prefix + 'Transform'] = 'translate3d(' + this.target._jtobj_.x + 'px,' + this.target._jtobj_.y + 'px,' + this.target._jtobj_.z + 'px) ' + 'rotateX(' + this.target._jtobj_.rotationX % 360 + 'deg) ' + 'rotateY(' + this.target._jtobj_.rotationY % 360 + 'deg) ' + 'rotateZ(' + this.target._jtobj_.rotationZ % 360 + 'deg) ' + 'scale3d(' + this.target._jtobj_.scaleX + ', ' + this.target._jtobj_.scaleY + ', ' + this.target._jtobj_.scaleZ + ') ';
-            }
+            if (_trans)
+                this.target.style[browserPrefix('transform')] = 'translate3d(' + this.target._jtobj_.x + 'px,' + this.target._jtobj_.y + 'px,' + this.target._jtobj_.z + 'px) ' + 'rotateX(' + this.target._jtobj_.rotationX % 360 + 'deg) ' + 'rotateY(' + this.target._jtobj_.rotationY % 360 + 'deg) ' + 'rotateZ(' + this.target._jtobj_.rotationZ % 360 + 'deg) ' + 'scale3d(' + this.target._jtobj_.scaleX + ', ' + this.target._jtobj_.scaleY + ', ' + this.target._jtobj_.scaleZ + ') ';
 
         },
 
@@ -399,24 +403,17 @@
             each(_target, function (index, obj) {
                 if (isDOM(obj)) {
                     checkJtobj(obj);
-                    var _params = {};
+                    var _trans = false;
                     for (var i in params) {
                         var _name = checkPropName(obj, i);
                         if (_name) {
-                            _params[_name] = checkCssValue(_name, calcValue(getStyle(obj, _name), params[i]));
+                            var _value = calcValue(parseFloat(getProp(obj, _name)), params[i]);
+                            if(setProp(obj, _name, _value)) _trans = true;
                         }
                     }
 
-                    var _trans = false;
-
-                    for (var j in params) {
-                        if(obj._jtobj_[j] !== undefined || obj.style[j] !== undefined)
-                            if(setProp(obj, j, params[j])) _trans = true;
-                    }
-
-                    if(_trans){
-                        this.target.style[prefix + 'Transform'] = 'translate3d(' + this.target._jtobj_.x + 'px,' + this.target._jtobj_.y + 'px,' + this.target._jtobj_.z + 'px) ' + 'rotateX(' + this.target._jtobj_.rotationX % 360 + 'deg) ' + 'rotateY(' + this.target._jtobj_.rotationY % 360 + 'deg) ' + 'rotateZ(' + this.target._jtobj_.rotationZ % 360 + 'deg) ' + 'scale3d(' + this.target._jtobj_.scaleX + ', ' + this.target._jtobj_.scaleY + ', ' + this.target._jtobj_.scaleZ + ') ';
-                    }
+                    if(_trans)
+                        obj.style[browserPrefix('transform')] = 'translate3d(' + obj._jtobj_.x + 'px,' + obj._jtobj_.y + 'px,' + obj._jtobj_.z + 'px) ' + 'rotateX(' + obj._jtobj_.rotationX % 360 + 'deg) ' + 'rotateY(' + obj._jtobj_.rotationY % 360 + 'deg) ' + 'rotateZ(' + obj._jtobj_.rotationZ % 360 + 'deg) ' + 'scale3d(' + obj._jtobj_.scaleX + ', ' + obj._jtobj_.scaleY + ', ' + obj._jtobj_.scaleZ + ') ';
 
                 } else {
                     for (var j in params) {
@@ -436,7 +433,7 @@
                 if (_isDom) checkJtobj(obj);
 
                 for (var j in toVars) {
-                    if (_isDom ? (obj._jtobj_[j] !== undefined || obj.style[j] !== undefined) : (obj[j] !== undefined)) {
+                    if (_isDom ? (checkPropName(obj, j) !== undefined) : (obj[j] !== undefined)) {
                         var _n = _isDom ? parseFloat(getProp(obj, j)) : obj[j];
                         _fromVars[j] = calcValue(_n, fromVars[j]);
                         _toVars[j] = calcValue(_n, toVars[j]);
@@ -466,7 +463,7 @@
                 if (_isDom) checkJtobj(obj);
 
                 for (var j in fromVars) {
-                    if (_isDom ? (obj._jtobj_[j] !== undefined || obj.style[j] !== undefined) : (obj[j] !== undefined)) {
+                    if (_isDom ? (checkPropName(obj, j) !== undefined) : (obj[j] !== undefined)) {
                         var _n = _isDom ? parseFloat(getProp(obj, j)) : obj[j];
                         _toVars[j] = _n;
                         _fromVars[j] = calcValue(_n, fromVars[j]);
@@ -496,7 +493,7 @@
                 if (_isDom) checkJtobj(obj);
 
                 for (var j in toVars) {
-                    if (_isDom ? (obj._jtobj_[j] !== undefined || obj.style[j] !== undefined) : (obj[j] !== undefined)) {
+                    if (_isDom ? (checkPropName(obj, j) !== undefined) : (obj[j] !== undefined)) {
                         var _n = _isDom ? parseFloat(getProp(obj, j)) : obj[j];
                         _fromVars[j] = _n;
                         _toVars[j] = calcValue(_n, toVars[j]);

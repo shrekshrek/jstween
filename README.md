@@ -23,14 +23,14 @@ tweenmax:6-6fps
 csstween:50-52fps(css animation循环动画在移动端有不可比拟的渲染优势)  
 
 
-测试2:无限创建测试,每秒60帧,每帧生成10个div白点,运动2s后结束自删除,峰值全屏1200个白点,带旋转  
+测试2:无限创建测试,每帧生成10个div白点,运动2s后结束自删除,带旋转  
 jstween:http://shrek.imdevsh.com/demo/performance/test2/jstween.html  
 tweenmax:http://shrek.imdevsh.com/demo/performance/test2/tweenmax.html  
 csstween:http://shrek.imdevsh.com/demo/performance/test2/csstween.html  
 pc端chrome:  
-jstween:19-20fps  
-tweenmax:18-19fps  
-csstween:10-14fps  
+jstween:23-25fps  
+tweenmax:22-24fps  
+csstween:19-20fps  
 
 iphone5s wechat:  
 jstween:16-16fps  

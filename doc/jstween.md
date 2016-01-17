@@ -100,23 +100,3 @@ JT.Bounce
 以上方法和参数均是参考TweenLite的方式，有使用经验者会很容易上手。  
 
 
-性能测试
-============
-测试1:repeat无限循环测试,全屏1200个div白点  
-18-19fps:http://shrek.imdevsh.com/demo/performance/test1/jstween.html  
-19-21fps:http://shrek.imdevsh.com/demo/performance/test1/tweenmax.html  
-17-18fps:http://shrek.imdevsh.com/demo/performance/test1/csstween.html  
-
-测试2:无限创建测试,每秒60帧,每帧生成10个div白点,运动2s后结束自删除,峰值全屏1200个白点  
-28-30fps:http://shrek.imdevsh.com/demo/performance/test2/jstween.html  
-26-28fps:http://shrek.imdevsh.com/demo/performance/test2/tweenmax.html  
-0-11fps:http://shrek.imdevsh.com/demo/performance/test2/csstween.html  
-
-以上测试可以看出,jstween效率和tweenmax差不多,css animation的实现效率从test1中也能看出效率比js略低一筹(这里csstween初始帧频很低,因为创建时会先写入css规则,然后赋值给div,写入占用了很高的cpu资源,稳定之后的17-18帧就是css动画的实际效率),
-最终结论,推荐使用jstween.  
-
-
-如果有大量基于时间线的tween动画需求,可以使用扩展库jstimeline
-https://github.com/shrekshrek/jstimeline
-
-

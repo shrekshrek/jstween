@@ -82,8 +82,7 @@
             var _time = time - this.lastTime;
             this.lastTime = time;
 
-            if (!this.isPlaying)
-                return true;
+            if (!this.isPlaying) return true;
 
             this.curTime += _time;
 

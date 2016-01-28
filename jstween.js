@@ -281,12 +281,14 @@
             if (!isUpdating) globalUpdate();
             else this._update(this.lastTime);
         },
+
         _update: function (time) {
             var _time = time - this.lastTime;
             this.lastTime = time;
 
             if (!this.isPlaying) return true;
 
+            _time %= this.duration;
             this.curTime += _time;
 
             if (this.curTime < this.startTime) return true;

@@ -14,7 +14,7 @@ tweenmax:http://shrek.imdevsh.com/demo/performance/test1/tweenmax.html
 csstween:http://shrek.imdevsh.com/demo/performance/test1/csstween.html  
 pc端chrome:  
 jstween:20-21fps  
-tweenmax:23-24fps  
+tweenmax:20-21fps  
 csstween:11-13fps  
 
 iphone5s wechat:  

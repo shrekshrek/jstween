@@ -143,13 +143,23 @@
         }
     }
 
-    function checkJtobj(target){
+    function checkJtobj(target) {
         if (target._jt_obj == undefined)
-            target._jt_obj = {x:0, y:0, z:0, rotationX:0, rotationY:0, rotationZ:0, scaleX:1, scaleY:1, scaleZ:1};
+            target._jt_obj = {
+                x: 0,
+                y: 0,
+                z: 0,
+                rotationX: 0,
+                rotationY: 0,
+                rotationZ: 0,
+                scaleX: 1,
+                scaleY: 1,
+                scaleZ: 1
+            };
     }
 
     function getProp(target, name) {
-        switch(name){
+        switch (name) {
             case 'x':
             case 'y':
             case 'z':
@@ -178,7 +188,7 @@
     }
 
     function setProp(target, name, value) {
-        switch(name){
+        switch (name) {
             case 'x':
             case 'y':
             case 'z':
@@ -272,7 +282,7 @@
             this.startTime = this.delay;
             this.endTime = this.startTime + this.repeatDelay + this.duration;
 
-            if(this.delay != 0){
+            if (this.delay != 0) {
                 this._updateProp();
                 if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
             }
@@ -300,21 +310,21 @@
 
             if (this.curTime < this.startTime + this.repeatDelay) return true;
 
-            if (this.curTime < this.endTime){
+            if (this.curTime < this.endTime) {
                 this._updateProp();
                 if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
-            }else{
-                if (this.curRepeat == 0){
+            } else {
+                if (this.curRepeat == 0) {
                     this._updateProp();
                     return false;
                 }
 
                 if (this.yoyo) this.isReverse = !this.isReverse;
 
-                if(this.repeatDelay == 0){
+                if (this.repeatDelay == 0) {
                     this.curTime = this.curTime - this.duration - this.repeatDelay;
                     this._updateProp();
-                }else{
+                } else {
                     this._updateProp();
                     this.curTime = this.curTime - this.duration - this.repeatDelay;
                 }
@@ -344,8 +354,8 @@
                 var _n = _start + ( _end - _start ) * _radio;
                 _n = Math.round(_n * 100) / 100;
 
-                if (this.isDom){
-                    if(setProp(this.target, prop, _n)) _trans = true;
+                if (this.isDom) {
+                    if (setProp(this.target, prop, _n)) _trans = true;
                 } else {
                     this.target[prop] = _n;
                 }
@@ -408,11 +418,11 @@
                         var _name = checkPropName(obj, i);
                         if (_name) {
                             var _value = calcValue(parseFloat(getProp(obj, _name)), params[i]);
-                            if(setProp(obj, _name, _value)) _trans = true;
+                            if (setProp(obj, _name, _value)) _trans = true;
                         }
                     }
 
-                    if(_trans)
+                    if (_trans)
                         obj.style[browserPrefix('transform')] = 'translate3d(' + obj._jt_obj.x + 'px,' + obj._jt_obj.y + 'px,' + obj._jt_obj.z + 'px) ' + 'rotateX(' + obj._jt_obj.rotationX % 360 + 'deg) ' + 'rotateY(' + obj._jt_obj.rotationY % 360 + 'deg) ' + 'rotateZ(' + obj._jt_obj.rotationZ % 360 + 'deg) ' + 'scale3d(' + obj._jt_obj.scaleX + ', ' + obj._jt_obj.scaleY + ', ' + obj._jt_obj.scaleZ + ') ';
 
                 } else {
@@ -430,15 +440,27 @@
                 var _fromVars = {};
                 var _toVars = {};
                 var _isDom = isDOM(obj);
-                if (_isDom) checkJtobj(obj);
-
-                for (var j in toVars) {
-                    if (_isDom ? (checkPropName(obj, j) !== undefined) : (obj[j] !== undefined)) {
-                        var _n = _isDom ? parseFloat(getProp(obj, j)) : obj[j];
-                        _fromVars[j] = calcValue(_n, fromVars[j]);
-                        _toVars[j] = calcValue(_n, toVars[j]);
-                    } else {
-                        _toVars[j] = toVars[j];
+                if (_isDom) {
+                    checkJtobj(obj);
+                    for (var i in toVars) {
+                        var _name = checkPropName(obj, i);
+                        if (_name) {
+                            var _n = parseFloat(getProp(obj, _name));
+                            _fromVars[_name] = calcValue(_n, fromVars[i]);
+                            _toVars[_name] = calcValue(_n, toVars[i]);
+                        } else {
+                            _toVars[i] = toVars[i];
+                        }
+                    }
+                } else {
+                    for (var i in toVars) {
+                        if ((obj[i] !== undefined)) {
+                            var _n = parseFloat(obj[i]);
+                            _fromVars[i] = calcValue(_n, fromVars[i]);
+                            _toVars[i] = calcValue(_n, toVars[i]);
+                        } else {
+                            _toVars[i] = toVars[i];
+                        }
                     }
                 }
 
@@ -460,15 +482,27 @@
                 var _fromVars = {};
                 var _toVars = {};
                 var _isDom = isDOM(obj);
-                if (_isDom) checkJtobj(obj);
-
-                for (var j in fromVars) {
-                    if (_isDom ? (checkPropName(obj, j) !== undefined) : (obj[j] !== undefined)) {
-                        var _n = _isDom ? parseFloat(getProp(obj, j)) : obj[j];
-                        _toVars[j] = _n;
-                        _fromVars[j] = calcValue(_n, fromVars[j]);
-                    } else {
-                        _toVars[j] = fromVars[j];
+                if (_isDom) {
+                    checkJtobj(obj);
+                    for (var i in fromVars) {
+                        var _name = checkPropName(obj, i);
+                        if (_name) {
+                            var _n = parseFloat(getProp(obj, _name));
+                            _fromVars[_name] = calcValue(_n, fromVars[i]);
+                            _toVars[_name] = _n;
+                        } else {
+                            _toVars[i] = fromVars[i];
+                        }
+                    }
+                } else {
+                    for (var i in fromVars) {
+                        if ((obj[i] !== undefined)) {
+                            var _n = parseFloat(obj[i]);
+                            _fromVars[i] = calcValue(_n, fromVars[i]);
+                            _toVars[i] = _n;
+                        } else {
+                            _toVars[i] = fromVars[i];
+                        }
                     }
                 }
 
@@ -490,15 +524,27 @@
                 var _fromVars = {};
                 var _toVars = {};
                 var _isDom = isDOM(obj);
-                if (_isDom) checkJtobj(obj);
-
-                for (var j in toVars) {
-                    if (_isDom ? (checkPropName(obj, j) !== undefined) : (obj[j] !== undefined)) {
-                        var _n = _isDom ? parseFloat(getProp(obj, j)) : obj[j];
-                        _fromVars[j] = _n;
-                        _toVars[j] = calcValue(_n, toVars[j]);
-                    } else {
-                        _toVars[j] = toVars[j];
+                if (_isDom) {
+                    checkJtobj(obj);
+                    for (var i in toVars) {
+                        var _name = checkPropName(obj, i);
+                        if (_name) {
+                            var _n = parseFloat(getProp(obj, _name));
+                            _fromVars[_name] = _n;
+                            _toVars[_name] = calcValue(_n, toVars[i]);
+                        } else {
+                            _toVars[i] = toVars[i];
+                        }
+                    }
+                } else {
+                    for (var i in toVars) {
+                        if ((obj[i] !== undefined)) {
+                            var _n = parseFloat(obj[i]);
+                            _fromVars[i] = _n;
+                            _toVars[i] = calcValue(_n, toVars[i]);
+                        } else {
+                            _toVars[i] = toVars[i];
+                        }
                     }
                 }
 

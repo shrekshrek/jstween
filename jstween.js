@@ -54,6 +54,12 @@
 
 
     // --------------------------------------------------------------------time fix
+    if (!Date.now) {
+        Date.now = function now() {
+            return new Date().getTime();
+        };
+    }
+
     var nowOffset = Date.now();
 
     var now = function () {
@@ -88,7 +94,10 @@
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         window.oRequestAnimationFrame ||
-        window.msRequestAnimationFrame;
+        window.msRequestAnimationFrame ||
+        function (callback) {
+            window.setTimeout(callback, 1000 / 60);
+        };
 
 
     // --------------------------------------------------------------------dom style相关方法

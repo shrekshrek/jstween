@@ -32,6 +32,8 @@ param为字符串，
 Params为数组，
 
 其中几个属性比较特殊:
+bezier:[]贝塞尔数组  
+through:[]同样是贝塞尔数组,不过是穿越数组中各点  
 ease设置缓动，  
 delay设置延时时间，  
 repeat设置重复次数，  

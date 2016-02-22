@@ -9,6 +9,7 @@
         }
 
         .b1 {
+            position: absolute;
             width: 100%;
             height: 100%;
         }
@@ -19,8 +20,9 @@
         }
 
         #box1 {
+            /*margin: -50px 0 0 -50px;*/
             background: #f00;
-            margin-left: 100px;
+            margin-left: 00px;
         }
 
         #box2 {
@@ -31,6 +33,14 @@
         #box3 {
             background: #00f;
         }
+
+        .dot {
+            width: 2px;
+            height: 2px;
+            position: absolute;
+            background: #fff;
+        }
+
     </style>
 </head>
 <body>
@@ -45,8 +55,21 @@
 </div>
 
 <script>
-    JT.to('#box1', 1, {
-        through: [{x: '+=500', y: '-=100'}, {x: 200, y: 400}, {x: 500, y: 100}, {x: 0, y: 0}],
+    var _body = document.getElementsByClassName('b1')[0];
+    var _a0 = [{x: 0, y: 0}, {x: 500, y: 100}, {x: 200, y: 400}, {x: 300, y: 300}, {x: 0, y: 0}];
+    var _a1 = [{x: 500, y: 100}, {x: 200, y: 400}, {x: 300, y: 300}, {x: 0, y: 0}];
+    var _a2 = JT.path({through:_a0, ease: JT.Quad.Out, step:100});
+    for (var i = 0; i < _a2.length; i++) {
+        var _dot = document.createElement('div');
+        _dot.className = 'dot';
+        _dot.style.left = _a2[i].x + 'px';
+        _dot.style.top = _a2[i].y + 'px';
+        _body.appendChild(_dot);
+    }
+
+    JT.set('#box1', {transformOrigin: "0% 0%"});
+    JT.to('#box1', 10, {
+        through: _a1,
         rotationZ: 360,
         scaleX: 2,
         scaleY: 0.5,
@@ -54,7 +77,7 @@
         delay: 1,
         repeat: -1,
         yoyo: true,
-//        ease: JT.Quad.Out,
+        ease: JT.Quad.Out,
         onEnd: function () {
             console.log("1 complete");
         }

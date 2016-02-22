@@ -120,20 +120,24 @@
         return undefined;
     }
 
-    function checkValue(value, value2) {
-        if(value2 instanceof Array){
-            for(var i in value2){
+    function checkValue(value, value2, push) {
+        if (value2 instanceof Array) {
+            for (var i in value2) {
                 value2[i] = calcValue(value, value2[i]);
             }
-            value2.unshift(value);
-        }else{
+            if (push) {
+                value2.push(value);
+            } else {
+                value2.unshift(value);
+            }
+        } else {
             value2 = calcValue(value, value2);
         }
         return value2;
     }
 
-    function calcValue(value, value2){
-        switch(typeof(value2)){
+    function calcValue(value, value2) {
+        switch (typeof(value2)) {
             case 'string':
                 var _s = value2.substr(0, 2);
                 var _n = parseFloat(value2.substr(2));
@@ -374,9 +378,11 @@
                 var _end = this.toVars[prop] || 0;
 
                 var _n;
-                if ( _end instanceof Array ) {
+                if (_end instanceof Array) {
                     _n = this.interpolation(_end, _radio);
-                }else{
+                } else if (_start instanceof Array) {
+                    _n = this.interpolation(_start, _radio);
+                } else {
                     _n = _start + ( _end - _start ) * _radio;
                 }
                 _n = Math.round(_n * 100) / 100;
@@ -461,20 +467,10 @@
         },
 
         fromTo: function (target, time, fromVars, toVars) {
+            checkBezier(toVars);
             var _target = getElement(target);
             var _tweens = [];
             each(_target, function (index, obj) {
-                if(toVars.bezier){
-                    sortBezier(toVars, toVars.bezier);
-                    toVars.interpolation = Bezier;
-                    delete toVars.bezier;
-                }
-                if(toVars.through){
-                    sortBezier(toVars, toVars.through);
-                    toVars.interpolation = Through;
-                    delete toVars.through;
-                }
-
                 var _fromVars = {};
                 var _toVars = {};
                 var _isDom = isDOM(obj);
@@ -514,6 +510,7 @@
         },
 
         from: function (target, time, fromVars) {
+            checkBezier(fromVars);
             var _target = getElement(target);
             var _tweens = [];
             each(_target, function (index, obj) {
@@ -526,7 +523,7 @@
                         var _name = checkPropName(obj, i);
                         if (_name) {
                             var _n = parseFloat(getProp(obj, _name));
-                            _fromVars[_name] = checkValue(_n, fromVars[i]);
+                            _fromVars[_name] = checkValue(_n, fromVars[i], true);
                             _toVars[_name] = _n;
                         } else {
                             _toVars[i] = fromVars[i];
@@ -556,20 +553,10 @@
         },
 
         to: function (target, time, toVars) {
+            checkBezier(toVars);
             var _target = getElement(target);
             var _tweens = [];
             each(_target, function (index, obj) {
-                if(toVars.bezier){
-                    sortBezier(toVars, toVars.bezier);
-                    toVars.interpolation = Bezier;
-                    delete toVars.bezier;
-                }
-                if(toVars.through){
-                    sortBezier(toVars, toVars.through);
-                    toVars.interpolation = Through;
-                    delete toVars.through;
-                }
-
                 var _fromVars = {};
                 var _toVars = {};
                 var _isDom = isDOM(obj);
@@ -803,16 +790,62 @@
 
 
     // --------------------------------------------------------------------bezier
-    function sortBezier(target, arr){
-        for(var i in arr){
-            for(var j in arr[i]){
-                if(i == 0){
+    extend(JT, {
+        path: function (obj) {
+            checkBezier(obj);
+            var _ease = obj.ease || JT.Linear.None;
+            var _step = obj.step || 1;
+
+            var _radio, _arr = [];
+            for (var i = 0; i <= _step; i++) {
+                _radio = _ease(i / _step);
+                var _o = {};
+                for (var j in obj) {
+                    if (obj[j] instanceof Array) {
+                        _o[j] = obj.interpolation(obj[j], _radio);
+                    }
+                }
+                _arr.push(_o);
+            }
+            return _arr;
+        }
+    });
+
+    function checkBezier(obj) {
+        if (obj.bezier) {
+            sortBezier(obj, obj.bezier);
+            obj.interpolation = Bezier;
+            delete obj.bezier;
+        }
+        if (obj.through) {
+            sortBezier(obj, obj.through);
+            obj.interpolation = Through;
+            delete obj.through;
+        }
+        if (obj.linear) {
+            sortBezier(obj, obj.linear);
+            obj.interpolation = Linear;
+            delete obj.linear;
+        }
+    }
+
+    function sortBezier(target, arr) {
+        for (var i in arr) {
+            for (var j in arr[i]) {
+                if (i == 0) {
                     target[j] = [arr[i][j]];
-                }else{
+                } else {
                     target[j].push(arr[i][j]);
                 }
             }
         }
+    }
+
+    function Linear(v, k) {
+        var m = v.length - 1, f = m * k, i = Math.floor(f), fn = Utils.Linear;
+        if (k < 0) return fn(v[0], v[1], f);
+        if (k > 1) return fn(v[m], v[m - 1], m - f);
+        return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
     }
 
     function Bezier(v, k) {
@@ -836,6 +869,10 @@
     }
 
     var Utils = {
+        Linear: function (p0, p1, t) {
+            return ( p1 - p0 ) * t + p0;
+        },
+
         Bernstein: function (n, i) {
             var fc = Utils.Factorial;
             return fc(n) / fc(i) / fc(n - i);

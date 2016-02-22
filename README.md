@@ -15,12 +15,12 @@ csstween:http://shrek.imdevsh.com/demo/performance/test1/csstween.html
 pc端chrome:  
 jstween:20-21fps  
 tweenmax:20-21fps  
-csstween:11-13fps  
+csstween:8-13fps  
 
 iphone5s wechat:  
 jstween:6-6fps  
 tweenmax:6-6fps  
-csstween:50-52fps(css animation循环动画在移动端有不可比拟的渲染优势)  
+csstween:49-50fps(css animation循环动画在移动端有不可比拟的渲染优势,不过创建阶段效率很低)  
 
 
 测试2:无限创建测试,每帧生成10个div白点,运动2s后结束自删除,带旋转  
@@ -35,16 +35,12 @@ csstween:17-19fps
 iphone5s wechat:  
 jstween:16-16fps  
 tweenmax:9-12fps  
-csstween:15-15fps(移动端transition出现闪断现象,有待检查)  
+csstween:8-9fps  
 
 
 以上测试可以看出,在pc端jstween效率和tweenmax差不多,modile端js优于tweenmax.  
 css animation的动画效率在移动端的表现是很出色的,transition会有些莫名的状况.  
 最终结论,推荐使用jstween或者csstween.  
-
-
-如果有大量基于时间线的tween动画需求,可以使用扩展库jstimeline
-https://github.com/shrekshrek/jstimeline
 
 
 

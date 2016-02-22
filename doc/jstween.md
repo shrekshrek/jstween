@@ -7,7 +7,7 @@ js tween
 API
 ============
 
-全局tween方法  
+全局tween方法:  
 
 JT.get(target, param);  
 JT.set(target, params);  
@@ -29,11 +29,13 @@ JT.kill(target, [toEnd]);
 JT.killAll([toEnd]);  
 
 param为字符串，  
-Params为数组，
+params为数组，  
 
-其中几个属性比较特殊:
+其中几个属性比较特殊:  
+linear:[]折线数组  
 bezier:[]贝塞尔数组  
 through:[]同样是贝塞尔数组,不过是穿越数组中各点  
+
 ease设置缓动，  
 delay设置延时时间，  
 repeat设置重复次数，  
@@ -79,6 +81,19 @@ call.play(); 播放
 call.pause(); 暂停  
 call.destroy(); 删除
 
+
+
+全局path方法:  
+
+JT.path(obj);
+
+包含以下属性:  
+linear:[]折线数组  
+bezier:[]贝塞尔数组  
+through:[]同样是贝塞尔数组,不过是穿越数组中各点  
+
+ease设置缓动，  
+step设置分步的步数,  
 
 
 

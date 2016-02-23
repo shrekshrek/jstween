@@ -52,7 +52,9 @@
     //    });
 
     JT.fromTo('#box1', 1, {marginLeft: 400, rotationZ:0, scaleX:0.5, scaleY:1, opacity: 0.5}, {
-        marginLeft: 200, rotationZ:360, scaleX:2, scaleY:0.5, opacity: 1, delay:1, repeat:-1, yoyo:true, ease: JT.Quad.Out, onEnd: function () {
+        marginLeft: 200, rotationZ:360, scaleX:2, scaleY:0.5, opacity: 1, delay:1, repeat:-1, yoyo:true, ease: JT.Quad.Out,onUpdate:function(){
+            console.log(this.curVars);
+        }, onEnd: function () {
             console.log("1 complete");
         }
     });

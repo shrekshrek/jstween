@@ -280,6 +280,7 @@
     extend(tween.prototype, {
         initialize: function (target, time, fromVars, toVars, isDom) {
             this.fromVars = fromVars;
+            this.curVars = {};
             this.toVars = toVars;
             this.target = target;
             this.duration = Math.max(time, 0) * 1000;
@@ -386,6 +387,7 @@
                     _n = _start + ( _end - _start ) * _radio;
                 }
                 _n = Math.round(_n * 100) / 100;
+                this.curVars[prop] = _n;
 
                 if (this.isDom) {
                     if (setProp(this.target, prop, _n)) _trans = true;

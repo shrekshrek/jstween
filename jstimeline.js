@@ -342,7 +342,7 @@
 
         seek: function (position) {
             var _time = this._parsePosition(position);
-            this.curTime = _time;
+            this.curTime = _time * 1000;
 
             var _len = this.anchors.length;
             for (var i = 0; i < _len; i++) {

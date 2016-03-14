@@ -96,9 +96,9 @@
             timelines.unshift(this);
             this.lastTime = JT.now();
 
-            if (!isUpdating){
+            if (!isUpdating) {
                 globalUpdate();
-            } else{
+            } else {
                 this._update(this.lastTime);
             }
         },
@@ -191,9 +191,9 @@
         },
 
         _addTween: function (tween) {
-            if(tween.length != undefined){
-                for(var i in tween) this.tweens.unshift(tween[i]);
-            }else{
+            if (tween.length != undefined) {
+                for (var i in tween) this.tweens.unshift(tween[i]);
+            } else {
                 this.tweens.unshift(tween);
             }
         },
@@ -347,7 +347,7 @@
             var _len = this.anchors.length;
             for (var i = 0; i < _len; i++) {
                 var _handler = this.anchors[i];
-                if (_handler.time >= this.curTime) {
+                if (_handler.time * 1000 >= this.curTime) {
                     this.anchorId = i;
                     return;
                 }

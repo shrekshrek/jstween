@@ -6,6 +6,7 @@
         body {
             background: #000;
             font-size: 14px;
+            margin: 0px;
         }
 
         .b1 {
@@ -22,7 +23,7 @@
         #box1 {
             /*margin: -50px 0 0 -50px;*/
             background: #f00;
-            margin-left: 00px;
+            margin-left: 0px;
         }
 
         #box2 {
@@ -56,8 +57,8 @@
 
 <script>
     var _body = document.getElementsByClassName('b1')[0];
-    var _a0 = [{x: 0, y: 0}, {x: 500, y: 100}, {x: 200, y: 400}, {x: 300, y: 300}, {x: 0, y: 0}];
-    var _a1 = [{x: 500, y: 100}, {x: 200, y: 400}, {x: 300, y: 300}, {x: 0, y: 0}];
+    var _a0 = [{x: 0, y: 0, z:-500}, {x: 500, y: 100, z:400}, {x: 200, y: 400, z:-300}, {x: 300, y: 300, z:200}, {x: 0, y: 0, z:0}];
+    var _a1 = [{x: 500, y: 100, z:400}, {x: 200, y: 400, z:-300}, {x: 300, y: 300, z:200}, {x: 0, y: 0, z:0}];
     var _a2 = JT.path({through:_a0, ease: JT.Quad.Out, step:100});
     for (var i = 0; i < _a2.length; i++) {
         var _dot = document.createElement('div');
@@ -75,8 +76,8 @@
         scaleY: 0.5,
         opacity: 1,
         delay: 1,
-        repeat: -1,
-        yoyo: true,
+//        repeat: -1,
+//        yoyo: true,
         ease: JT.Quad.Out,
         onEnd: function () {
             console.log("1 complete");

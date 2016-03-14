@@ -120,15 +120,17 @@
         return undefined;
     }
 
-    function checkValue(value, value2, push) {
+    function checkValue(value, value2, value3, push) {
         if (value2 instanceof Array) {
             for (var i in value2) {
                 value2[i] = calcValue(value, value2[i]);
             }
-            if (push) {
-                value2.push(value);
-            } else {
-                value2.unshift(value);
+            if (value3 != undefined) {
+                if (push) {
+                    value2.push(value3);
+                } else {
+                    value2.unshift(value3);
+                }
             }
         } else {
             value2 = calcValue(value, value2);
@@ -483,7 +485,7 @@
                         if (_name) {
                             var _n = parseFloat(getProp(obj, _name));
                             _fromVars[_name] = checkValue(_n, fromVars[i]);
-                            _toVars[_name] = checkValue(_n, toVars[i]);
+                            _toVars[_name] = checkValue(_n, toVars[i], _fromVars[_name], false);
                         } else {
                             _toVars[i] = toVars[i];
                         }
@@ -493,7 +495,7 @@
                         if ((obj[i] !== undefined)) {
                             var _n = parseFloat(obj[i]);
                             _fromVars[i] = checkValue(_n, fromVars[i]);
-                            _toVars[i] = checkValue(_n, toVars[i]);
+                            _toVars[i] = checkValue(_n, toVars[i], _fromVars[i], false);
                         } else {
                             _toVars[i] = toVars[i];
                         }
@@ -525,7 +527,7 @@
                         var _name = checkPropName(obj, i);
                         if (_name) {
                             var _n = parseFloat(getProp(obj, _name));
-                            _fromVars[_name] = checkValue(_n, fromVars[i], true);
+                            _fromVars[_name] = checkValue(_n, fromVars[i], _n, true);
                             _toVars[_name] = _n;
                         } else {
                             _toVars[i] = fromVars[i];
@@ -535,7 +537,7 @@
                     for (var i in fromVars) {
                         if ((obj[i] !== undefined)) {
                             var _n = parseFloat(obj[i]);
-                            _fromVars[i] = checkValue(_n, fromVars[i]);
+                            _fromVars[i] = checkValue(_n, fromVars[i], _n, true);
                             _toVars[i] = _n;
                         } else {
                             _toVars[i] = fromVars[i];
@@ -569,7 +571,7 @@
                         if (_name) {
                             var _n = parseFloat(getProp(obj, _name));
                             _fromVars[_name] = _n;
-                            _toVars[_name] = checkValue(_n, toVars[i]);
+                            _toVars[_name] = checkValue(_n, toVars[i], _n, false);
                         } else {
                             _toVars[i] = toVars[i];
                         }
@@ -579,7 +581,7 @@
                         if ((obj[i] !== undefined)) {
                             var _n = parseFloat(obj[i]);
                             _fromVars[i] = _n;
-                            _toVars[i] = checkValue(_n, toVars[i]);
+                            _toVars[i] = checkValue(_n, toVars[i], _n, false);
                         } else {
                             _toVars[i] = toVars[i];
                         }

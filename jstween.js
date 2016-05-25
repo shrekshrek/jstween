@@ -1,6 +1,6 @@
 /*!
- * VERSION: 0.5.0
- * DATE: 2016-2-21
+ * VERSION: 0.5.1
+ * DATE: 2016-5-25
  * GIT:https://github.com/shrekshrek/jstween
  *
  * @author: Shrek.wang, shrekshrek@gmail.com
@@ -245,6 +245,7 @@
     // --------------------------------------------------------------------全局update
     var tweens = [];
     var isUpdating = false;
+    var lastTime = 0;
 
     function globalUpdate() {
         isUpdating = true;
@@ -255,7 +256,9 @@
             return;
         }
 
-        var _time = now();
+        var _now = now();
+        var _time = _now - lastTime;
+        lastTime = _now;
         for (i = _len - 1; i >= 0; i--) {
             if (tweens[i] && !tweens[i]._update(_time)) {
                 var _tween = tweens.splice(i, 1)[0];
@@ -306,7 +309,6 @@
             this.isDom = isDom;
 
             this.curTime = 0;
-            this.lastTime = now();
             this.isStart = false;
             this.startTime = this.delay;
             this.endTime = this.startTime + this.repeatDelay + this.duration;
@@ -317,16 +319,16 @@
             }
 
             tweens.unshift(this);
-            if (!isUpdating) globalUpdate();
-            else this._update(this.lastTime);
+            if (!isUpdating) {
+                lastTime = now();
+                globalUpdate();
+            }
         },
 
         _update: function (time) {
-            var _time = time - this.lastTime;
-            this.lastTime = time;
-
             if (!this.isPlaying) return true;
 
+            var _time = time;
             _time %= this.duration;
             this.curTime += _time;
 
@@ -683,20 +685,19 @@
             this.onEndParams = params || [];
 
             this.curTime = 0;
-            this.lastTime = now();
             this.endTime = this.delay;
             this.isPlaying = isPlaying || true;
 
             calls.unshift(this);
-            if (!isUpdating) globalUpdate();
-            else this._update(this.lastTime);
+            if (!isUpdating){
+                lastTime = now();
+                globalUpdate();
+            }
         },
         _update: function (time) {
-            var _time = time - this.lastTime;
-            this.lastTime = time;
-
             if (!this.isPlaying) return true;
 
+            var _time = time;
             this.curTime += _time;
 
             if (this.curTime < this.endTime) return true;

@@ -1,7 +1,7 @@
 /*!
- * VERSION: 0.1.0
- * DATE: 2015-11-10
- * GIT:https://github.com/shrekshrek/jstimeline
+ * VERSION: 0.1.1
+ * DATE: 2016-5-25
+ * GIT:https://github.com/shrekshrek/jstween
  *
  * @author: Shrek.wang, shrekshrek@gmail.com
  **/
@@ -41,6 +41,7 @@
     // --------------------------------------------------------------------全局update
     var timelines = [];
     var isUpdating = false;
+    var lastTime = 0;
 
     function globalUpdate() {
         isUpdating = true;
@@ -50,7 +51,9 @@
             return;
         }
 
-        var _time = JT.now();
+        var _now = JT.now();
+        var _time = _now - lastTime;
+        lastTime = _now;
         for (var i = _len - 1; i >= 0; i--) {
             timelines[i]._update(_time);
         }
@@ -77,16 +80,13 @@
             this.isPlaying = false;
 
             this.curTime = 0;
-            this.lastTime = 0;
 
         },
 
         _update: function (time) {
-            var _time = time - this.lastTime;
-            this.lastTime = time;
-
             if (!this.isPlaying) return true;
 
+            var _time = time;
             this.curTime += _time;
 
             this._checkHandler();
@@ -94,12 +94,10 @@
 
         _addSelf: function () {
             timelines.unshift(this);
-            this.lastTime = JT.now();
 
             if (!isUpdating) {
+                lastTime = JT.now();
                 globalUpdate();
-            } else {
-                this._update(this.lastTime);
             }
         },
 
@@ -320,11 +318,9 @@
 
             this._addSelf();
             this.isPlaying = true;
-            this.lastTime = JT.now();
 
             if (position !== undefined) {
                 this.seek(position);
-                this._update(this.lastTime);
             }
         },
 
@@ -361,7 +357,6 @@
             }
             this.tweens = [];
             this.curTime = 0;
-            this.lastTime = 0;
 
             this.labels = [];
             this.labelTime = 0;

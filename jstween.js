@@ -329,7 +329,6 @@
             if (!this.isPlaying) return true;
 
             var _time = time;
-            _time %= this.duration;
             this.curTime += _time;
 
             if (this.curTime < this.startTime) return true;

@@ -349,7 +349,7 @@
                 if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
             }
 
-            tweens.unshift(this);
+            tweens.push(this);
             if (!isUpdating) {
                 lastTime = now();
                 globalUpdate();
@@ -724,7 +724,7 @@
             this.endTime = this.delay;
             this.isPlaying = isPlaying || true;
 
-            calls.unshift(this);
+            calls.push(this);
             if (!isUpdating) {
                 lastTime = now();
                 globalUpdate();

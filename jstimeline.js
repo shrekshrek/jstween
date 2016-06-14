@@ -93,7 +93,7 @@
         },
 
         _addSelf: function () {
-            timelines.unshift(this);
+            timelines.push(this);
 
             if (!isUpdating) {
                 lastTime = JT.now();
@@ -190,9 +190,9 @@
 
         _addTween: function (tween) {
             if (tween.length != undefined) {
-                for (var i in tween) this.tweens.unshift(tween[i]);
+                for (var i in tween) this.tweens.push(tween[i]);
             } else {
-                this.tweens.unshift(tween);
+                this.tweens.push(tween);
             }
         },
 

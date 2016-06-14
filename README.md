@@ -2,6 +2,8 @@ jstween为简单好用的tween类，api参考tweenlite。可对一般对象或�
 
 jstimeline为jstween的扩展库,类似于greensock的TimelineLite,不过功能比较简单,方便编写大量基于时间线的jstween.  
 
+默认单位是px,支持rem。  
+
 API文档请查看doc目录  
 
 

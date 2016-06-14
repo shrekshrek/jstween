@@ -1,6 +1,6 @@
 /*!
- * VERSION: 0.5.1
- * DATE: 2016-5-25
+ * VERSION: 0.5.2
+ * DATE: 2016-6-7
  * GIT:https://github.com/shrekshrek/jstween
  *
  * @author: Shrek.wang, shrekshrek@gmail.com
@@ -120,54 +120,54 @@
         return undefined;
     }
 
-    function checkValue(value, value2, value3, push) {
-        if (value2 instanceof Array) {
-            for (var i in value2) {
-                value2[i] = calcValue(value, value2[i]);
+    function checkValue(o1, o2, o3, push) {
+        var o = {};
+        if (o2 instanceof Array) {
+            o.num = [];
+            for (var i in o2) {
+                var _o = calcValue(o1, o2[i]);
+                o.num[i] = _o.num;
+                o.unit = _o.unit;
             }
-            if (value3 != undefined) {
+            if (o3 != undefined) {
                 if (push) {
-                    value2.push(value3);
+                    o.num.push(o3.num);
                 } else {
-                    value2.unshift(value3);
+                    o.num.unshift(o3.num);
                 }
             }
         } else {
-            value2 = calcValue(value, value2);
+            o = calcValue(o1, o2);
         }
-        return value2;
+        return o;
     }
 
-    function calcValue(value, value2) {
-        switch (typeof(value2)) {
-            case 'string':
-                var _s = value2.substr(0, 2);
-                var _n = parseFloat(value2.substr(2));
-                switch (_s) {
-                    case '+=':
-                        value2 = value + _n;
-                        break;
-                    case '-=':
-                        value2 = value - _n;
-                        break;
-                }
+    function calcValue(o1, o2) {
+        var _o = regValue(o2);
+
+        if (o1.unit == 'rem' && _o.unit != 'rem') {
+            checkRem();
+            o1.num = Math.floor(o1.num * remUnit * 100) / 100;
+            o1.unit = 'px'
+        } else if (o1.unit != 'rem' && _o.unit == 'rem') {
+            checkRem();
+            o1.num = Math.floor(o1.num * 100 / remUnit) / 100;
+            o1.unit = 'rem';
+        }
+
+        var _value;
+        switch (_o.ext) {
+            case '+=':
+                _value = o1.num + _o.num;
                 break;
-        }
-        return value2;
-    }
-
-    function checkCssValue(name, value) {
-        switch (name) {
-            case 'opacity':
-            case 'fontWeight':
-            case 'lineHeight':
-            case 'zoom':
-                return value;
+            case '-=':
+                _value = o1.num - _o.num;
+                break;
             default:
-                //return Math.round(value) + 'px';
-                return typeof(value) === 'number' ? Math.round(value) + 'px' : value;
+                _value = _o.num;
                 break;
         }
+        return {num: _value, unit: _o.unit || o1.unit};
     }
 
     function checkJtobj(target) {
@@ -183,6 +183,17 @@
                 scaleY: 1,
                 scaleZ: 1
             };
+    }
+
+    function regValue(value) {
+        var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(rem|px|)/i;
+        var _a = _r.exec(value);
+        return {num: parseFloat(_a[2] + _a[3]), unit: _a[4], ext: _a[1]};
+    }
+
+    function hasBlank(value) {
+        var _r = /\S\s+\S/g;
+        return _r.test(value);
     }
 
     function getProp(target, name) {
@@ -203,7 +214,9 @@
     }
 
     function getStyle(target, name) {
-        if (document.defaultView && document.defaultView.getComputedStyle) {
+        if (target.style[name]) {
+            return target.style[name];
+        } else if (document.defaultView && document.defaultView.getComputedStyle) {
             var _p = hyphenize(name);
             var _s = document.defaultView.getComputedStyle(target, '');
             return _s && _s.getPropertyValue(_p);
@@ -234,11 +247,29 @@
     }
 
     function setStyle(target, name, value) {
-        target.style[name] = checkCssValue(name, value);
+        target.style[name] = value;
     }
 
     function isDOM(obj) {
         return typeof(obj) === 'object' && obj.nodeType === 1;
+    }
+
+    // --------------------------------------------------------------------计算1rem单位值
+    var body, tempDiv, remUnit;
+
+    function checkRem() {
+        if (!tempDiv) {
+            tempDiv = document.createElement('div');
+            tempDiv.style.cssText = 'border:0 solid; position:absolute; line-height:0px;';
+        }
+        if (!body) {
+            body = document.getElementsByTagName('body')[0];
+        }
+
+        body.appendChild(tempDiv);
+        tempDiv.style.borderLeftWidth = '1rem';
+        remUnit = parseFloat(tempDiv.offsetWidth);
+        body.removeChild(tempDiv);
     }
 
 
@@ -379,23 +410,24 @@
 
             for (var prop in this.fromVars) {
                 var _start = this.fromVars[prop];
-                var _end = this.toVars[prop] || 0;
+                var _end = this.toVars[prop];
 
                 var _n;
-                if (_end instanceof Array) {
-                    _n = this.interpolation(_end, _radio);
-                } else if (_start instanceof Array) {
-                    _n = this.interpolation(_start, _radio);
+                if (_end.num instanceof Array) {
+                    _n = this.interpolation(_end.num, _radio);
                 } else {
-                    _n = _start + ( _end - _start ) * _radio;
+                    _n = _start.num + ( _end.num - _start.num ) * _radio;
                 }
                 _n = Math.round(_n * 100) / 100;
-                this.curVars[prop] = _n;
+                this.curVars[prop] = {num: _n, unit: _end.unit};
 
                 if (this.isDom) {
-                    if (setProp(this.target, prop, _n)) _trans = true;
+                    if (Math.abs(_end.num - _start.num) > 20) {
+                        _n = Math.round(_n);
+                    }
+                    if (setProp(this.target, prop, _n + _end.unit)) _trans = true;
                 } else {
-                    this.target[prop] = _n;
+                    this.target[prop] = _n + _end.unit;
                 }
             }
 
@@ -455,8 +487,12 @@
                     for (var i in params) {
                         var _name = checkPropName(obj, i);
                         if (_name) {
-                            var _value = checkValue(parseFloat(getProp(obj, _name)), params[i]);
-                            if (setProp(obj, _name, _value)) _trans = true;
+                            if (hasBlank(params[i])) {
+                                setProp(obj, _name, params[i]);
+                            } else {
+                                var _o = checkValue(regValue(getProp(obj, _name)), params[i]);
+                                if (setProp(obj, _name, _o.num + _o.unit)) _trans = true;
+                            }
                         }
                     }
 
@@ -465,7 +501,8 @@
 
                 } else {
                     for (var j in params) {
-                        obj[j] = checkValue(obj[j], params[j]);
+                        var _o = checkValue(regValue(obj[j]), params[j]);
+                        obj[j] = _o.num + _o.unit;
                     }
                 }
             });
@@ -484,9 +521,9 @@
                     for (var i in toVars) {
                         var _name = checkPropName(obj, i);
                         if (_name) {
-                            var _n = parseFloat(getProp(obj, _name));
-                            _fromVars[_name] = checkValue(_n, fromVars[i]);
-                            _toVars[_name] = checkValue(_n, toVars[i], _fromVars[_name], false);
+                            var _o = regValue(getProp(obj, _name));
+                            _fromVars[_name] = checkValue(_o, fromVars[i]);
+                            _toVars[_name] = checkValue(_o, toVars[i], _fromVars[_name], false);
                         } else {
                             _toVars[i] = toVars[i];
                         }
@@ -494,9 +531,9 @@
                 } else {
                     for (var i in toVars) {
                         if ((obj[i] !== undefined)) {
-                            var _n = parseFloat(obj[i]);
-                            _fromVars[i] = checkValue(_n, fromVars[i]);
-                            _toVars[i] = checkValue(_n, toVars[i], _fromVars[i], false);
+                            var _o = regValue(obj[i]);
+                            _fromVars[i] = checkValue(_o, fromVars[i]);
+                            _toVars[i] = checkValue(_o, toVars[i], _fromVars[i], false);
                         } else {
                             _toVars[i] = toVars[i];
                         }
@@ -527,9 +564,9 @@
                     for (var i in fromVars) {
                         var _name = checkPropName(obj, i);
                         if (_name) {
-                            var _n = parseFloat(getProp(obj, _name));
-                            _fromVars[_name] = checkValue(_n, fromVars[i], _n, true);
-                            _toVars[_name] = _n;
+                            var _o = regValue(getProp(obj, _name));
+                            _fromVars[_name] = checkValue(_o, fromVars[i], _o, true);
+                            _toVars[_name] = _o;
                         } else {
                             _toVars[i] = fromVars[i];
                         }
@@ -537,9 +574,9 @@
                 } else {
                     for (var i in fromVars) {
                         if ((obj[i] !== undefined)) {
-                            var _n = parseFloat(obj[i]);
-                            _fromVars[i] = checkValue(_n, fromVars[i], _n, true);
-                            _toVars[i] = _n;
+                            var _o = regValue(obj[i]);
+                            _fromVars[i] = checkValue(_o, fromVars[i], _o, true);
+                            _toVars[i] = _o;
                         } else {
                             _toVars[i] = fromVars[i];
                         }
@@ -570,9 +607,9 @@
                     for (var i in toVars) {
                         var _name = checkPropName(obj, i);
                         if (_name) {
-                            var _n = parseFloat(getProp(obj, _name));
-                            _fromVars[_name] = _n;
-                            _toVars[_name] = checkValue(_n, toVars[i], _n, false);
+                            var _o = regValue(getProp(obj, _name));
+                            _fromVars[_name] = _o;
+                            _toVars[_name] = checkValue(_o, toVars[i], _o, false);
                         } else {
                             _toVars[i] = toVars[i];
                         }
@@ -580,9 +617,9 @@
                 } else {
                     for (var i in toVars) {
                         if ((obj[i] !== undefined)) {
-                            var _n = parseFloat(obj[i]);
-                            _fromVars[i] = _n;
-                            _toVars[i] = checkValue(_n, toVars[i], _n, false);
+                            var _o = regValue(obj[i]);
+                            _fromVars[i] = _o;
+                            _toVars[i] = checkValue(_o, toVars[i], _o, false);
                         } else {
                             _toVars[i] = toVars[i];
                         }
@@ -688,7 +725,7 @@
             this.isPlaying = isPlaying || true;
 
             calls.unshift(this);
-            if (!isUpdating){
+            if (!isUpdating) {
                 lastTime = now();
                 globalUpdate();
             }

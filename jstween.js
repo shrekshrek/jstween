@@ -52,6 +52,10 @@
         });
     }
 
+    function fixed2(n) {
+        return Math.round(n * 100) / 100;
+    }
+
 
     // --------------------------------------------------------------------time fix
     Date.now = (Date.now || function () {
@@ -147,11 +151,11 @@
 
         if (o1.unit == 'rem' && _o.unit != 'rem') {
             checkRem();
-            o1.num = Math.floor(o1.num * remUnit * 100) / 100;
+            o1.num = fixed2(o1.num * remUnit);
             o1.unit = 'px'
         } else if (o1.unit != 'rem' && _o.unit == 'rem') {
             checkRem();
-            o1.num = Math.floor(o1.num * 100 / remUnit) / 100;
+            o1.num = fixed2(o1.num / remUnit);
             o1.unit = 'rem';
         }
 
@@ -418,7 +422,7 @@
                 } else {
                     _n = _start.num + ( _end.num - _start.num ) * _radio;
                 }
-                _n = Math.round(_n * 100) / 100;
+                _n = fixed2(_n);
                 this.curVars[prop] = {num: _n, unit: _end.unit};
 
                 if (this.isDom) {

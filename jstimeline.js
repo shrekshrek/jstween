@@ -29,6 +29,12 @@
         }
     }
 
+    function regValue(value) {
+        var _r = /(^[a-zA-Z]\w*|)(\+=|-=|)(\d*\.\d*|\d*)/;
+        var _a = _r.exec(value);
+        return {label: _a[1], ext: _a[2], num: parseFloat(_a[3])};
+    }
+
     var requestFrame = window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
@@ -145,30 +151,23 @@
         _parsePosition: function (position) {
             if (position == undefined) return this.labelTime;
 
+            var _o = regValue(position);
             var _time = 0;
-            switch (typeof(position)) {
-                case 'string':
-                    var _a = Math.max(position.indexOf('+='), position.indexOf('-='));
-                    if (_a != -1) {
-                        var _t = position.substr(0, _a);
-                        var _s = position.substr(_a, 2);
-                        var _n = parseFloat(position.substr(_a + 2));
-                        switch (_s) {
-                            case '+=':
-                                _time = this.getLabelTime(_t) + _n;
-                                break;
-                            case '-=':
-                                _time = this.getLabelTime(_t) - _n;
-                                break;
-                        }
-                    } else {
-                        _time = this.getLabelTime(position);
-                    }
-                    break;
-                case 'number':
-                    _time = position;
-                    break;
+            if (_o.label) {
+                _time = this.getLabelTime(_o.label);
+
+                switch (_o.ext) {
+                    case '+=':
+                        _time += _o.num;
+                        break;
+                    case '-=':
+                        _time -= _o.num;
+                        break;
+                }
+            } else {
+                _time = _o.num;
             }
+
             return _time;
         },
 

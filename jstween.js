@@ -192,7 +192,8 @@
     function regValue(value) {
         var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(rem|px|)/i;
         var _a = _r.exec(value);
-        return {num: parseFloat(_a[2] + _a[3]), unit: _a[4], ext: _a[1]};
+        if (_a) return {num: parseFloat(_a[2] + _a[3]), unit: _a[4], ext: _a[1]};
+        else return {num: 0, unit: 'px', ext: ''};
     }
 
     function hasBlank(value) {

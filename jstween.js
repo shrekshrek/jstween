@@ -114,6 +114,8 @@
     }
 
     function checkPropName(target, name) {
+        if (name == 'rotation' || name == 'scale') return name;
+
         if (target._jt_obj[name] !== undefined) return name;
 
         if (target.style[name] !== undefined) return name;
@@ -217,6 +219,10 @@
             case 'skewX':
             case 'skewY':
                 return target._jt_obj[name];
+            case 'rotation':
+                return target._jt_obj['rotationZ'];
+            case 'scale':
+                return target._jt_obj['scaleX'];
             default:
                 return getStyle(target, name);
         }
@@ -250,6 +256,13 @@
             case 'skewX':
             case 'skewY':
                 target._jt_obj[name] = value;
+                return true;
+            case 'rotation':
+                target._jt_obj['rotationZ'] = value;
+                return true;
+            case 'scale':
+                target._jt_obj['scaleX'] = value;
+                target._jt_obj['scaleY'] = value;
                 return true;
             default:
                 setStyle(target, name, value);

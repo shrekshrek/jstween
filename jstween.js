@@ -432,7 +432,7 @@
                     }
                     if (setProp(this.target, prop, _n + _end.unit)) _trans = true;
                 } else {
-                    this.target[prop] = _n + _end.unit;
+                    this.target[prop] = _n + (_end.unit || 0);
                 }
             }
 
@@ -507,7 +507,7 @@
                 } else {
                     for (var j in params) {
                         var _o = checkValue(regValue(obj[j]), params[j]);
-                        obj[j] = _o.num + _o.unit;
+                        obj[j] = _o.num + (_o.unit || 0);
                     }
                 }
             });

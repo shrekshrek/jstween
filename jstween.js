@@ -280,7 +280,7 @@
 
     function updateTransform(obj) {
         var _t = '';
-        if (obj._jt_obj.x || obj._jt_obj.y || obj._jt_obj.z) _t += 'translate3d(' + obj._jt_obj.x + 'px,' + obj._jt_obj.y + 'px,' + obj._jt_obj.z + 'px) ';
+        if (obj._jt_obj.x || obj._jt_obj.y || obj._jt_obj.z) _t += 'translate3d(' + obj._jt_obj.x + (typeof(obj._jt_obj.x) == 'number' ? 'px' : '') + ',' + obj._jt_obj.y + (typeof(obj._jt_obj.y) == 'number' ? 'px' : '') + ',' + obj._jt_obj.z + (typeof(obj._jt_obj.z) == 'number' ? 'px' : '') + ') ';
         if (obj._jt_obj.rotationX) _t += 'rotateX(' + obj._jt_obj.rotationX % 360 + 'deg) ';
         if (obj._jt_obj.rotationY) _t += 'rotateY(' + obj._jt_obj.rotationY % 360 + 'deg) ';
         if (obj._jt_obj.rotationZ) _t += 'rotateZ(' + obj._jt_obj.rotationZ % 360 + 'deg) ';
@@ -460,7 +460,7 @@
                     if (Math.abs(_end.num - _start.num) > 20) {
                         _n = Math.round(_n);
                     }
-                    if (setProp(this.target, prop, _n + _end.unit)) _trans = true;
+                    if (setProp(this.target, prop, _n + (_end.unit || 0))) _trans = true;
                 } else {
                     this.target[prop] = _n + (_end.unit || 0);
                 }
@@ -525,7 +525,7 @@
                                 setProp(obj, _name, params[i]);
                             } else {
                                 var _o = checkValue(regValue(getProp(obj, _name)), params[i]);
-                                if (setProp(obj, _name, _o.num + _o.unit)) _trans = true;
+                                if (setProp(obj, _name, _o.num + (_o.unit || 0))) _trans = true;
                             }
                         }
                     }

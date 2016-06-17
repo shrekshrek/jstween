@@ -185,7 +185,9 @@
                 rotationZ: 0,
                 scaleX: 1,
                 scaleY: 1,
-                scaleZ: 1
+                scaleZ: 1,
+                skewX: 0,
+                skewY: 0,
             };
     }
 
@@ -212,6 +214,8 @@
             case 'scaleX':
             case 'scaleY':
             case 'scaleZ':
+            case 'skewX':
+            case 'skewY':
                 return target._jt_obj[name];
             default:
                 return getStyle(target, name);
@@ -243,6 +247,8 @@
             case 'scaleX':
             case 'scaleY':
             case 'scaleZ':
+            case 'skewX':
+            case 'skewY':
                 target._jt_obj[name] = value;
                 return true;
             default:
@@ -257,6 +263,17 @@
 
     function isDOM(obj) {
         return typeof(obj) === 'object' && obj.nodeType === 1;
+    }
+
+    function updateTransform(obj) {
+        var _t = '';
+        if (obj._jt_obj.x || obj._jt_obj.y || obj._jt_obj.z) _t += 'translate3d(' + obj._jt_obj.x + 'px,' + obj._jt_obj.y + 'px,' + obj._jt_obj.z + 'px) ';
+        if (obj._jt_obj.rotationX) _t += 'rotateX(' + obj._jt_obj.rotationX % 360 + 'deg) ';
+        if (obj._jt_obj.rotationY) _t += 'rotateY(' + obj._jt_obj.rotationY % 360 + 'deg) ';
+        if (obj._jt_obj.rotationZ) _t += 'rotateZ(' + obj._jt_obj.rotationZ % 360 + 'deg) ';
+        if (obj._jt_obj.scaleX != 1 || obj._jt_obj.scaleY != 1 || obj._jt_obj.scaleZ != 1) _t += 'scale3d(' + obj._jt_obj.scaleX + ', ' + obj._jt_obj.scaleY + ', ' + obj._jt_obj.scaleZ + ') ';
+        if (obj._jt_obj.skewX || obj._jt_obj.skewY) _t += 'skew(' + obj._jt_obj.skewX + 'deg,' + obj._jt_obj.skewY + 'deg) ';
+        obj.style[browserPrefix('transform')] = _t;
     }
 
     // --------------------------------------------------------------------计算1rem单位值
@@ -436,8 +453,7 @@
                 }
             }
 
-            if (_trans)
-                this.target.style[browserPrefix('transform')] = 'translate3d(' + this.target._jt_obj.x + 'px,' + this.target._jt_obj.y + 'px,' + this.target._jt_obj.z + 'px) ' + 'rotateX(' + this.target._jt_obj.rotationX % 360 + 'deg) ' + 'rotateY(' + this.target._jt_obj.rotationY % 360 + 'deg) ' + 'rotateZ(' + this.target._jt_obj.rotationZ % 360 + 'deg) ' + 'scale3d(' + this.target._jt_obj.scaleX + ', ' + this.target._jt_obj.scaleY + ', ' + this.target._jt_obj.scaleZ + ') ';
+            if (_trans) updateTransform(this.target);
 
         },
 
@@ -501,8 +517,7 @@
                         }
                     }
 
-                    if (_trans)
-                        obj.style[browserPrefix('transform')] = 'translate3d(' + obj._jt_obj.x + 'px,' + obj._jt_obj.y + 'px,' + obj._jt_obj.z + 'px) ' + 'rotateX(' + obj._jt_obj.rotationX % 360 + 'deg) ' + 'rotateY(' + obj._jt_obj.rotationY % 360 + 'deg) ' + 'rotateZ(' + obj._jt_obj.rotationZ % 360 + 'deg) ' + 'scale3d(' + obj._jt_obj.scaleX + ', ' + obj._jt_obj.scaleY + ', ' + obj._jt_obj.scaleZ + ') ';
+                    if (_trans) updateTransform(this.target);
 
                 } else {
                     for (var j in params) {

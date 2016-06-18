@@ -280,13 +280,17 @@
 
     function updateTransform(obj) {
         var _t = '';
-        if (obj._jt_obj.x || obj._jt_obj.y || obj._jt_obj.z) _t += 'translate3d(' + obj._jt_obj.x + (typeof(obj._jt_obj.x) == 'number' ? 'px' : '') + ',' + obj._jt_obj.y + (typeof(obj._jt_obj.y) == 'number' ? 'px' : '') + ',' + obj._jt_obj.z + (typeof(obj._jt_obj.z) == 'number' ? 'px' : '') + ') ';
+        if (obj._jt_obj.x || obj._jt_obj.y || obj._jt_obj.z) _t += 'translate3d(' + checkNumber(obj._jt_obj.x) + ',' + checkNumber(obj._jt_obj.y) + ',' + checkNumber(obj._jt_obj.z) + ') ';
         if (obj._jt_obj.rotationX) _t += 'rotateX(' + obj._jt_obj.rotationX % 360 + 'deg) ';
         if (obj._jt_obj.rotationY) _t += 'rotateY(' + obj._jt_obj.rotationY % 360 + 'deg) ';
         if (obj._jt_obj.rotationZ) _t += 'rotateZ(' + obj._jt_obj.rotationZ % 360 + 'deg) ';
         if (obj._jt_obj.scaleX != 1 || obj._jt_obj.scaleY != 1 || obj._jt_obj.scaleZ != 1) _t += 'scale3d(' + obj._jt_obj.scaleX + ', ' + obj._jt_obj.scaleY + ', ' + obj._jt_obj.scaleZ + ') ';
         if (obj._jt_obj.skewX || obj._jt_obj.skewY) _t += 'skew(' + obj._jt_obj.skewX + 'deg,' + obj._jt_obj.skewY + 'deg) ';
         obj.style[browserPrefix('transform')] = _t;
+    }
+
+    function checkNumber(value) {
+        return value + (typeof(value) == 'number' ? 'px' : '');
     }
 
     // --------------------------------------------------------------------计算1rem单位值

@@ -534,7 +534,7 @@
                         }
                     }
 
-                    if (_trans) updateTransform(this.target);
+                    if (_trans) updateTransform(obj);
 
                 } else {
                     for (var j in params) {

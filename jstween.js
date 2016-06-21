@@ -529,7 +529,7 @@
                                 setProp(obj, _name, params[i]);
                             } else {
                                 var _o = checkValue(regValue(getProp(obj, _name)), params[i]);
-                                if (setProp(obj, _name, _o.num + (_o.unit || 0))) _trans = true;
+                                if (setProp(obj, _name, fixed2(_o.num) + (_o.unit || 0))) _trans = true;
                             }
                         }
                     }
@@ -539,7 +539,7 @@
                 } else {
                     for (var j in params) {
                         var _o = checkValue(regValue(obj[j]), params[j]);
-                        obj[j] = _o.num + (_o.unit || 0);
+                        obj[j] = fixed2(_o.num) + (_o.unit || 0);
                     }
                 }
             });

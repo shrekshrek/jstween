@@ -194,11 +194,14 @@
     }
 
     function regValue(value) {
-        if(typeof(value) == 'number') return {num: fixed2(value), unit: '', ext: ''};
-        var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(rem|px|)/i;
-        var _a = _r.exec(value);
-        if (_a) return {num: parseFloat(_a[2] + _a[3]), unit: _a[4], ext: _a[1]};
-        else return {num: 0, unit: 'px', ext: ''};
+        if(typeof(value) == 'number'){
+            return {num: fixed2(value), unit: '', ext: ''};
+        }else{
+            var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(rem|px|)/i;
+            var _a = _r.exec(value);
+            if (_a) return {num: parseFloat(_a[2] + _a[3]), unit: _a[4], ext: _a[1]};
+            else return {num: 0, unit: 'px', ext: ''};
+        }
     }
 
     function hasBlank(value) {
@@ -399,8 +402,7 @@
         _update: function (time) {
             if (!this.isPlaying) return true;
 
-            var _time = time;
-            this.curTime += _time;
+            this.curTime += time;
 
             if (this.curTime < this.startTime) return true;
 

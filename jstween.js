@@ -773,8 +773,7 @@
         _update: function (time) {
             if (!this.isPlaying) return true;
 
-            var _time = time;
-            this.curTime += _time;
+            this.curTime += time;
 
             if (this.curTime < this.endTime) return true;
 

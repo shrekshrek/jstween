@@ -1,6 +1,6 @@
 /*!
- * VERSION: 0.5.2
- * DATE: 2016-6-7
+ * VERSION: 0.6.0
+ * DATE: 2016-6-26
  * GIT:https://github.com/shrekshrek/jstween
  *
  * @author: Shrek.wang, shrekshrek@gmail.com
@@ -194,9 +194,9 @@
     }
 
     function regValue(value) {
-        if(typeof(value) == 'number'){
+        if (typeof(value) == 'number') {
             return {num: fixed2(value), unit: '', ext: ''};
-        }else{
+        } else {
             var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(rem|px|)/i;
             var _a = _r.exec(value);
             if (_a) return {num: parseFloat(_a[2] + _a[3]), unit: _a[4], ext: _a[1]};
@@ -409,6 +409,7 @@
             if (!this.isStart) {
                 this.isStart = true;
                 if (this.onStart) this.onStart.apply(this, this.onStartParams);
+                if (this.repeat == this.curRepeat) this.curTime += this.repeatDelay;
             }
 
             if (this.curTime < this.startTime + this.repeatDelay) return true;

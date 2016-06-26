@@ -194,14 +194,10 @@
     }
 
     function regValue(value) {
-        if (typeof(value) == 'number') {
-            return {num: fixed2(value), unit: '', ext: ''};
-        } else {
-            var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(rem|px|)/i;
-            var _a = _r.exec(value);
-            if (_a) return {num: parseFloat(_a[2] + _a[3]), unit: _a[4], ext: _a[1]};
-            else return {num: 0, unit: 'px', ext: ''};
-        }
+        var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(e[+-]?[0-9]{0,2}|)(rem|px|)/i;
+        var _a = _r.exec(value);
+        if (_a) return {num: fixed2(_a[2] + _a[3] + _a[4]), unit: _a[5], ext: _a[1]};
+        else return {num: 0, unit: 'px', ext: ''};
     }
 
     function hasBlank(value) {
@@ -533,7 +529,7 @@
                                 setProp(obj, _name, params[i]);
                             } else {
                                 var _o = checkValue(regValue(getProp(obj, _name)), params[i]);
-                                if (setProp(obj, _name, fixed2(_o.num) + (_o.unit || 0))) _trans = true;
+                                if (setProp(obj, _name, _o.num + (_o.unit || 0))) _trans = true;
                             }
                         }
                     }
@@ -543,7 +539,7 @@
                 } else {
                     for (var j in params) {
                         var _o = checkValue(regValue(obj[j]), params[j]);
-                        obj[j] = fixed2(_o.num) + (_o.unit || 0);
+                        obj[j] = _o.num + (_o.unit || 0);
                     }
                 }
             });

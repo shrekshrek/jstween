@@ -1,6 +1,6 @@
 /*!
- * VERSION: 0.1.1
- * DATE: 2016-5-25
+ * VERSION: 0.2.0
+ * DATE: 2016-6-26
  * GIT:https://github.com/shrekshrek/jstween
  *
  * @author: Shrek.wang, shrekshrek@gmail.com
@@ -138,7 +138,7 @@
             var _delay = Math.max(vars.delay || 0, 0);
             var _repeat = Math.max(0, Math.floor(vars.repeat || 0));
             var _repeatDelay = Math.max(vars.repeatDelay || 0, 0);
-            var _totalDuration = _delay + (_repeatDelay + _duration) * (_repeat + 1);
+            var _totalDuration = _delay + _duration + (_repeatDelay + _duration) * _repeat;
 
             var _startTime = this._parsePosition(position);
 

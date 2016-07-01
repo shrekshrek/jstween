@@ -28,6 +28,8 @@ JT.restartAll();
 JT.kill(target, [toEnd]);  
 JT.killAll([toEnd]);  
 
+JT.isTweening(target);  
+
 param为字符串，  
 params为数组，  
 

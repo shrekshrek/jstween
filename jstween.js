@@ -52,8 +52,8 @@
         });
     }
 
-    function fixed2(n) {
-        return Math.round(n * 100) / 100;
+    function fixed3(n) {
+        return Math.round(n * 1000) / 1000;
     }
 
 
@@ -153,11 +153,11 @@
 
         if (o1.unit == 'rem' && _o.unit != 'rem') {
             checkRem();
-            o1.num = fixed2(o1.num * remUnit);
+            o1.num = fixed3(o1.num * remUnit);
             o1.unit = 'px'
         } else if (o1.unit != 'rem' && _o.unit == 'rem') {
             checkRem();
-            o1.num = fixed2(o1.num / remUnit);
+            o1.num = fixed3(o1.num / remUnit);
             o1.unit = 'rem';
         }
 
@@ -196,7 +196,7 @@
     function regValue(value) {
         var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(e[+-]?[0-9]{0,2}|)(rem|px|)/i;
         var _a = _r.exec(value);
-        if (_a) return {num: fixed2(_a[2] + _a[3] + _a[4]), unit: _a[5], ext: _a[1]};
+        if (_a) return {num: fixed3(_a[2] + _a[3] + _a[4]), unit: _a[5], ext: _a[1]};
         else return {num: 0, unit: 'px', ext: ''};
     }
 
@@ -421,12 +421,15 @@
 
                 if (this.yoyo) this.isReverse = !this.isReverse;
 
+                var _time = (this.curTime - this.endTime) % (this.duration + this.repeatDelay);
                 if (this.repeatDelay == 0) {
-                    this.curTime = this.curTime - this.duration - this.repeatDelay;
+                    // this.curTime = this.curTime - this.duration - this.repeatDelay;
+                    this.curTime = this.startTime + _time;
                     this._updateProp();
                 } else {
                     this._updateProp();
-                    this.curTime = this.curTime - this.duration - this.repeatDelay;
+                    // this.curTime = this.curTime - this.duration - this.repeatDelay;
+                    this.curTime = this.startTime + _time;
                 }
 
                 if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
@@ -457,7 +460,7 @@
                 } else {
                     _n = _start.num + ( _end.num - _start.num ) * _radio;
                 }
-                _n = fixed2(_n);
+                _n = fixed3(_n);
                 this.curVars[prop] = {num: _n, unit: _end.unit};
 
                 if (this.isDom) {
@@ -718,7 +721,23 @@
 
         pauseAll: function () {
             actionProxyAllTweens('pause');
-        }
+        },
+
+        isTweening: function(target){
+            var _target = getElement(target);
+            var _has = false;
+            each(_target, function (index, obj) {
+                var _len = tweens.length;
+                for (var i = _len - 1; i >= 0; i--) {
+                    var _tween = tweens[i];
+                    if (_tween.target === obj) {
+                        _has = true;
+                        return;
+                    }
+                }
+            });
+            return _has;
+        },
 
     });
 

@@ -723,20 +723,17 @@
             actionProxyAllTweens('pause');
         },
 
-        isTweening: function(target){
+        isTweening: function (target) {
             var _target = getElement(target);
-            var _has = false;
-            each(_target, function (index, obj) {
-                var _len = tweens.length;
-                for (var i = _len - 1; i >= 0; i--) {
-                    var _tween = tweens[i];
-                    if (_tween.target === obj) {
-                        _has = true;
-                        return;
-                    }
+            _target = _target[0] || _target;
+            var _len = tweens.length;
+            for (var i = _len - 1; i >= 0; i--) {
+                var _tween = tweens[i];
+                if (_tween.target === _target) {
+                    return true;
                 }
-            });
-            return _has;
+            }
+            return false;
         },
 
     });

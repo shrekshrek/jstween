@@ -48,7 +48,7 @@
     var timelines = [];
     var isUpdating = false;
     var lastTime = 0;
-    var lastStep = 0;
+    // var lastStep = 0;
 
     function globalUpdate() {
         isUpdating = true;
@@ -62,13 +62,13 @@
         var _step = _now - lastTime;
         lastTime = _now;
 
-        if (lastStep == 0 || _step < lastStep * 10) {
+        // if (lastStep == 0 || _step < lastStep * 10) {
             for (var i = _len - 1; i >= 0; i--) {
                 timelines[i]._update(_step);
             }
-        }
+        // }
 
-        lastStep = _step;
+        // lastStep = _step;
 
         requestFrame(globalUpdate);
     }

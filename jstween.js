@@ -315,7 +315,7 @@
     var tweens = [];
     var isUpdating = false;
     var lastTime = 0;
-    var lastStep = 0;
+    // var lastStep = 0;
 
     function globalUpdate() {
         isUpdating = true;
@@ -330,7 +330,7 @@
         var _step = _now - lastTime;
         lastTime = _now;
 
-        if (lastStep == 0 || _step < lastStep * 10) {
+        // if (lastStep == 0 || _step < lastStep * 10) {
             for (var i = 0; i < _len; i++) {
                 if (!tweens[i]._update(_step)) {
                     tweens.splice(i--, 1);
@@ -344,9 +344,9 @@
                     _len2--;
                 }
             }
-        }
+        // }
 
-        lastStep = _step;
+        // lastStep = _step;
 
         requestFrame(globalUpdate);
     }

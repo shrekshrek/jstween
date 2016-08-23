@@ -1,6 +1,6 @@
 /*!
- * VERSION: 0.6.0
- * DATE: 2016-6-26
+ * VERSION: 0.7.0
+ * DATE: 2016-8-17
  * GIT:https://github.com/shrekshrek/jstween
  *
  * @author: Shrek.wang, shrekshrek@gmail.com
@@ -194,15 +194,14 @@
     }
 
     function regValue(value) {
-        var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(e[+-]?[0-9]{0,2}|)(rem|px|)/i;
+        var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(e[+-]?[0-9]{0,2}|)(rem|px|%|)/i;
         var _a = _r.exec(value);
         if (_a) return {num: fixed3(_a[2] + _a[3] + _a[4]), unit: _a[5], ext: _a[1]};
         else return {num: 0, unit: 'px', ext: ''};
     }
 
-    function hasBlank(value) {
-        var _r = /\S\s+\S/g;
-        return _r.test(value);
+    function checkString(value) {
+        return /\S\s+\S]/g.test(value)||!/\d/g.test(value);
     }
 
     function getProp(target, name) {
@@ -316,33 +315,38 @@
     var tweens = [];
     var isUpdating = false;
     var lastTime = 0;
+    var lastStep = 0;
 
     function globalUpdate() {
         isUpdating = true;
-        var _len = tweens.length, i;
-        var _len2 = calls.length, j;
+        var _len = tweens.length;
+        var _len2 = calls.length;
         if (_len === 0 && _len2 === 0) {
             isUpdating = false;
             return;
         }
 
         var _now = now();
-        var _time = _now - lastTime;
+        var _step = _now - lastTime;
         lastTime = _now;
-        for (i = _len - 1; i >= 0; i--) {
-            if (tweens[i] && !tweens[i]._update(_time)) {
-                var _tween = tweens.splice(i, 1)[0];
-                if (_tween.onUpdate) _tween.onUpdate.apply(_tween, _tween.onUpdateParams);
-                if (_tween.onEnd) _tween.onEnd.apply(_tween, _tween.onEndParams);
-                _tween.target = null;
+
+        if (lastStep == 0 || _step < lastStep * 10) {
+            for (var i = 0; i < _len; i++) {
+                if (!tweens[i]._update(_step)) {
+                    tweens.splice(i--, 1);
+                    _len--;
+                }
+            }
+
+            for (var j = 0; j < _len2; j++) {
+                if (!calls[j]._update(_step)) {
+                    calls.splice(j--, 1);
+                    _len2--;
+                }
             }
         }
-        for (j = _len2 - 1; j >= 0; j--) {
-            if (calls[j] && !calls[j]._update(_time)) {
-                var _call = calls.splice(j, 1)[0];
-                if (_call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
-            }
-        }
+
+        lastStep = _step;
 
         requestFrame(globalUpdate);
     }
@@ -374,6 +378,7 @@
             this.onUpdateParams = toVars.onUpdateParams || [];
             this.isPlaying = toVars.isPlaying || true;
             this.interpolation = toVars.interpolation || null;
+            this.isActive = toVars.isActive || true;
 
             this.isReverse = false;
             this.isDom = isDom;
@@ -388,10 +393,8 @@
                 if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
             }
 
-            tweens.push(this);
-            if (!isUpdating) {
-                lastTime = now();
-                globalUpdate();
+            if (this.isActive) {
+                this._addSelf();
             }
         },
 
@@ -416,6 +419,8 @@
             } else {
                 if (this.curRepeat == 0) {
                     this._updateProp();
+                    if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
+                    if (this.onEnd) this.onEnd.apply(this, this.onEndParams);
                     return false;
                 }
 
@@ -423,12 +428,10 @@
 
                 var _time = (this.curTime - this.endTime) % (this.duration + this.repeatDelay);
                 if (this.repeatDelay == 0) {
-                    // this.curTime = this.curTime - this.duration - this.repeatDelay;
                     this.curTime = this.startTime + _time;
                     this._updateProp();
                 } else {
                     this._updateProp();
-                    // this.curTime = this.curTime - this.duration - this.repeatDelay;
                     this.curTime = this.startTime + _time;
                 }
 
@@ -477,27 +480,39 @@
 
         },
 
-        play: function () {
-            if (!this.target) return;
+        _addSelf: function () {
+            this.isActive = true;
+            tweens.push(this);
+            if (!isUpdating) {
+                lastTime = JT.now();
+                globalUpdate();
+            }
+        },
 
+        _removeSelf: function () {
+            this.isActive = false;
+            var i = tweens.indexOf(this);
+            if (i !== -1) {
+                tweens.splice(i, 1);
+            }
+        },
+
+        play: function () {
             this.isPlaying = true;
         },
 
         pause: function () {
-            if (!this.target) return;
-
             this.isPlaying = false;
         },
 
-        destroy: function (toEnd) {
-            if (!this.target) return;
+        active: function () {
+            this._addSelf();
+        },
 
-            var i = tweens.indexOf(this);
-            if (i !== -1) {
-                var _tween = tweens.splice(i, 1)[0];
-                if (toEnd && _tween.onEnd) _tween.onEnd.apply(_tween, _tween.onEndParams);
-                this.target = null;
-            }
+        destroy: function (toEnd) {
+            this._removeSelf();
+            if (toEnd && this.onEnd) this.onEnd.apply(this, this.onEndParams);
+            this.target = null;
         }
     });
 
@@ -528,7 +543,7 @@
                     for (var i in params) {
                         var _name = checkPropName(obj, i);
                         if (_name) {
-                            if (hasBlank(params[i])) {
+                            if (checkString(params[i])) {
                                 setProp(obj, _name, params[i]);
                             } else {
                                 var _o = checkValue(regValue(getProp(obj, _name)), params[i]);
@@ -701,7 +716,7 @@
 
             var _len = tweens.length;
             for (var i = _len - 1; i >= 0; i--) {
-                var _tween = tweens.splice(i, 1);
+                var _tween = tweens.splice(i, 1)[0];
                 if (toEnd && _tween.onEnd) _tween.onEnd.apply(_tween, _tween.onEndParams);
                 _tween.target = null;
             }
@@ -777,12 +792,14 @@
             this.endTime = this.delay;
             this.isPlaying = isPlaying || true;
 
-            calls.push(this);
-            if (!isUpdating) {
-                lastTime = now();
-                globalUpdate();
+            if (this.delay != 0) {
+                this._addSelf();
+            }else{
+                if (this.onEnd) this.onEnd.apply(this, this.onEndParams);
             }
+
         },
+
         _update: function (time) {
             if (!this.isPlaying) return true;
 
@@ -790,28 +807,45 @@
 
             if (this.curTime < this.endTime) return true;
 
+            if (this.onEnd) this.onEnd.apply(this, this.onEndParams);
             return false;
         },
+
+        _addSelf: function () {
+            calls.push(this);
+            if (!isUpdating) {
+                lastTime = JT.now();
+                globalUpdate();
+            }
+        },
+
+        _removeSelf: function () {
+            var i = calls.indexOf(this);
+            if (i !== -1) {
+                calls.splice(i, 1);
+            }
+        },
+
         play: function () {
             this.isPlaying = true;
         },
+
         pause: function () {
             this.isPlaying = false;
         },
+
         destroy: function (toEnd) {
-            var i = calls.indexOf(this);
-            if (i !== -1) {
-                var _call = calls.splice(i, 1)[0];
-                if (toEnd && _call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
-            }
+            this._removeSelf();
+            if (toEnd && this.onEnd) this.onEnd.apply(this, this.onEndParams);
+            this.target = null;
         }
     });
 
 
     //---------------------------------------------------------------call 全局方法
     extend(JT, {
-        call: function (time, callback, params) {
-            return new call(time, callback, params);
+        call: function (time, callback, params, isPlaying) {
+            return new call(time, callback, params, isPlaying);
         },
 
         killCall: function (callback, toEnd) {
@@ -821,7 +855,6 @@
                 for (var i = _len - 1; i >= 0; i--) {
                     var _call = calls[i];
                     if (_call.onEnd === obj) {
-                        //_call.kill(toEnd);
                         calls.splice(i, 1);
                         if (toEnd && _call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
                     }

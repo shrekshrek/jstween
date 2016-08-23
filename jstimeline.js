@@ -1,6 +1,6 @@
 /*!
- * VERSION: 0.2.0
- * DATE: 2016-6-26
+ * VERSION: 0.3.0
+ * DATE: 2016-8-17
  * GIT:https://github.com/shrekshrek/jstween
  *
  * @author: Shrek.wang, shrekshrek@gmail.com
@@ -48,6 +48,7 @@
     var timelines = [];
     var isUpdating = false;
     var lastTime = 0;
+    var lastStep = 0;
 
     function globalUpdate() {
         isUpdating = true;
@@ -58,11 +59,16 @@
         }
 
         var _now = JT.now();
-        var _time = _now - lastTime;
+        var _step = _now - lastTime;
         lastTime = _now;
-        for (var i = _len - 1; i >= 0; i--) {
-            timelines[i]._update(_time);
+
+        if (lastStep == 0 || _step < lastStep * 10) {
+            for (var i = _len - 1; i >= 0; i--) {
+                timelines[i]._update(_step);
+            }
         }
+
+        lastStep = _step;
 
         requestFrame(globalUpdate);
     }
@@ -90,7 +96,7 @@
         },
 
         _update: function (time) {
-            if (!this.isPlaying) return true;
+            if (!this.isPlaying) return;
 
             this.curTime += time;
 
@@ -99,7 +105,6 @@
 
         _addSelf: function () {
             timelines.push(this);
-
             if (!isUpdating) {
                 lastTime = JT.now();
                 globalUpdate();
@@ -115,14 +120,17 @@
 
         _checkHandler: function () {
             var _len = this.anchors.length;
-            if (this.anchorId >= _len) return;
+            if (this.anchorId >= _len) {
+                this._removeSelf();
+                this.isPlaying = false;
+                return;
+            }
 
             var _handler = this.anchors[this.anchorId];
             if (this.curTime >= _handler.time * 1000) {
                 if (this.anchorId == _len - 1) {
                     this._removeSelf();
                     this.isPlaying = false;
-                    //this.anchorId++;
                     _handler.handler.apply();
                 } else {
                     _handler.handler.apply();
@@ -307,7 +315,8 @@
         },
 
         play: function (position) {
-            if (this.isPlaying) return;
+            if (this.isPlaying) this.pause();
+            // if (this.isPlaying) return;
 
             var _len = this.tweens.length;
             for (var i = _len - 1; i >= 0; i--) {
@@ -372,7 +381,7 @@
             return new timeline();
         },
         kill: function (tl) {
-            tl.destroy();
+            tl.clear();
         }
     });
 

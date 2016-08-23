@@ -3,7 +3,7 @@
 <head>
     <script src="../jstween.js"></script>
     <!--<script src="../jstimeline.js"></script>-->
-    <script src="../jstimeline.05.25.js"></script>
+    <script src="../jstimeline.js"></script>
     <style>
         body {
             background: #000;
@@ -62,11 +62,40 @@
     tl.fromTo('#box3', 1, {marginLeft:300}, {marginLeft:500});
     tl.add(function(){
         console.log('again');
-//        tl.play(0);
+        tl.play(0);
     }, '+=4.5');
 
-//    tl.play('l1');
-    tl.play();
+    tl.play(0);
+
+//    tl.add('l1',1);
+//    tl.add(function(){
+//        for(var i=0;i<10;i++){
+//            JT.call(0.1, function(n){
+//                console.log('i='+n);
+//            }, [i]);
+//        }
+//
+//    },'l1+=1');
+//    tl.add(function(){
+//        console.log('22');
+//    },'l1+=1');
+//    tl.add(function(){
+//        console.log('33');
+//    },'l1+=1.1');
+//    tl.add(function(){
+//        console.log('44');
+//    },'l1+=1.2');
+//    tl.add(function(){
+//        console.log('55');
+//    },'l1+=1');
+//    tl.add(function(){
+//        console.log('66');
+//    },'l1+=1.1');
+//    tl.add(function(){
+//        console.log('77');
+//    },'l1+=1');
+//
+//    tl.play();
 
 
 </script>

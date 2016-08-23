@@ -201,7 +201,7 @@
     }
 
     function checkString(value) {
-        return /\S\s+\S]/g.test(value)||!/\d/g.test(value);
+        return /\S\s+\S/g.test(value)||!/\d/g.test(value);
     }
 
     function getProp(target, name) {

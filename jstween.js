@@ -417,11 +417,7 @@
 
             if (this.curTime < this.startTime) return true;
 
-            if (!this.isStart) {
-                this.isStart = true;
-                if (this.onStart) this.onStart.apply(this, this.onStartParams);
-                if (this.repeat == this.curRepeat) this.curTime += this.repeatDelay;
-            }
+            if (!this.isStart) this.curTime += this.repeatDelay;
 
             if (this.curTime < this.startTime + this.repeatDelay) return true;
 
@@ -433,6 +429,7 @@
                     this._updateProp();
                     if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
                     // if (this.onEnd) this.onEnd.apply(this, this.onEndParams);
+                    this._checkStart();
                     return false;
                 }
 
@@ -452,7 +449,16 @@
                 if (this.curRepeat > 0) this.curRepeat--;
             }
 
+            this._checkStart();
+
             return true;
+        },
+
+        _checkStart: function(){
+            if (!this.isStart) {
+                this.isStart = true;
+                if (this.onStart) this.onStart.apply(this, this.onStartParams);
+            }
         },
 
         _updateProp: function () {

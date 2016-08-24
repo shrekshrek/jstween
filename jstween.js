@@ -179,6 +179,7 @@
     function checkJtobj(target) {
         if (target._jt_obj == undefined)
             target._jt_obj = {
+                perspective: 0,
                 x: 0,
                 y: 0,
                 z: 0,
@@ -206,6 +207,7 @@
 
     function getProp(target, name) {
         switch (name) {
+            case 'perspective':
             case 'x':
             case 'y':
             case 'z':
@@ -243,6 +245,7 @@
 
     function setProp(target, name, value) {
         switch (name) {
+            case 'perspective':
             case 'x':
             case 'y':
             case 'z':
@@ -279,6 +282,7 @@
 
     function updateTransform(obj) {
         var _t = '';
+        if (obj._jt_obj.perspective) _t += 'perspective(' + obj._jt_obj.perspective + ') ';
         if (obj._jt_obj.x || obj._jt_obj.y || obj._jt_obj.z) _t += 'translate3d(' + checkNumber(obj._jt_obj.x) + ',' + checkNumber(obj._jt_obj.y) + ',' + checkNumber(obj._jt_obj.z) + ') ';
         if (obj._jt_obj.rotationX) _t += 'rotateX(' + obj._jt_obj.rotationX % 360 + 'deg) ';
         if (obj._jt_obj.rotationY) _t += 'rotateY(' + obj._jt_obj.rotationY % 360 + 'deg) ';
@@ -454,7 +458,7 @@
             return true;
         },
 
-        _checkStart: function(){
+        _checkStart: function () {
             if (!this.isStart) {
                 this.isStart = true;
                 if (this.onStart) this.onStart.apply(this, this.onStartParams);

@@ -51,16 +51,20 @@
     //        }
     //    });
 
-    JT.set('#box1', {transformOrigin: "100px 0px"});
+    JT.set('#box1', {transformStyle: "preserve-3d"});
     JT.fromTo('#box1', 1, {
-        marginLeft: 400,
+        perspective: 0,
+        x: 400,
         rotationZ: 0,
+        rotationY: 0,
         scaleX: 0.5,
         scaleY: 1,
         opacity: 0.5
     }, {
-        marginLeft: 200,
+        perspective: 500,
+        x: 200,
         rotationZ: 360,
+        rotationY: 90,
         scaleX: 2,
         scaleY: 0.5,
         opacity: 1,

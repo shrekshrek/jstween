@@ -1,6 +1,6 @@
 /*!
  * VERSION: 0.1.0
- * DATE: 2016-5-25
+ * DATE: 2016-8-17
  * GIT:https://github.com/shrekshrek/jstween
  *
  * @author: Shrek.wang, shrekshrek@gmail.com
@@ -22,7 +22,6 @@
     }
 
 }(function (root, JP, JT) {
-
 
 
     return JP;

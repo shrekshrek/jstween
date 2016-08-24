@@ -201,7 +201,7 @@
     }
 
     function checkString(value) {
-        return /\S\s+\S/g.test(value)||!/\d/g.test(value);
+        return /\S\s+\S/g.test(value) || !/\d/g.test(value);
     }
 
     function getProp(target, name) {
@@ -331,19 +331,31 @@
         lastTime = _now;
 
         // if (lastStep == 0 || _step < lastStep * 10) {
-            for (var i = 0; i < _len; i++) {
-                if (!tweens[i]._update(_step)) {
-                    tweens.splice(i--, 1);
-                    _len--;
+        for (var i = 0; i < _len; i++) {
+            var _tween = tweens[i];
+            if (_tween && !_tween._update(_step)) {
+                if (_tween.isActive) {
+                    _tween.isActive = false;
+                    tweens.splice(i, 1);
+                    if (_tween.onEnd) _tween.onEnd.apply(_tween, _tween.onEndParams);
                 }
+                i--;
+                _len--;
             }
+        }
 
-            for (var j = 0; j < _len2; j++) {
-                if (!calls[j]._update(_step)) {
-                    calls.splice(j--, 1);
-                    _len2--;
+        for (var j = 0; j < _len2; j++) {
+            var _call = calls[j];
+            if (_call && !_call._update(_step)) {
+                if (_call.isActive) {
+                    _call.isActive = false;
+                    calls.splice(j, 1);
+                    if (_call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
                 }
+                j--;
+                _len2--;
             }
+        }
         // }
 
         // lastStep = _step;
@@ -420,7 +432,7 @@
                 if (this.curRepeat == 0) {
                     this._updateProp();
                     if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
-                    if (this.onEnd) this.onEnd.apply(this, this.onEndParams);
+                    // if (this.onEnd) this.onEnd.apply(this, this.onEndParams);
                     return false;
                 }
 
@@ -480,6 +492,25 @@
 
         },
 
+        _toEnd: function () {
+            var _trans = false;
+
+            for (var prop in this.fromVars) {
+                var _end = this.toVars[prop];
+
+                var _n = fixed3(_end.num);
+                this.curVars[prop] = {num: _n, unit: _end.unit};
+
+                if (this.isDom) {
+                    if (setProp(this.target, prop, _n + (_end.unit || 0))) _trans = true;
+                } else {
+                    this.target[prop] = _n + (_end.unit || 0);
+                }
+            }
+
+            if (_trans) updateTransform(this.target);
+        },
+
         _addSelf: function () {
             this.isActive = true;
             tweens.push(this);
@@ -509,10 +540,12 @@
             this._addSelf();
         },
 
-        destroy: function (toEnd) {
+        kill: function (toEnd) {
             this._removeSelf();
-            if (toEnd && this.onEnd) this.onEnd.apply(this, this.onEndParams);
-            this.target = null;
+            if (toEnd) {
+                this._toEnd();
+                if (this.onEnd) this.onEnd.apply(this, this.onEndParams);
+            }
         }
     });
 
@@ -699,26 +732,17 @@
                 for (var i = _len - 1; i >= 0; i--) {
                     var _tween = tweens[i];
                     if (_tween.target === obj) {
-                        //_tween.kill(toEnd);
-                        tweens.splice(i, 1);
-                        if (toEnd && _tween.onEnd) _tween.onEnd.apply(_tween, _tween.onEndParams);
-                        _tween.target = null;
+                        _tween.kill(toEnd);
                     }
                 }
             });
         },
 
         killAll: function (toEnd) {
-            if (!toEnd) {
-                tweens = [];
-                return;
-            }
-
             var _len = tweens.length;
             for (var i = _len - 1; i >= 0; i--) {
-                var _tween = tweens.splice(i, 1)[0];
-                if (toEnd && _tween.onEnd) _tween.onEnd.apply(_tween, _tween.onEndParams);
-                _tween.target = null;
+                var _tween = tweens[i];
+                _tween.kill(toEnd);
             }
         },
 
@@ -749,7 +773,7 @@
                 }
             }
             return false;
-        },
+        }
 
     });
 
@@ -794,7 +818,7 @@
 
             if (this.delay != 0) {
                 this._addSelf();
-            }else{
+            } else {
                 if (this.onEnd) this.onEnd.apply(this, this.onEndParams);
             }
 
@@ -834,10 +858,12 @@
             this.isPlaying = false;
         },
 
-        destroy: function (toEnd) {
+        kill: function (toEnd) {
             this._removeSelf();
-            if (toEnd && this.onEnd) this.onEnd.apply(this, this.onEndParams);
-            this.target = null;
+            if (toEnd) {
+                this._toEnd();
+                if (this.onEnd) this.onEnd.apply(this, this.onEndParams);
+            }
         }
     });
 
@@ -855,23 +881,17 @@
                 for (var i = _len - 1; i >= 0; i--) {
                     var _call = calls[i];
                     if (_call.onEnd === obj) {
-                        calls.splice(i, 1);
-                        if (toEnd && _call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
+                        _call.kill(toEnd);
                     }
                 }
             });
         },
 
         killAllCalls: function (toEnd) {
-            if (!toEnd) {
-                calls = [];
-                return;
-            }
-
             var _len = calls.length;
             for (var i = _len - 1; i >= 0; i--) {
-                var _call = calls.splice(i, 1);
-                if (toEnd && _call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
+                var _call = calls[i];
+                _call.kill(toEnd);
             }
         },
 

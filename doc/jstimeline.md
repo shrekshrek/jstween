@@ -27,7 +27,6 @@ play();
 pause();  
 seek();  
 clear();  
-destroy();  
 
 
 

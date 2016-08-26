@@ -58,7 +58,7 @@ tween实例方法：
 
 tween.play(); 播放  
 tween.pause(); 暂停  
-tween.destroy([toEnd]); 删除，参数设置是否直接去到终点并出发onEnd
+tween.kill([toEnd]); 删除，参数设置是否直接去到终点并出发onEnd
 
 
 
@@ -81,7 +81,7 @@ call实例方法：
 
 call.play(); 播放  
 call.pause(); 暂停  
-call.destroy(); 删除
+call.kill(); 删除
 
 
 

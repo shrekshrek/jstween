@@ -319,7 +319,6 @@
     var tweens = [];
     var isUpdating = false;
     var lastTime = 0;
-    // var lastStep = 0;
 
     function globalUpdate() {
         isUpdating = true;
@@ -334,7 +333,6 @@
         var _step = _now - lastTime;
         lastTime = _now;
 
-        // if (lastStep == 0 || _step < lastStep * 10) {
         for (var i = 0; i < _len; i++) {
             var _tween = tweens[i];
             if (_tween && !_tween._update(_step)) {
@@ -351,18 +349,12 @@
         for (var j = 0; j < _len2; j++) {
             var _call = calls[j];
             if (_call && !_call._update(_step)) {
-                if (_call.isActive) {
-                    _call.isActive = false;
-                    calls.splice(j, 1);
-                    if (_call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
-                }
+                calls.splice(j, 1);
+                if (_call.onEnd) _call.onEnd.apply(_call, _call.onEndParams);
                 j--;
                 _len2--;
             }
         }
-        // }
-
-        // lastStep = _step;
 
         requestFrame(globalUpdate);
     }
@@ -409,9 +401,7 @@
                 if (this.onUpdate) this.onUpdate.apply(this, this.onUpdateParams);
             }
 
-            if (this.isActive) {
-                this._addSelf();
-            }
+            if (this.isActive) this._addSelf();
         },
 
         _update: function (time) {
@@ -538,16 +528,16 @@
             }
         },
 
+        active: function () {
+            this._addSelf();
+        },
+
         play: function () {
             this.isPlaying = true;
         },
 
         pause: function () {
             this.isPlaying = false;
-        },
-
-        active: function () {
-            this._addSelf();
         },
 
         kill: function (toEnd) {
@@ -841,7 +831,7 @@
 
             if (this.curTime < this.endTime) return true;
 
-            if (this.onEnd) this.onEnd.apply(this, this.onEndParams);
+            // if (this.onEnd) this.onEnd.apply(this, this.onEndParams);
             return false;
         },
 

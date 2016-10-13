@@ -31,12 +31,12 @@
     function each(obj, callback) {
         if (typeof(obj) === 'function') {
             callback.call(obj, 0, obj);
-        } else if (obj.length === undefined) {
-            callback.call(obj, 0, obj);
-        } else {
+        } else if (obj instanceof Array) {
             for (var i = 0; i < obj.length; i++) {
                 callback.call(obj[i], i, obj[i]);
             }
+        } else {
+            callback.call(obj, 0, obj);
         }
     }
 

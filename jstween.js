@@ -29,9 +29,7 @@
     }
 
     function each(obj, callback) {
-        if (typeof(obj) === 'function') {
-            callback.call(obj, 0, obj);
-        } else if (obj instanceof Array) {
+        if (obj.length && obj.length > 0) {
             for (var i = 0; i < obj.length; i++) {
                 callback.call(obj[i], i, obj[i]);
             }

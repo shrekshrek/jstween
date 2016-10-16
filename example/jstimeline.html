@@ -55,8 +55,8 @@
         marginLeft: 500, onEnd: function () {
             console.log(this.target);
         }
-    }, '-=0.5');
-    tl.kill('#box3', '-=2');
+    }, '+=3.5');
+//    tl.kill('#box3', '-=2');
     tl.add('l1','+=1.5');
     tl.fromTo('#box2', 1, {marginLeft:500}, {marginLeft:600}, 'l1');
     tl.fromTo('#box3', 1, {marginLeft:300}, {marginLeft:500});

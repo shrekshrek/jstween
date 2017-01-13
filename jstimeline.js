@@ -161,6 +161,8 @@
                 _time = this.getLabelTime(_o.label);
             } else if(_o.ext) {
                 _time = this.labelTime;
+            }else if(_o.num) {
+                _time = _o.num;
             }
 
             switch (_o.ext) {

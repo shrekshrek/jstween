@@ -2,7 +2,6 @@
 <html>
 <head>
     <script src="../jstween.js"></script>
-    <!--<script src="../jstimeline.js"></script>-->
     <script src="../jstimeline.js"></script>
     <style>
         body {
@@ -50,12 +49,12 @@
     var tl = JTL.create();
 
     tl.from('#box1', 1, {marginLeft: 300});
-    tl.from('#box2', 1, {marginLeft: 300}, '+=0.5');
+    tl.from('#box2', 1, {marginLeft: 400}, '+=0.5');
     tl.fromTo('#box3', 3, {marginLeft: 300}, {
         marginLeft: 500, onEnd: function () {
             console.log(this.target);
         }
-    }, '+=3.5');
+    }, '+=0.5');
 //    tl.kill('#box3', '-=2');
     tl.add('l1','+=1.5');
     tl.fromTo('#box2', 1, {marginLeft:500}, {marginLeft:600}, 'l1');

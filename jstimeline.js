@@ -159,17 +159,17 @@
             var _time = 0;
             if (_o.label) {
                 _time = this.getLabelTime(_o.label);
+            } else if(_o.ext) {
+                _time = this.labelTime;
+            }
 
-                switch (_o.ext) {
-                    case '+=':
-                        _time += _o.num;
-                        break;
-                    case '-=':
-                        _time -= _o.num;
-                        break;
-                }
-            } else {
-                _time = _o.num;
+            switch (_o.ext) {
+                case '+=':
+                    _time += _o.num;
+                    break;
+                case '-=':
+                    _time -= _o.num;
+                    break;
             }
 
             return _time;

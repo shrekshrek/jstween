@@ -535,6 +535,92 @@
 
 
     // --------------------------------------------------------------------tween 全局方法
+    function addTween(type, target, time, fromVars, toVars){
+        switch(type){
+            case 'from':
+                checkBezier(fromVars);
+                break;
+            default:
+                checkBezier(toVars);
+                break;
+        }
+
+        var _target = getElement(target);
+        var _tweens = [];
+        each(_target, function (index, obj) {
+            var _fromVars = {};
+            var _toVars = {};
+            var _isDom = isDOM(obj);
+            var _vars;
+            switch(type){
+                case 'fromTo':
+                    _vars = toVars;
+                    break;
+                case 'from':
+                    _vars = fromVars;
+                    break;
+                case 'to':
+                    _vars = toVars;
+                    break;
+            }
+
+            if (_isDom) {
+                checkJtobj(obj);
+                for (var i in _vars) {
+                    var _name = checkPropName(obj, i);
+                    if (_name) {
+                        if (!checkString(_vars[i])) {
+                            var _o = regValue(getProp(obj, _name));
+                            switch(type){
+                                case 'fromTo':
+                                    _fromVars[_name] = checkValue(_o, fromVars[i]);
+                                    _toVars[_name] = checkValue(_o, toVars[i], _fromVars[_name], false);
+                                    break;
+                                case 'from':
+                                    _fromVars[_name] = checkValue(_o, fromVars[i], _o, true);
+                                    _toVars[_name] = _o;
+                                    break;
+                                case 'to':
+                                    _fromVars[_name] = _o;
+                                    _toVars[_name] = checkValue(_o, toVars[i], _o, false);
+                                    break;
+                            }
+                        }
+                    } else {
+                        _toVars[i] = _vars[i];
+                    }
+                }
+
+            } else {
+                for (var i in _vars) {
+                    if ((obj[i] !== undefined)) {
+                        var _o = regValue(obj[i]);
+                        switch(type){
+                            case 'fromTo':
+                                _fromVars[i] = checkValue(_o, fromVars[i]);
+                                _toVars[i] = checkValue(_o, toVars[i], _fromVars[i], false);
+                                break;
+                            case 'from':
+                                _fromVars[i] = checkValue(_o, fromVars[i], _o, true);
+                                _toVars[i] = _o;
+                                break;
+                            case 'to':
+                                _fromVars[i] = _o;
+                                _toVars[i] = checkValue(_o, toVars[i], _o, false);
+                                break;
+                        }
+                    } else {
+                        _toVars[i] = _vars[i];
+                    }
+                }
+            }
+            _tweens.push(new tween(obj, time, _fromVars, _toVars, _isDom));
+        });
+
+        if (_tweens.length == 1) return _tweens[0];
+        else return _tweens;
+    }
+
     extend(JT, {
         get: function (target, param) {
             var _target = getElement(target);
@@ -581,123 +667,15 @@
         },
 
         fromTo: function (target, time, fromVars, toVars) {
-            checkBezier(toVars);
-            var _target = getElement(target);
-            var _tweens = [];
-            each(_target, function (index, obj) {
-                var _fromVars = {};
-                var _toVars = {};
-                var _isDom = isDOM(obj);
-                if (_isDom) {
-                    checkJtobj(obj);
-                    for (var i in toVars) {
-                        var _name = checkPropName(obj, i);
-                        if (_name) {
-                            if (!checkString(toVars[i])) {
-                                var _o = regValue(getProp(obj, _name));
-                                _fromVars[_name] = checkValue(_o, fromVars[i]);
-                                _toVars[_name] = checkValue(_o, toVars[i], _fromVars[_name], false);
-                            }
-                        } else {
-                            _toVars[i] = toVars[i];
-                        }
-                    }
-                } else {
-                    for (var i in toVars) {
-                        if ((obj[i] !== undefined)) {
-                            var _o = regValue(obj[i]);
-                            _fromVars[i] = checkValue(_o, fromVars[i]);
-                            _toVars[i] = checkValue(_o, toVars[i], _fromVars[i], false);
-                        } else {
-                            _toVars[i] = toVars[i];
-                        }
-                    }
-                }
-                _tweens.push(new tween(obj, time, _fromVars, _toVars, _isDom));
-            });
-
-            if (_tweens.length == 1) return _tweens[0];
-            else return _tweens;
+            return addTween('fromTo', target, time, fromVars, toVars);
         },
 
         from: function (target, time, fromVars) {
-            checkBezier(fromVars);
-            var _target = getElement(target);
-            var _tweens = [];
-            each(_target, function (index, obj) {
-                var _fromVars = {};
-                var _toVars = {};
-                var _isDom = isDOM(obj);
-                if (_isDom) {
-                    checkJtobj(obj);
-                    for (var i in fromVars) {
-                        var _name = checkPropName(obj, i);
-                        if (_name) {
-                            if (!checkString(fromVars[i])) {
-                                var _o = regValue(getProp(obj, _name));
-                                _fromVars[_name] = checkValue(_o, fromVars[i], _o, true);
-                                _toVars[_name] = _o;
-                            }
-                        } else {
-                            _toVars[i] = fromVars[i];
-                        }
-                    }
-                } else {
-                    for (var i in fromVars) {
-                        if ((obj[i] !== undefined)) {
-                            var _o = regValue(obj[i]);
-                            _fromVars[i] = checkValue(_o, fromVars[i], _o, true);
-                            _toVars[i] = _o;
-                        } else {
-                            _toVars[i] = fromVars[i];
-                        }
-                    }
-                }
-                _tweens.push(new tween(obj, time, _fromVars, _toVars, _isDom));
-            });
-
-            if (_tweens.length == 1) return _tweens[0];
-            else return _tweens;
+            return addTween('from', target, time, fromVars, {});
         },
 
         to: function (target, time, toVars) {
-            checkBezier(toVars);
-            var _target = getElement(target);
-            var _tweens = [];
-            each(_target, function (index, obj) {
-                var _fromVars = {};
-                var _toVars = {};
-                var _isDom = isDOM(obj);
-                if (_isDom) {
-                    checkJtobj(obj);
-                    for (var i in toVars) {
-                        var _name = checkPropName(obj, i);
-                        if (_name) {
-                            if (!checkString(toVars[i])) {
-                                var _o = regValue(getProp(obj, _name));
-                                _fromVars[_name] = _o;
-                                _toVars[_name] = checkValue(_o, toVars[i], _o, false);
-                            }
-                        } else {
-                            _toVars[i] = toVars[i];
-                        }
-                    }
-                } else {
-                    for (var i in toVars) {
-                        if ((obj[i] !== undefined)) {
-                            var _o = regValue(obj[i]);
-                            _fromVars[i] = _o;
-                            _toVars[i] = checkValue(_o, toVars[i], _o, false);
-                        } else {
-                            _toVars[i] = toVars[i];
-                        }
-                    }
-                }
-                _tweens.push(new tween(obj, time, _fromVars, _toVars, _isDom));
-            });
-
-            if (_tweens.length == 1) return _tweens[0];
-            else return _tweens;
+            return addTween('to', target, time, {}, toVars);
         },
 
         kill: function (target, toEnd) {

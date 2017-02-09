@@ -569,22 +569,20 @@
                 for (var i in _vars) {
                     var _name = checkPropName(obj, i);
                     if (_name) {
-                        if (!checkString(_vars[i])) {
-                            var _o = regValue(getProp(obj, _name));
-                            switch(type){
-                                case 'fromTo':
-                                    _fromVars[_name] = checkValue(_o, fromVars[i]);
-                                    _toVars[_name] = checkValue(_o, toVars[i], _fromVars[_name], false);
-                                    break;
-                                case 'from':
-                                    _fromVars[_name] = checkValue(_o, fromVars[i], _o, true);
-                                    _toVars[_name] = _o;
-                                    break;
-                                case 'to':
-                                    _fromVars[_name] = _o;
-                                    _toVars[_name] = checkValue(_o, toVars[i], _o, false);
-                                    break;
-                            }
+                        var _o = regValue(getProp(obj, _name));
+                        switch(type){
+                            case 'fromTo':
+                                _fromVars[_name] = checkValue(_o, fromVars[i]);
+                                _toVars[_name] = checkValue(_o, toVars[i], _fromVars[_name], false);
+                                break;
+                            case 'from':
+                                _fromVars[_name] = checkValue(_o, fromVars[i], _o, true);
+                                _toVars[_name] = _o;
+                                break;
+                            case 'to':
+                                _fromVars[_name] = _o;
+                                _toVars[_name] = checkValue(_o, toVars[i], _o, false);
+                                break;
                         }
                     } else {
                         _toVars[i] = _vars[i];

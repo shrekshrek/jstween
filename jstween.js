@@ -535,8 +535,8 @@
 
 
     // --------------------------------------------------------------------tween 全局方法
-    function addTween(type, target, time, fromVars, toVars){
-        switch(type){
+    function addTween(type, target, time, fromVars, toVars) {
+        switch (type) {
             case 'from':
                 checkBezier(fromVars);
                 break;
@@ -552,7 +552,7 @@
             var _toVars = {};
             var _isDom = isDOM(obj);
             var _vars;
-            switch(type){
+            switch (type) {
                 case 'fromTo':
                     _vars = toVars;
                     break;
@@ -570,7 +570,7 @@
                     var _name = checkPropName(obj, i);
                     if (_name) {
                         var _o = regValue(getProp(obj, _name));
-                        switch(type){
+                        switch (type) {
                             case 'fromTo':
                                 _fromVars[_name] = checkValue(_o, fromVars[i]);
                                 _toVars[_name] = checkValue(_o, toVars[i], _fromVars[_name], false);
@@ -588,12 +588,11 @@
                         _toVars[i] = _vars[i];
                     }
                 }
-
             } else {
                 for (var i in _vars) {
-                    if ((obj[i] !== undefined)) {
+                    if (typeof(obj[i]) == 'string' || typeof(obj[i]) == 'number') {
                         var _o = regValue(obj[i]);
-                        switch(type){
+                        switch (type) {
                             case 'fromTo':
                                 _fromVars[i] = checkValue(_o, fromVars[i]);
                                 _toVars[i] = checkValue(_o, toVars[i], _fromVars[i], false);
@@ -727,7 +726,7 @@
         },
 
         call: function (time, callback, params, isPlaying) {
-            return new tween(callback, time, {}, {onEnd:callback, onEndParams:params, isPlaying:isPlaying}, false);
+            return new tween(callback, time, {}, {onEnd: callback, onEndParams: params, isPlaying: isPlaying}, false);
         },
 
     });
@@ -917,7 +916,7 @@
         },
         Sine: {
             In: function (k) {
-                return 1 - Math.cos(k * Math.PI / 2);
+                return 1 - Math.cojstween.min.jss(k * Math.PI / 2);
             },
             Out: function (k) {
                 return Math.sin(k * Math.PI / 2);

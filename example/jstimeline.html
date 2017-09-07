@@ -48,23 +48,28 @@
 <script>
     var tl = JTL.create();
 
-    tl.from('#box1', 1, {marginLeft: 300});
-    tl.from('#box2', 1, {marginLeft: 400}, '+=0.5');
-    tl.fromTo('#box3', 3, {marginLeft: 300}, {
-        marginLeft: 500, onEnd: function () {
-            console.log(this.target);
-        }
-    }, '+=0.5');
-//    tl.kill('#box3', '-=2');
-    tl.add('l1','+=1.5');
-    tl.fromTo('#box2', 1, {marginLeft:500}, {marginLeft:600}, 'l1');
-    tl.fromTo('#box3', 1, {marginLeft:300}, {marginLeft:500});
+//    tl.from('#box1', 1, {marginLeft: 300, ease:JT.Quad.InOut});
+    tl.from('#box2', 1.5, {marginLeft: 400}, '+=1.5');
+//    tl.fromTo('#box3', 3, {marginLeft: 300}, {
+//        marginLeft: 500, onEnd: function () {
+//            console.log(this.target);
+//        }
+//    }, '+=0.5');
+////    tl.kill('#box3', '-=2');
+    tl.add('l1','-=1.0');
+    tl.fromTo('#box1', 1, {marginLeft:500}, {marginLeft:600}, 'l1');
+    tl.fromTo('#box3', 1.5, {marginLeft:300}, {marginLeft:500}, 'l1+=0.5');
     tl.add(function(){
         console.log('again');
-        tl.play(0);
-    }, '+=4.5');
+        tl.seek(2.5);
+        tl.pause();
+    }, '+=0.5');
 
-    tl.play(0);
+    tl.add(function(){
+        console.log('again2');
+    }, '+=0.5');
+//
+//    tl.play(0);
 
 //    tl.add('l1',1);
 //    tl.add(function(){
@@ -94,7 +99,7 @@
 //        console.log('77');
 //    },'l1+=1');
 //
-//    tl.play();
+    tl.play();
 
 
 </script>

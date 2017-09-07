@@ -45,15 +45,15 @@
 </div>
 
 <script>
-//    JT.fromTo('#box1', 1, {marginLeft: 400, opacity: 0.5}, {
-//        marginLeft: 200, opacity: 1, repeat:-1, yoyo:false, repeatDelay:0, ease: JT.Quad.Out, onEnd: function () {
-//            console.log("1 complete");
-//        }
-//    });
+    //    JT.fromTo('#box1', 1, {marginLeft: 400, opacity: 0.5}, {
+    //        marginLeft: 200, opacity: 1, repeat:-1, yoyo:false, repeatDelay:0, ease: JT.Quad.Out, onEnd: function () {
+    //            console.log("1 complete");
+    //        }
+    //    });
 
-    JT.set('#box1', {transformStyle: "preserve-3d"});
+    //    JT.set('#box1', {transformStyle: "preserve-3d"});
 
-    JT.fromTo('#box1', 1, {
+    var t = JT.fromTo('#box1', 1, {
 //        perspective: 0,
         x: 400,
 //        rotationZ: 0,
@@ -69,17 +69,57 @@
 //        scaleX: 2,
 //        scaleY: 0.5,
         opacity: 1,
-        delay: 1,
-//        repeat: -1,
-        yoyo: true,
+//        delay: 1,
+//        repeatDelay: 0.5,
+        repeat: 2,
+//        isPlaying: false,
+//        yoyo: true,
         ease: JT.Quad.Out,
+        onStart: function () {
+            console.log('onStart');
+        },
         onUpdate: function () {
-//            console.log(this.curVars);
+//            console.log('onUpdate',this.curVars);
+        },
+        onRepeat: function () {
+            console.log('onRepeat', this.curVars);
         },
         onEnd: function () {
-            console.log("1 complete");
+            console.log("onEnd");
         }
     });
+
+//    JT.fromTo('#box2', 1.5, {
+//        x: 100
+//    }, {
+//        x: 200,
+////        delay: 1,
+////        repeatDelay: 0.5,
+////        repeat: 3,
+//        yoyo: true,
+//        ease: JT.Quad.Out,
+//        onStart: function () {
+//            console.log('onStart2');
+//        },
+//        onUpdate: function () {
+////            console.log('onUpdate2',this.curVars);
+//        },
+//        onRepeat: function () {
+//            console.log('onRepeat2', this.curVars);
+//        },
+//        onEnd: function () {
+//            console.log("onEnd2");
+//        }
+//    });
+
+//    JT.call(2.5, function () {console.log('call');
+////        t.timeScale = 0.1;
+//        t.reverse();
+////        JT.setTimeScaleAll(0.5);
+//        JT.seekAll(1.8);
+////        JT.pauseAll();
+//    });
+
 
 
 </script>

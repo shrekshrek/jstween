@@ -300,13 +300,20 @@
         },
 
         seek: function (position) {
-            this.curTime = this.prevTime = this._parsePosition(position);
+            var _time = Math.max(0, Math.min(this.endTime, this._parsePosition(position)));
+            if (this.curTime == _time) return;
+
+            this.curTime = _time;
 
             for (var i = 0, _len = this.tweens.length; i < _len; i++) {
                 var _tween = this.tweens[i];
                 var startTime = _tween.time;
                 var endTime = _tween.time + _tween.tween.endTime;
-                if (this.curTime >= startTime && this.curTime <= endTime || (this.prevTime > startTime && this.prevTime < endTime)) {
+                if (this.curTime < startTime) {
+                    _tween.tween.seek(0);
+                } else if (this.curTime > endTime) {
+                    _tween.tween.seek(_tween.tween.endTime);
+                } else {
                     _tween.tween.seek((this.curTime - startTime) / 1000);
                 }
             }

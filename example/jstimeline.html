@@ -100,8 +100,22 @@
 //        console.log('77');
 //    },'l1+=1');
 //
-    tl.play();
+//    tl.play();
 
+    var isDown = false;
+    document.addEventListener('mousedown', function(evt){
+        isDown = true;
+    });
+    document.addEventListener('mouseup', function(evt){
+        isDown = false;
+    });
+    document.addEventListener('mousemove', function(evt){
+        if(isDown){
+            var y = Math.min(1,evt.clientY/1000)*tl.endTime/1000;
+            tl.seek(y);
+            console.log(y);
+        }
+    });
 
 </script>
 </body>

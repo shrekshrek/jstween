@@ -529,7 +529,10 @@
         },
 
         seek: function (time) {
-            this.curTime = this.prevTime = Math.max(0, Math.min(this.endTime, time * 1000));
+            var _time = Math.max(0, Math.min(this.endTime, time * 1000));
+            if (this.curTime == _time) return;
+
+            this.curTime = _time;
             this._updateProp(this.curTime);
         },
 

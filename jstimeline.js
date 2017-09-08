@@ -330,7 +330,7 @@
             return new timeline();
         },
         kill: function (tl) {
-            tl.clear();
+            tl.kill();
         }
     });
 

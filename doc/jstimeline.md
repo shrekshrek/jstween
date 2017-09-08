@@ -23,10 +23,10 @@ addLabel();
 removeLabel();  
 getLabelTime();  
 totalTime();  
-play();  
+play(position);  
 pause();  
+reverse(position);  
 seek();  
-clear();  
 
 
 时间戳范例说明

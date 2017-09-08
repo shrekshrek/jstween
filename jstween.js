@@ -370,6 +370,7 @@
             this.isReverse = toVars.isReverse || false;
             this.timeScale = toVars.timeScale || 1;
 
+            this.isKeep = false;
             this.isYoReverse = false;
             this.isDom = isDom;
 
@@ -382,24 +383,26 @@
         },
 
         _update: function (time) {
+            this.isKeep = false;
+
             time = this.isReverse ? (-time * this.timeScale) : (time * this.timeScale);
             this.prevTime = this.curTime;
             this.curTime = this.prevTime + time;
-            // console.log(time,this.prevTime,this.curTime,this.endTime);
+            // console.log(this.isReverse, time,this.prevTime,this.curTime,this.endTime);
 
             if (this.isReverse && this.prevTime >= 0 && this.curTime < 0) {
                 this.curTime = 0;
                 this._updateProp(this.curTime);
                 if (this.onStart && this.prevTime >= this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
-                return false;
+                return this.isKeep;
             } else if (!this.isReverse && this.prevTime < this.endTime && this.curTime >= this.endTime) {
                 this.curTime = this.endTime;
                 this._updateProp(this.curTime);
                 if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
-                return false;
+                return this.isKeep;
             } else {
-                var _prevRepeat = Math.max(0, Math.floor((this.prevTime - this.startTime) / (this.duration + this.repeatDelay)));
-                var _curRepeat = Math.max(0, Math.floor((this.curTime - this.startTime) / (this.duration + this.repeatDelay)));
+                var _prevRepeat = Math.min(this.repeat, Math.max(0, Math.floor((this.prevTime - this.startTime) / (this.duration + this.repeatDelay))));
+                var _curRepeat = Math.min(this.repeat, Math.max(0, Math.floor((this.curTime - this.startTime) / (this.duration + this.repeatDelay))));
                 if (_prevRepeat != _curRepeat) {
                     if (this.yoyo) this.isYoReverse = !this.isYoReverse;
                     if (this.onRepeat) this.onRepeat.apply(this.onRepeatScope, this.onRepeatParams);
@@ -444,9 +447,6 @@
                 this.curVars[prop] = {num: _n, unit: _end.unit};
 
                 if (this.isDom) {
-                    // if (Math.abs(_end.num - _start.num) > 20) {
-                    //     _n = Math.round(_n);
-                    // }
                     if (setProp(this.target, prop, _n + (_end.unit || 0))) _trans = true;
                 } else {
                     this.target[prop] = _n + (_end.unit || 0);
@@ -492,9 +492,12 @@
             if (i !== -1) tweens.splice(i, 1);
         },
 
-        play: function (position) {
-            if (position !== undefined) this.seek(position);
-            else this._updateProp(this.curTime);
+        play: function (time) {
+            this.isKeep = true;
+            this.isReverse = false;
+
+            if (time !== undefined) this.seek(time);
+            // else this._updateProp(this.curTime);
 
             if (this.isPlaying) return;
             this.isPlaying = true;
@@ -502,6 +505,8 @@
         },
 
         pause: function () {
+            this.isKeep = false;
+
             if (!this.isPlaying) return;
             this.isPlaying = false;
             this._removeSelf();
@@ -512,8 +517,15 @@
             this.curTime = this.prevTime = 0;
         },
 
-        reverse: function () {
-            this.isReverse = !this.isReverse;
+        reverse: function (time) {
+            this.isKeep = true;
+            this.isReverse = true;
+
+            if (time !== undefined) this.seek(time);
+
+            if (this.isPlaying) return;
+            this.isPlaying = true;
+            this._addSelf();
         },
 
         seek: function (time) {
@@ -531,6 +543,8 @@
                 this._toEnd();
                 if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
             }
+            this.curTime = this.prevTime = this.endTime = 0;
+            this.target = this.onStart = this.onRepeat = this.onEnd = this.onUpdate = null;
         }
     });
 
@@ -697,12 +711,12 @@
             }
         },
 
-        play: function (target) {
-            actionProxyTween(target, 'play');
+        play: function (target, time) {
+            actionProxyTween(target, 'play', time);
         },
 
-        playAll: function () {
-            actionProxyAllTweens('play');
+        playAll: function (time) {
+            actionProxyAllTweens('play', time);
         },
 
         pause: function (target) {
@@ -721,12 +735,12 @@
             actionProxyAllTweens('stop');
         },
 
-        reverse: function (target) {
-            actionProxyTween(target, 'reverse');
+        reverse: function (target, time) {
+            actionProxyTween(target, 'reverse', time);
         },
 
-        reverseAll: function () {
-            actionProxyAllTweens('reverse');
+        reverseAll: function (time) {
+            actionProxyAllTweens('reverse', time);
         },
 
         seek: function (target, time) {

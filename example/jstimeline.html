@@ -61,12 +61,13 @@
     tl.fromTo('#box3', 1.5, {marginLeft:300}, {marginLeft:500}, 'l1+=0.5');
     tl.add(function(){
         console.log('again');
-        tl.seek(2.5);
-        tl.pause();
+//        tl.seek(2.5);
+//        tl.pause();
     }, '+=0.5');
 
     tl.add(function(){
         console.log('again2');
+        tl.reverse();
     }, '+=0.5');
 //
 //    tl.play(0);

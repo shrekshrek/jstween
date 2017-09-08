@@ -85,11 +85,14 @@
             this.isReverse = vars && vars.isReverse || false;
             this.timeScale = vars && vars.timeScale || 1;
 
+            this.isKeep = false;
             this.curTime = this.prevTime = 0;
 
         },
 
         _update: function (time) {
+            this.isKeep = false;
+
             time = this.isReverse ? -time * this.timeScale : time * this.timeScale;
             this.prevTime = this.curTime;
             this.curTime = this.prevTime + time;
@@ -98,12 +101,12 @@
                 this.curTime = 0;
                 this._checkCall();
                 this._checkTween();
-                return false;
+                return this.isKeep;
             } else if (!this.isReverse && this.prevTime < this.endTime && this.curTime >= this.endTime) {
                 this.curTime = this.endTime;
                 this._checkCall();
                 this._checkTween();
-                return false;
+                return this.isKeep;
             } else {
                 this._checkCall();
                 this._checkTween();
@@ -260,19 +263,22 @@
         },
 
         play: function (position) {
+            this.isKeep = true;
+            this.isReverse = false;
+            for (var i in this.tweens) this.tweens[i].tween.isReverse = this.isReverse;
+
             if (position !== undefined) this.seek(position);
 
             if (this.isPlaying) return;
             this.isPlaying = true;
-
             this._addSelf();
-
         },
 
         pause: function () {
+            this.isKeep = false;
+
             if (!this.isPlaying) return;
             this.isPlaying = false;
-
             this._removeSelf();
         },
 
@@ -281,9 +287,16 @@
             this.curTime = this.prevTime = 0;
         },
 
-        reverse: function () {
-            this.isReverse = !this.isReverse;
-            for (var i in this.tweens) this.tweens[i].isReverse = this.isReverse;
+        reverse: function (position) {
+            this.isKeep = true;
+            this.isReverse = true;
+            for (var i in this.tweens) this.tweens[i].tween.isReverse = this.isReverse;
+
+            if (position !== undefined) this.seek(position);
+
+            if (this.isPlaying) return;
+            this.isPlaying = true;
+            this._addSelf();
         },
 
         seek: function (position) {

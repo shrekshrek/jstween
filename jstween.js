@@ -412,9 +412,7 @@
 
                 if (this.onEnd && this.isReverse && this.prevTime == this.endTime && this.curTime < this.endTime) this.onEnd.apply(this.onEndScope, this.onEndParams);
 
-                if (this.onStart && !this.isReverse && this.prevTime == 0 && this.curTime >= this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
-
-                if (this.onStart && (this.isReverse ? (this.prevTime >= this.startTime && this.curTime < this.startTime) : (this.prevTime < this.startTime && this.curTime >= this.startTime))) this.onStart.apply(this.onStartScope, this.onStartParams);
+                if (this.onStart && (this.isReverse ? (this.prevTime >= this.startTime && this.curTime < this.startTime) : ((this.startTime == 0 && this.prevTime == 0 && this.curTime >= this.startTime) || (this.prevTime < this.startTime && this.curTime >= this.startTime)))) this.onStart.apply(this.onStartScope, this.onStartParams);
 
                 return true;
             }

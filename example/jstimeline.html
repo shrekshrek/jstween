@@ -47,74 +47,88 @@
 
 <script>
     var tl = JTL.create();
+    tl.add(function () {
+        console.log('start');
+    });
 
-//    tl.from('#box1', 1, {marginLeft: 300, ease:JT.Quad.InOut});
+    //    tl.from('#box1', 1, {marginLeft: 300, ease:JT.Quad.InOut});
     tl.from('#box2', 1.5, {marginLeft: 400}, '+=1.5');
-//    tl.fromTo('#box3', 3, {marginLeft: 300}, {
-//        marginLeft: 500, onEnd: function () {
-//            console.log(this.target);
-//        }
-//    }, '+=0.5');
-////    tl.kill('#box3', '-=2');
-    tl.add('l1','-=1.0');
-    tl.fromTo('#box1', 1, {marginLeft:500}, {marginLeft:600}, 'l1');
-    tl.fromTo('#box3', 1.5, {marginLeft:300}, {marginLeft:500}, 'l1+=0.5');
-    tl.add(function(){
+    //    tl.fromTo('#box3', 3, {marginLeft: 300}, {
+    //        marginLeft: 500, onEnd: function () {
+    //            console.log(this.target);
+    //        }
+    //    }, '+=0.5');
+    ////    tl.kill('#box3', '-=2');
+    tl.add('l1', '-=1.0');
+    tl.fromTo('#box1', 1, {marginLeft: 500}, {marginLeft: 600}, 'l1');
+    tl.fromTo('#box3', 1.5, {marginLeft: 300}, {marginLeft: 500}, 'l1+=0.5');
+    tl.add(function () {
         console.log('again');
 //        tl.seek(2.5);
 //        tl.pause();
     }, '+=0.5');
 
-    tl.add(function(){
+    tl.add(function () {
         console.log('again2');
-        tl.reverse();
+//        tl.reverse();
     }, '+=0.5');
-//
-//    tl.play(0);
+    //
+        tl.play(0);
 
-//    tl.add('l1',1);
-//    tl.add(function(){
-//        for(var i=0;i<10;i++){
-//            JT.call(0.1, function(n){
-//                console.log('i='+n);
-//            }, [i]);
-//        }
-//
-//    },'l1+=1');
-//    tl.add(function(){
-//        console.log('22');
-//    },'l1+=1');
-//    tl.add(function(){
-//        console.log('33');
-//    },'l1+=1.1');
-//    tl.add(function(){
-//        console.log('44');
-//    },'l1+=1.2');
-//    tl.add(function(){
-//        console.log('55');
-//    },'l1+=1');
-//    tl.add(function(){
-//        console.log('66');
-//    },'l1+=1.1');
-//    tl.add(function(){
-//        console.log('77');
-//    },'l1+=1');
-//
-//    tl.play();
+    //    tl.add('l1',1);
+    //    tl.add(function(){
+    //        for(var i=0;i<10;i++){
+    //            JT.call(0.1, function(n){
+    //                console.log('i='+n);
+    //            }, [i]);
+    //        }
+    //
+    //    },'l1+=1');
+    //    tl.add(function(){
+    //        console.log('22');
+    //    },'l1+=1');
+    //    tl.add(function(){
+    //        console.log('33');
+    //    },'l1+=1.1');
+    //    tl.add(function(){
+    //        console.log('44');
+    //    },'l1+=1.2');
+    //    tl.add(function(){
+    //        console.log('55');
+    //    },'l1+=1');
+    //    tl.add(function(){
+    //        console.log('66');
+    //    },'l1+=1.1');
+    //    tl.add(function(){
+    //        console.log('77');
+    //    },'l1+=1');
+    //
+//        tl.play();
 
+    var oldY = 0;
     var isDown = false;
-    document.addEventListener('mousedown', function(evt){
+    document.addEventListener('mousedown', function (evt) {
+        oldY = Math.min(1, evt.clientY / 1000) * tl.endTime / 1000;
         isDown = true;
     });
-    document.addEventListener('mouseup', function(evt){
+    document.addEventListener('mouseup', function (evt) {
         isDown = false;
     });
-    document.addEventListener('mousemove', function(evt){
-        if(isDown){
-            var y = Math.min(1,evt.clientY/1000)*tl.endTime/1000;
+    document.addEventListener('mousemove', function (evt) {
+        if (isDown) {
+            var y = Math.min(1, evt.clientY / 1000) * tl.endTime / 1000;
             tl.seek(y);
-            console.log(y);
+//            tl.update(y - oldY);
+            oldY = y;
+//            console.log(y);
         }
+    });
+    document.addEventListener('touchmove', function (evt) {
+        var y = Math.min(1, evt.touches[0].clientY / 1000) * tl.endTime / 1000;
+        tl.seek(y);
+//        tl.update(y - oldY);
+        oldY = y;
+        console.log(y);
     });
 
 </script>

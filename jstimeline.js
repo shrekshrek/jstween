@@ -75,18 +75,23 @@
 
     extend(timeline.prototype, {
         initialize: function (vars) {
+            vars = vars || {};
+            this.onUpdate = vars.onUpdate || null;
+            this.onUpdateScope = vars.onUpdateScope || this;
+            this.onUpdateParams = vars.onUpdateParams || [];
+            this.isPlaying = false;
+            this.isReverse = vars.isReverse || false;
+            this.timeScale = vars.timeScale || 1;
+
+            this.isKeep = false;
+
+            this.startTime = 0;
             this.endTime = 0;
+            this.curTime = this.prevTime = 0;
 
             this.labels = [];
             this.tweens = [];
             this.calls = [];
-
-            this.isPlaying = false;
-            this.isReverse = vars && vars.isReverse || false;
-            this.timeScale = vars && vars.timeScale || 1;
-
-            this.isKeep = false;
-            this.curTime = this.prevTime = 0;
 
         },
 
@@ -96,6 +101,8 @@
             time = this.isReverse ? -time * this.timeScale : time * this.timeScale;
             this.prevTime = this.curTime;
             this.curTime = this.prevTime + time;
+
+            if (this.onUpdate) this.onUpdate.apply(this.onUpdateScope, this.onUpdateParams);
 
             if (this.isReverse && this.prevTime >= 0 && this.curTime < 0) {
                 this.curTime = 0;
@@ -162,7 +169,7 @@
             for (var i = 0, _len = this.calls.length; i < _len; i++) {
                 var _call = this.calls[i];
                 var startTime = _call.time;
-                if (this.isReverse ? (this.prevTime >= startTime && this.curTime < startTime) : (this.prevTime < startTime && this.curTime >= startTime)) _call.call();
+                if (this.isReverse ? (this.prevTime >= startTime && this.curTime < startTime) : ((startTime == 0 && this.prevTime == 0 && this.curTime >= startTime) || (this.prevTime < startTime && this.curTime >= startTime))) _call.call();
             }
         },
 
@@ -177,7 +184,7 @@
                 var _tween = this.tweens[i];
                 var startTime = _tween.time;
                 var endTime = _tween.time + _tween.tween.endTime;
-                if (this.curTime >= startTime && this.curTime <= endTime || (this.prevTime > startTime && this.prevTime < endTime)) {
+                if ((this.curTime >= startTime && this.curTime <= endTime) || (this.prevTime > startTime && this.prevTime < endTime)) {
                     if (this.prevTime >= startTime && this.curTime < startTime) {
                         _tween.tween._update(this.prevTime - startTime);
                     } else if (this.prevTime > endTime && this.curTime <= endTime) {
@@ -230,6 +237,21 @@
                 default:
                     throw 'add action is wrong!!!';
                     break;
+            }
+            return this;
+        },
+
+        remove: function (position) {
+            var _time = this._parsePosition(position);
+
+            for (var _len = this.calls.length, i = _len - 1; i >= 0; i--) {
+                var _call = this.calls[i];
+                if (_call.time == _time) this.calls.splice(i, 1);
+            }
+
+            for (var _len = this.tweens.length, i = _len - 1; i >= 0; i--) {
+                var _tween = this.tweens[i];
+                if (_tween.time == _time) this.tweens.splice(i, 1);
             }
             return this;
         },

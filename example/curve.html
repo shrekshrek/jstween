@@ -42,6 +42,13 @@
             background: #fff;
         }
 
+        .dot2 {
+            width: 4px;
+            height: 4px;
+            position: absolute;
+            background: #f00;
+        }
+
     </style>
 </head>
 <body>
@@ -57,9 +64,13 @@
 
 <script>
     var _body = document.getElementsByClassName('b1')[0];
-    var _a0 = [{x: 0, y: 0, z:-500}, {x: 500, y: 100, z:400}, {x: 200, y: 400, z:-300}, {x: 300, y: 300, z:200}, {x: 0, y: 0, z:0}];
-    var _a1 = [{x: 500, y: 100, z:400}, {x: 200, y: 400, z:-300}, {x: 300, y: 300, z:200}, {x: 0, y: 0, z:0}];
-    var _a2 = JT.path({through:_a0, ease: JT.Quad.Out, step:100});
+    var _a0 = [{x: 200, y: 100, z:-500}, {x: 800, y: 100, z:400}, {x: 200, y: 400, z:-300}, {x: 300, y: 300, z:200}, {x: 200, y: 100, z:-500}];
+    var _a1 = [{x: 800, y: 100, z:400}, {x: 200, y: 400, z:-300}, {x: 300, y: 300, z:200}, {x: 200, y: 100, z:-500}];
+    var _a2 = JT.path({
+        through:_a0,
+        ease: JT.Quad.In,
+        step:100
+    });
     for (var i = 0; i < _a2.length; i++) {
         var _dot = document.createElement('div');
         _dot.className = 'dot';
@@ -68,8 +79,16 @@
         _body.appendChild(_dot);
     }
 
+    for (var i = 0; i < _a0.length; i++) {console.log(i);
+        var _dot = document.createElement('div');
+        _dot.className = 'dot2';
+        _dot.style.left = _a0[i].x + 'px';
+        _dot.style.top = _a0[i].y + 'px';
+        _body.appendChild(_dot);
+    }
+
     JT.set('#box1', {transformOrigin: "0% 0%"});
-    JT.to('#box1', 10, {
+    JT.fromTo('#box1', 10, {x: 200, y: 100, z:-500, opacity:1, rotationZ:0}, {
         through: _a1,
         rotationZ: 360,
 //        scaleX: 2,
@@ -78,7 +97,7 @@
         delay: 1,
 //        repeat: -1,
 //        yoyo: true,
-        ease: JT.Quad.Out,
+        ease: JT.Quad.In,
         onEnd: function () {
             console.log("1 complete");
         }

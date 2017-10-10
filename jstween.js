@@ -19,12 +19,6 @@
 
 }(function (JT) {
     // --------------------------------------------------------------------辅助方法
-    function extend(obj, obj2) {
-        for (var prop in obj2) {
-            obj[prop] = obj2[prop];
-        }
-    }
-
     function each(obj, callback) {
         if (obj.length && obj.length > 0) {
             for (var i = 0; i < obj.length; i++) {
@@ -341,7 +335,7 @@
         this.initialize.apply(this, arguments);
     }
 
-    extend(tween.prototype, {
+    Object.assign(tween.prototype, {
         initialize: function (target, time, fromVars, toVars, isDom) {
             this.fromVars = fromVars;
             this.curVars = {};
@@ -634,7 +628,7 @@
         else return _tweens;
     }
 
-    extend(JT, {
+    Object.assign(JT, {
         get: function (target, param) {
             var _target = getElement(target);
             if (_target.length !== undefined) {
@@ -802,7 +796,7 @@
 
 
     // --------------------------------------------------------------------bezier
-    extend(JT, {
+    Object.assign(JT, {
         path: function (obj) {
             checkBezier(obj);
             var _ease = obj.ease || JT.Linear.None;
@@ -908,7 +902,7 @@
 
 
     // --------------------------------------------------------------------缓动选项
-    extend(JT, {
+    Object.assign(JT, {
         Linear: {
             None: function (k) {
                 return k;

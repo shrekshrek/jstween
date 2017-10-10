@@ -20,12 +20,6 @@
 
 }(function (JTL, JT) {
     // --------------------------------------------------------------------辅助方法
-    function extend(obj, obj2) {
-        for (var prop in obj2) {
-            obj[prop] = obj2[prop];
-        }
-    }
-
     function regValue(value) {
         var _r = /(^[a-zA-Z]\w*|)(\+=|-=|)(\d*\.\d*|\d*)/;
         var _a = _r.exec(value);
@@ -73,7 +67,7 @@
         this.initialize.apply(this, arguments);
     }
 
-    extend(timeline.prototype, {
+    Object.assign(timeline.prototype, {
         initialize: function (vars) {
             vars = vars || {};
             this.onUpdate = vars.onUpdate || null;
@@ -354,7 +348,7 @@
 
 
     //---------------------------------------------------------------全局方法
-    extend(JTL, {
+    Object.assign(JTL, {
         create: function () {
             return new timeline();
         },

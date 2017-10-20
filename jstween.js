@@ -345,7 +345,7 @@
             this.ease = toVars.ease || JT.Linear.None;
             this.delay = Math.max(toVars.delay || 0, 0) * 1000;
             this.yoyo = toVars.yoyo || false;
-            this.repeat = toVars.repeat ? (toVars.repeat < 0 ? -100 : toVars.repeat) : 0;
+            this.repeat = toVars.repeat || 0;
             this.repeatDelay = Math.max(toVars.repeatDelay || 0, 0) * 1000;
             this.onStart = toVars.onStart || null;
             this.onStartScope = toVars.onStartScope || this;
@@ -369,7 +369,7 @@
             this.isDom = isDom;
 
             this.startTime = this.delay;
-            this.endTime = this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1);
+            this.endTime = this.repeat < 0 ? 999999999999 : (this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1));
             this.curTime = this.prevTime = 0;
 
             if (toVars.isPlaying == undefined ? true : toVars.isPlaying) this.play();
@@ -386,23 +386,24 @@
 
             if (this.isReverse && this.prevTime >= 0 && this.curTime < 0) {
                 this.curTime = 0;
-                this._updateProp(this.curTime);
+                this._updateProp();
                 if (this.onStart && this.prevTime >= this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
                 return this.isKeep;
             } else if (!this.isReverse && this.prevTime < this.endTime && this.curTime >= this.endTime) {
                 this.curTime = this.endTime;
-                this._updateProp(this.curTime);
+                this._updateProp();
                 if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
                 return this.isKeep;
             } else {
-                var _prevRepeat = Math.min(this.repeat, Math.max(0, Math.floor((this.prevTime - this.startTime) / (this.duration + this.repeatDelay))));
-                var _curRepeat = Math.min(this.repeat, Math.max(0, Math.floor((this.curTime - this.startTime) / (this.duration + this.repeatDelay))));
+                var _repeat = this.repeat < 0 ? 999999999999 : this.repeat;
+                var _prevRepeat = Math.min(_repeat, Math.max(0, Math.floor((this.prevTime - this.startTime) / (this.duration + this.repeatDelay))));
+                var _curRepeat = Math.min(_repeat, Math.max(0, Math.floor((this.curTime - this.startTime) / (this.duration + this.repeatDelay))));
                 if (_prevRepeat != _curRepeat) {
                     if (this.yoyo) this.isYoReverse = !this.isYoReverse;
                     if (this.onRepeat) this.onRepeat.apply(this.onRepeatScope, this.onRepeatParams);
                 }
 
-                this._updateProp(this.curTime);
+                this._updateProp();
 
                 if (this.onEnd && this.isReverse && this.prevTime == this.endTime && this.curTime < this.endTime) this.onEnd.apply(this.onEndScope, this.onEndParams);
 
@@ -413,10 +414,10 @@
 
         },
 
-        _updateProp: function (time) {
-            time = time == this.endTime ? this.duration : ((time - this.startTime) % (this.duration + this.repeatDelay));
+        _updateProp: function () {
+            var _time = this.curTime == this.endTime ? this.duration : ((this.curTime - this.startTime) % (this.duration + this.repeatDelay));
 
-            var _elapsed = Math.max(0, Math.min(1, this.duration == 0 ? 1 : (time / this.duration)));
+            var _elapsed = Math.max(0, Math.min(1, this.duration == 0 ? 1 : (_time / this.duration)));
 
             if (this.isYoReverse) _elapsed = 1 - _elapsed;
 
@@ -525,7 +526,7 @@
             if (this.curTime == _time) return;
 
             this.curTime = _time;
-            this._updateProp(this.curTime);
+            this._updateProp();
         },
 
         setTimeScale: function (scale) {
@@ -538,7 +539,8 @@
                 this._toEnd();
                 if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
             }
-            this.curTime = this.prevTime = this.endTime = 0;
+            this.duration = 0;
+            this.curTime = this.prevTime = this.startTime = this.endTime = 0;
             this.target = this.onStart = this.onRepeat = this.onEnd = this.onUpdate = null;
         }
     });

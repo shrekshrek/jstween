@@ -70,6 +70,20 @@
     Object.assign(timeline.prototype, {
         initialize: function (vars) {
             vars = vars || {};
+            this.duration = 0;
+            this.delay = Math.max(vars.delay || 0, 0) * 1000;
+            this.yoyo = vars.yoyo || false;
+            this.repeat = vars.repeat ? (vars.repeat < 0 ? -100 : vars.repeat) : 0;
+            this.repeatDelay = Math.max(vars.repeatDelay || 0, 0) * 1000;
+            this.onStart = vars.onStart || null;
+            this.onStartScope = vars.onStartScope || this;
+            this.onStartParams = vars.onStartParams || [];
+            this.onRepeat = vars.onRepeat || null;
+            this.onRepeatScope = vars.onRepeatScope || this;
+            this.onRepeatParams = vars.onRepeatParams || [];
+            this.onEnd = vars.onEnd || null;
+            this.onEndScope = vars.onEndScope || this;
+            this.onEndParams = vars.onEndParams || [];
             this.onUpdate = vars.onUpdate || null;
             this.onUpdateScope = vars.onUpdateScope || this;
             this.onUpdateParams = vars.onUpdateParams || [];
@@ -78,15 +92,21 @@
             this.timeScale = vars.timeScale || 1;
 
             this.isKeep = false;
+            this.isYoReverse = false;
 
-            this.startTime = 0;
-            this.endTime = 0;
+            this.startTime = this.delay;
+            this._updateEndTime();
+            // this.endTime = this.repeat < 0 ? 999999999999 : (this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1));
             this.curTime = this.prevTime = 0;
 
             this.labels = [];
             this.tweens = [];
             this.calls = [];
 
+        },
+
+        _updateEndTime: function(){
+            this.endTime = this.repeat < 0 ? 999999999999 : (this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1));
         },
 
         _update: function (time) {
@@ -100,19 +120,39 @@
 
             if (this.isReverse && this.prevTime >= 0 && this.curTime < 0) {
                 this.curTime = 0;
-                this._checkCall();
-                this._checkTween();
+                this._updateProp();
+                if (this.onStart && this.prevTime >= this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
                 return this.isKeep;
             } else if (!this.isReverse && this.prevTime < this.endTime && this.curTime >= this.endTime) {
                 this.curTime = this.endTime;
-                this._checkCall();
-                this._checkTween();
+                this._updateProp();
+                if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
                 return this.isKeep;
             } else {
-                this._checkCall();
-                this._checkTween();
+                var _repeat = this.repeat < 0 ? 999999999999 : this.repeat;
+                var _prevRepeat = Math.min(_repeat, Math.max(0, Math.floor((this.prevTime - this.startTime) / (this.duration + this.repeatDelay))));
+                var _curRepeat = Math.min(_repeat, Math.max(0, Math.floor((this.curTime - this.startTime) / (this.duration + this.repeatDelay))));
+                if (_prevRepeat != _curRepeat) {
+                    if (this.yoyo) this.isYoReverse = !this.isYoReverse;
+                    if (this.onRepeat) this.onRepeat.apply(this.onRepeatScope, this.onRepeatParams);
+                }
+
+                this._updateProp();
+
+                if (this.onEnd && this.isReverse && this.prevTime == this.endTime && this.curTime < this.endTime) this.onEnd.apply(this.onEndScope, this.onEndParams);
+
+                if (this.onStart && (this.isReverse ? (this.prevTime >= this.startTime && this.curTime < this.startTime) : ((this.startTime == 0 && this.prevTime == 0 && this.curTime >= this.startTime) || (this.prevTime < this.startTime && this.curTime >= this.startTime)))) this.onStart.apply(this.onStartScope, this.onStartParams);
+
                 return true;
             }
+
+        },
+
+        _updateProp: function(){
+            var _prevTime = this.prevTime == this.endTime ? this.duration : ((this.prevTime - this.startTime) % (this.duration + this.repeatDelay));
+            var _curTime = this.curTime == this.endTime ? this.duration : ((this.curTime - this.startTime) % (this.duration + this.repeatDelay));
+            this._checkCall(_prevTime, _curTime);
+            this._checkTween(_prevTime, _curTime);
         },
 
         _addSelf: function () {
@@ -131,7 +171,7 @@
         },
 
         _parsePosition: function (position) {
-            if (position == undefined) return this.endTime;
+            if (position == undefined) return this.duration;
 
             var _o = regValue(position);
             var _time = 0;
@@ -140,12 +180,13 @@
             } else if (_o.ext) {
                 switch (_o.ext) {
                     case '+=':
-                        _time = this.endTime + _o.num * 1000;
+                        _time = this.duration + _o.num * 1000;
                         break;
                     case '-=':
-                        _time = this.endTime - _o.num * 1000;
+                        _time = this.duration - _o.num * 1000;
                         break;
                 }
+                this._updateEndTime();
             } else if (_o.num) {
                 _time = _o.num * 1000;
             }
@@ -155,42 +196,44 @@
 
         _addCall: function (call, position) {
             var _time = this._parsePosition(position);
-            this.endTime = Math.max(this.endTime, _time);
+            this.duration = Math.max(this.duration, _time);
             this.calls.push({time: _time, call: call});
+            this._updateEndTime();
         },
 
-        _checkCall: function () {
+        _checkCall: function (prevTime, curTime) {
             for (var i = 0, _len = this.calls.length; i < _len; i++) {
                 var _call = this.calls[i];
                 var startTime = _call.time;
-                if (this.isReverse ? (this.prevTime >= startTime && this.curTime < startTime) : ((startTime == 0 && this.prevTime == 0 && this.curTime >= startTime) || (this.prevTime < startTime && this.curTime >= startTime))) _call.call();
+                if (this.isReverse ? (prevTime >= startTime && curTime < startTime) : ((startTime == 0 && prevTime == 0 && curTime >= startTime) || (prevTime < startTime && curTime >= startTime))) _call.call();
             }
         },
 
         _addTween: function (tween, position) {
             var _time = this._parsePosition(position);
-            this.endTime = Math.max(this.endTime, _time + tween.endTime);
+            this.duration = Math.max(this.duration, _time + tween.endTime);
             this.tweens.push({time: _time, tween: tween});
+            this._updateEndTime();
         },
 
-        _checkTween: function () {
+        _checkTween: function (prevTime, curTime) {
             for (var i = 0, _len = this.tweens.length; i < _len; i++) {
                 var _tween = this.tweens[i];
                 var startTime = _tween.time;
                 var endTime = _tween.time + _tween.tween.endTime;
-                if ((this.curTime >= startTime && this.curTime <= endTime) || (this.prevTime > startTime && this.prevTime < endTime)) {
-                    if (this.prevTime >= startTime && this.curTime < startTime) {
-                        _tween.tween._update(this.prevTime - startTime);
-                    } else if (this.prevTime > endTime && this.curTime <= endTime) {
+                if ((curTime >= startTime && curTime <= endTime) || (prevTime > startTime && prevTime < endTime)) {
+                    if (prevTime >= startTime && curTime < startTime) {
+                        _tween.tween._update(prevTime - startTime);
+                    } else if (prevTime > endTime && curTime <= endTime) {
                         _tween.tween.curTime = _tween.tween.prevTime = _tween.tween.endTime;
-                        _tween.tween._update(endTime - this.curTime);
-                    } else if (this.prevTime < startTime && this.curTime >= startTime) {
+                        _tween.tween._update(endTime - curTime);
+                    } else if (prevTime < startTime && curTime >= startTime) {
                         _tween.tween.curTime = _tween.tween.prevTime = 0;
-                        _tween.tween._update(this.curTime - startTime);
-                    } else if (this.prevTime <= endTime && this.curTime > endTime) {
-                        _tween.tween._update(endTime - this.prevTime);
+                        _tween.tween._update(curTime - startTime);
+                    } else if (prevTime <= endTime && curTime > endTime) {
+                        _tween.tween._update(endTime - prevTime);
                     } else {
-                        _tween.tween._update(Math.abs(this.curTime - this.prevTime));
+                        _tween.tween._update(Math.abs(curTime - prevTime));
                     }
                 }
             }
@@ -271,11 +314,11 @@
                 var _label = this.labels[i];
                 if (name == _label.name) return _label.time;
             }
-            return this.endTime;
+            return null;
         },
 
         totalTime: function () {
-            return this.endTime;
+            return this.duration;
         },
 
         play: function (position) {
@@ -316,7 +359,7 @@
         },
 
         seek: function (position) {
-            var _time = Math.max(0, Math.min(this.endTime, this._parsePosition(position)));
+            var _time = Math.max(0, Math.min(this.duration, this._parsePosition(position)));
             if (this.curTime == _time) return;
 
             this.curTime = _time;
@@ -340,8 +383,9 @@
             this.tweens = [];
             this.calls = [];
             this.labels = [];
-            this.endTime = 0;
-            this.curTime = this.prevTime = 0;
+            this.duration = 0;
+            this.curTime = this.prevTime = this.startTime = this.endTime = 0;
+            this.onStart = this.onRepeat = this.onEnd = this.onUpdate = null;
         }
 
     });
@@ -349,8 +393,8 @@
 
     //---------------------------------------------------------------全局方法
     Object.assign(JTL, {
-        create: function () {
-            return new timeline();
+        create: function (vars) {
+            return new timeline(vars);
         },
         kill: function (tl) {
             tl.kill();

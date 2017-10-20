@@ -46,7 +46,9 @@
 </div>
 
 <script>
-    var tl = JTL.create();
+    var tl = JTL.create({repeat:2, onRepeat: function(){
+        console.log('repeat');
+    }});
     tl.add(function () {
         console.log('start');
     });

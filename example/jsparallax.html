@@ -46,7 +46,28 @@
 </div>
 
 <script>
+    var pl = JP.create({hook: 20});
+    pl.from('#box2', 1.5, {marginLeft: 400}, 0, 100);
+    console.log(pl);
 
+    var oldY = 0;
+    var isDown = false;
+    document.addEventListener('mousedown', function (evt) {
+        oldY = evt.clientY;
+        isDown = true;
+    });
+    document.addEventListener('mouseup', function (evt) {
+        isDown = false;
+    });
+    document.addEventListener('mousemove', function (evt) {
+        if (isDown) {
+            var y = evt.clientY;
+            pl.seek(y);
+//            tl.update(y - oldY);
+            oldY = y;
+//            console.log(y);
+        }
+    });
 
 
 </script>

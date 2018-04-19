@@ -94,7 +94,7 @@
             this.startTime = this.delay;
             this._updateEndTime();
             // this.endTime = this.repeat < 0 ? 999999999999 : (this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1));
-            this.curTime = this.prevTime = 0;
+            this.curTime = this.prevTime = null;
 
             this.labels = [];
             this.tweens = [];
@@ -102,7 +102,7 @@
 
         },
 
-        _updateEndTime: function(){
+        _updateEndTime: function () {
             this.endTime = this.repeat < 0 ? 999999999999 : (this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1));
         },
 
@@ -145,7 +145,7 @@
 
         },
 
-        _updateProp: function(){
+        _updateProp: function () {
             var _prevTime = this.prevTime == this.endTime ? this.duration : ((this.prevTime - this.startTime) % (this.duration + this.repeatDelay));
             var _curTime = this.curTime == this.endTime ? this.duration : ((this.curTime - this.startTime) % (this.duration + this.repeatDelay));
             this._checkCall(_prevTime, _curTime);
@@ -168,7 +168,7 @@
         },
 
         _parsePosition: function (position) {
-            if (position == undefined) return this.duration;
+            if (position === undefined) return this.duration;
 
             var _o = regValue(position);
             var _time = 0;
@@ -207,6 +207,7 @@
         },
 
         _addTween: function (tween, position) {
+            tween.stop();
             var _time = this._parsePosition(position);
             this.duration = Math.max(this.duration, _time + tween.endTime);
             this.tweens.push({time: _time, tween: tween});
@@ -237,21 +238,18 @@
         },
 
         fromTo: function (target, time, fromVars, toVars, position) {
-            toVars.isPlaying = false;
             var _tween = JT.fromTo(target, time, fromVars, toVars);
             this._addTween(_tween, position);
             return this;
         },
 
         from: function (target, time, fromVars, position) {
-            fromVars.isPlaying = false;
             var _tween = JT.from(target, time, fromVars);
             this._addTween(_tween, position);
             return this;
         },
 
         to: function (target, time, toVars, position) {
-            toVars.isPlaying = false;
             var _tween = JT.to(target, time, toVars);
             this._addTween(_tween, position);
             return this;
@@ -340,7 +338,10 @@
 
         stop: function () {
             this.pause();
-            this.curTime = this.prevTime = 0;
+            if (this.curTime !== 0) {
+                this.curTime = this.prevTime = null;
+                this.seek(0);
+            }
         },
 
         reverse: function (position) {

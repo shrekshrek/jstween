@@ -163,7 +163,7 @@
     }
 
     function checkJtobj(target) {
-        if (target._jt_obj == undefined)
+        if (target._jt_obj === undefined)
             target._jt_obj = {
                 perspective: 0,
                 x: 0,
@@ -309,7 +309,7 @@
 
     function globalUpdate() {
         var _len = tweens.length;
-        if (_len === 0) {
+        if (_len == 0) {
             isUpdating = false;
             return;
         }
@@ -367,10 +367,11 @@
 
             this.startTime = this.delay;
             this.endTime = this.repeat < 0 ? 999999999999 : (this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1));
-            this.curTime = this.prevTime = 0;
+            this.curTime = this.prevTime = null;
 
-            if (toVars.isPlaying == undefined ? true : toVars.isPlaying) this.play();
+            this._update(0);
 
+            if (toVars.isPlaying === undefined ? true : toVars.isPlaying) this.play();
         },
 
         _update: function (time) {
@@ -379,7 +380,6 @@
             time = this.isReverse ? (-time * this.timeScale) : (time * this.timeScale);
             this.prevTime = this.curTime;
             this.curTime = this.prevTime + time;
-            // console.log(this.isReverse, time,this.prevTime,this.curTime,this.endTime);
 
             if (this.isReverse && this.prevTime >= 0 && this.curTime < 0) {
                 this.curTime = 0;
@@ -430,7 +430,7 @@
                 if (_end.num instanceof Array) {
                     _n = this.interpolation(_end.num, _radio);
                 } else {
-                    _n = _start.num + ( _end.num - _start.num ) * _radio;
+                    _n = _start.num + (_end.num - _start.num) * _radio;
                 }
 
                 _n = fixed3(_n);
@@ -504,7 +504,10 @@
 
         stop: function () {
             this.pause();
-            this.curTime = this.prevTime = 0;
+            if (this.curTime !== 0) {
+                this.curTime = this.prevTime = null;
+                this.seek(0);
+            }
         },
 
         reverse: function (time) {
@@ -520,7 +523,7 @@
 
         seek: function (time) {
             var _time = Math.max(0, Math.min(this.endTime, time * 1000));
-            if (this.curTime == _time) return;
+            if (this.curTime === _time) return;
 
             this.curTime = _time;
             this._updateProp();
@@ -536,8 +539,8 @@
                 this._toEnd();
                 if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
             }
-            this.duration = 0;
-            this.curTime = this.prevTime = this.startTime = this.endTime = 0;
+            this.duration = null;
+            this.curTime = this.prevTime = this.startTime = this.endTime = null;
             this.target = this.onStart = this.onRepeat = this.onEnd = this.onUpdate = null;
         }
     });
@@ -690,7 +693,7 @@
                 var _len = tweens.length;
                 for (var i = _len - 1; i >= 0; i--) {
                     var _tween = tweens[i];
-                    if (_tween.target === obj) {
+                    if (_tween.target == obj) {
                         _tween.kill(toEnd);
                     }
                 }
@@ -864,18 +867,18 @@
     function Through(v, k) {
         var m = v.length - 1, f = m * k, i = Math.floor(f), fn = Utils.Through;
         if (v[0] === v[m]) {
-            if (k < 0) i = Math.floor(f = m * ( 1 + k ));
-            return fn(v[( i - 1 + m ) % m], v[i], v[( i + 1 ) % m], v[( i + 2 ) % m], f - i);
+            if (k < 0) i = Math.floor(f = m * (1 + k));
+            return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
         } else {
-            if (k < 0) return v[0] - ( fn(v[0], v[0], v[1], v[1], -f) - v[0] );
-            if (k > 1) return v[m] - ( fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m] );
+            if (k < 0) return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+            if (k > 1) return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
             return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
         }
     }
 
     var Utils = {
         Linear: function (p0, p1, t) {
-            return ( p1 - p0 ) * t + p0;
+            return (p1 - p0) * t + p0;
         },
 
         Bernstein: function (n, i) {
@@ -894,8 +897,8 @@
         })(),
 
         Through: function (p0, p1, p2, p3, t) {
-            var v0 = ( p2 - p0 ) * 0.5, v1 = ( p3 - p1 ) * 0.5, t2 = t * t, t3 = t * t2;
-            return ( 2 * p1 - 2 * p2 + v0 + v1 ) * t3 + ( -3 * p1 + 3 * p2 - 2 * v0 - v1 ) * t2 + v0 * t + p1;
+            var v0 = (p2 - p0) * 0.5, v1 = (p3 - p1) * 0.5, t2 = t * t, t3 = t * t2;
+            return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
         }
     };
 
@@ -912,11 +915,11 @@
                 return k * k;
             },
             Out: function (k) {
-                return k * ( 2 - k );
+                return k * (2 - k);
             },
             InOut: function (k) {
-                if (( k *= 2 ) < 1) return 0.5 * k * k;
-                return -0.5 * ( --k * ( k - 2 ) - 1 );
+                if ((k *= 2) < 1) return 0.5 * k * k;
+                return -0.5 * (--k * (k - 2) - 1);
             }
         },
         Cubic: {
@@ -927,8 +930,8 @@
                 return --k * k * k + 1;
             },
             InOut: function (k) {
-                if (( k *= 2 ) < 1) return 0.5 * k * k * k;
-                return 0.5 * ( ( k -= 2 ) * k * k + 2 );
+                if ((k *= 2) < 1) return 0.5 * k * k * k;
+                return 0.5 * ((k -= 2) * k * k + 2);
             }
         },
         Quart: {
@@ -936,11 +939,11 @@
                 return k * k * k * k;
             },
             Out: function (k) {
-                return 1 - ( --k * k * k * k );
+                return 1 - (--k * k * k * k);
             },
             InOut: function (k) {
-                if (( k *= 2 ) < 1) return 0.5 * k * k * k * k;
-                return -0.5 * ( ( k -= 2 ) * k * k * k - 2 );
+                if ((k *= 2) < 1) return 0.5 * k * k * k * k;
+                return -0.5 * ((k -= 2) * k * k * k - 2);
             }
         },
         Quint: {
@@ -951,8 +954,8 @@
                 return --k * k * k * k * k + 1;
             },
             InOut: function (k) {
-                if (( k *= 2 ) < 1) return 0.5 * k * k * k * k * k;
-                return 0.5 * ( ( k -= 2 ) * k * k * k * k + 2 );
+                if ((k *= 2) < 1) return 0.5 * k * k * k * k * k;
+                return 0.5 * ((k -= 2) * k * k * k * k + 2);
             }
         },
         Sine: {
@@ -963,7 +966,7 @@
                 return Math.sin(k * Math.PI / 2);
             },
             InOut: function (k) {
-                return 0.5 * ( 1 - Math.cos(Math.PI * k) );
+                return 0.5 * (1 - Math.cos(Math.PI * k));
             }
         },
         Expo: {
@@ -976,8 +979,8 @@
             InOut: function (k) {
                 if (k === 0) return 0;
                 if (k === 1) return 1;
-                if (( k *= 2 ) < 1) return 0.5 * Math.pow(1024, k - 1);
-                return 0.5 * ( -Math.pow(2, -10 * ( k - 1 )) + 2 );
+                if ((k *= 2) < 1) return 0.5 * Math.pow(1024, k - 1);
+                return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
             }
         },
         Circ: {
@@ -985,11 +988,11 @@
                 return 1 - Math.sqrt(1 - k * k);
             },
             Out: function (k) {
-                return Math.sqrt(1 - ( --k * k ));
+                return Math.sqrt(1 - (--k * k));
             },
             InOut: function (k) {
-                if (( k *= 2 ) < 1) return -0.5 * ( Math.sqrt(1 - k * k) - 1);
-                return 0.5 * ( Math.sqrt(1 - ( k -= 2) * k) + 1);
+                if ((k *= 2) < 1) return -0.5 * (Math.sqrt(1 - k * k) - 1);
+                return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
             }
         },
         Elastic: {
@@ -1001,8 +1004,8 @@
                     a = 1;
                     s = p / 4;
                 }
-                else s = p * Math.asin(1 / a) / ( 2 * Math.PI );
-                return -( a * Math.pow(2, 10 * ( k -= 1 )) * Math.sin(( k - s ) * ( 2 * Math.PI ) / p) );
+                else s = p * Math.asin(1 / a) / (2 * Math.PI);
+                return -(a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
             },
             Out: function (k) {
                 var s, a = 0.1, p = 0.4;
@@ -1012,8 +1015,8 @@
                     a = 1;
                     s = p / 4;
                 }
-                else s = p * Math.asin(1 / a) / ( 2 * Math.PI );
-                return ( a * Math.pow(2, -10 * k) * Math.sin(( k - s ) * ( 2 * Math.PI ) / p) + 1 );
+                else s = p * Math.asin(1 / a) / (2 * Math.PI);
+                return (a * Math.pow(2, -10 * k) * Math.sin((k - s) * (2 * Math.PI) / p) + 1);
             },
             InOut: function (k) {
                 var s, a = 0.1, p = 0.4;
@@ -1023,24 +1026,24 @@
                     a = 1;
                     s = p / 4;
                 }
-                else s = p * Math.asin(1 / a) / ( 2 * Math.PI );
-                if (( k *= 2 ) < 1) return -0.5 * ( a * Math.pow(2, 10 * ( k -= 1 )) * Math.sin(( k - s ) * ( 2 * Math.PI ) / p) );
-                return a * Math.pow(2, -10 * ( k -= 1 )) * Math.sin(( k - s ) * ( 2 * Math.PI ) / p) * 0.5 + 1;
+                else s = p * Math.asin(1 / a) / (2 * Math.PI);
+                if ((k *= 2) < 1) return -0.5 * (a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
+                return a * Math.pow(2, -10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p) * 0.5 + 1;
             }
         },
         Back: {
             In: function (k) {
                 var s = 1.70158;
-                return k * k * ( ( s + 1 ) * k - s );
+                return k * k * ((s + 1) * k - s);
             },
             Out: function (k) {
                 var s = 1.70158;
-                return --k * k * ( ( s + 1 ) * k + s ) + 1;
+                return --k * k * ((s + 1) * k + s) + 1;
             },
             InOut: function (k) {
                 var s = 1.70158 * 1.525;
-                if (( k *= 2 ) < 1) return 0.5 * ( k * k * ( ( s + 1 ) * k - s ) );
-                return 0.5 * ( ( k -= 2 ) * k * ( ( s + 1 ) * k + s ) + 2 );
+                if ((k *= 2) < 1) return 0.5 * (k * k * ((s + 1) * k - s));
+                return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
             }
         },
         Bounce: {
@@ -1048,14 +1051,14 @@
                 return 1 - JT.Bounce.Out(1 - k);
             },
             Out: function (k) {
-                if (k < ( 1 / 2.75 )) {
+                if (k < (1 / 2.75)) {
                     return 7.5625 * k * k;
-                } else if (k < ( 2 / 2.75 )) {
-                    return 7.5625 * ( k -= ( 1.5 / 2.75 ) ) * k + 0.75;
-                } else if (k < ( 2.5 / 2.75 )) {
-                    return 7.5625 * ( k -= ( 2.25 / 2.75 ) ) * k + 0.9375;
+                } else if (k < (2 / 2.75)) {
+                    return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
+                } else if (k < (2.5 / 2.75)) {
+                    return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
                 } else {
-                    return 7.5625 * ( k -= ( 2.625 / 2.75 ) ) * k + 0.984375;
+                    return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
                 }
             },
             InOut: function (k) {

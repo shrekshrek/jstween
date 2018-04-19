@@ -45,6 +45,9 @@
 </div>
 
 <script>
+    JT.set('#box3', {opacity:0, display:'none'});
+
+
     //    JT.fromTo('#box1', 1, {marginLeft: 400, opacity: 0.5}, {
     //        marginLeft: 200, opacity: 1, repeat:-1, yoyo:false, repeatDelay:0, ease: JT.Quad.Out, onEnd: function () {
     //            console.log("1 complete");
@@ -53,6 +56,7 @@
 
     //    JT.set('#box1', {transformStyle: "preserve-3d"});
 
+    console.log('now1',Date.now());
     var t = JT.fromTo('#box1', 1, {
 //        perspective: 0,
         x: 400,
@@ -69,10 +73,10 @@
 //        scaleX: 2,
 //        scaleY: 0.5,
         opacity: 1,
-//        delay: 1,
+       // delay: 1,
 //        repeatDelay: 0.5,
-        repeat: -2,
-//        isPlaying: false,
+//         repeat: -1,
+       isPlaying: false,
 //        yoyo: true,
         ease: JT.Quad.Out,
         onStart: function () {
@@ -90,7 +94,7 @@
 //            this.play(0.5);
         }
     });
-
+    console.log('now2',Date.now());
 //    JT.fromTo('#box2', 1.5, {
 //        x: 100
 //    }, {
@@ -121,8 +125,6 @@
 //        JT.seekAll(1.8);
 ////        JT.pauseAll();
 //    });
-
-
 
 </script>
 </body>

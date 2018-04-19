@@ -309,7 +309,7 @@
 
     function globalUpdate() {
         var _len = tweens.length;
-        if (_len == 0) {
+        if (_len === 0) {
             isUpdating = false;
             return;
         }
@@ -693,7 +693,7 @@
                 var _len = tweens.length;
                 for (var i = _len - 1; i >= 0; i--) {
                     var _tween = tweens[i];
-                    if (_tween.target == obj) {
+                    if (_tween.target === obj) {
                         _tween.kill(toEnd);
                     }
                 }

@@ -381,8 +381,8 @@
             this.tweens = [];
             this.calls = [];
             this.labels = [];
-            this.duration = 0;
-            this.curTime = this.prevTime = this.startTime = this.endTime = 0;
+            this.duration = null;
+            this.curTime = this.prevTime = this.startTime = this.endTime = null;
             this.onStart = this.onRepeat = this.onEnd = this.onUpdate = null;
         }
 

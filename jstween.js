@@ -38,7 +38,7 @@
         });
     }
 
-    function fixed3(n) {
+    function fixed(n) {
         return Math.round(n * 1000) / 1000;
     }
 
@@ -92,7 +92,7 @@
     function getElement(target) {
         if (!target) throw "target is undefined, can't tween!!!";
 
-        if (typeof(target) == 'string') {
+        if (typeof(target) === 'string') {
             return (typeof(document) === 'undefined') ? target : (document.querySelectorAll ? document.querySelectorAll(target) : document.getElementById((target.charAt(0) === '#') ? target.substr(1) : target));
         } else {
             return target;
@@ -100,7 +100,7 @@
     }
 
     function checkPropName(target, name) {
-        if (name == 'rotation' || name == 'scale') return name;
+        if (name === 'rotation' || name === 'scale') return name;
 
         if (target._jt_obj[name] !== undefined) return name;
 
@@ -114,14 +114,14 @@
 
     function checkValue(o1, o2, o3, push) {
         var o = {};
-        if (o2 instanceof Array) {
+        if (Array.isArray(o2)) {
             o.num = [];
             for (var i in o2) {
                 var _o = calcValue(o1, o2[i]);
                 o.num[i] = _o.num;
                 o.unit = _o.unit;
             }
-            if (o3 != undefined) {
+            if (o3 !== undefined) {
                 if (push) {
                     o.num.push(o3.num);
                 } else {
@@ -137,13 +137,13 @@
     function calcValue(o1, o2) {
         var _o = regValue(o2);
 
-        if (o1.unit == 'rem' && _o.unit != 'rem') {
+        if (o1.unit === 'rem' && _o.unit !== 'rem') {
             checkRem();
-            o1.num = fixed3(o1.num * remUnit);
+            o1.num = fixed(o1.num * remUnit);
             o1.unit = 'px'
-        } else if (o1.unit != 'rem' && _o.unit == 'rem') {
+        } else if (o1.unit !== 'rem' && _o.unit === 'rem') {
             checkRem();
-            o1.num = fixed3(o1.num / remUnit);
+            o1.num = fixed(o1.num / remUnit);
             o1.unit = 'rem';
         }
 
@@ -183,7 +183,7 @@
     function regValue(value) {
         var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(e[+-]?[0-9]{0,2}|)(rem|px|%|)/i;
         var _a = _r.exec(value);
-        if (_a) return {num: fixed3(_a[2] + _a[3] + _a[4]), unit: _a[5], ext: _a[1]};
+        if (_a) return {num: fixed(_a[2] + _a[3] + _a[4]), unit: _a[5], ext: _a[1]};
         else return {num: 0, unit: 'px', ext: ''};
     }
 
@@ -273,13 +273,13 @@
         if (obj._jt_obj.rotationX) _t += 'rotateX(' + obj._jt_obj.rotationX % 360 + 'deg) ';
         if (obj._jt_obj.rotationY) _t += 'rotateY(' + obj._jt_obj.rotationY % 360 + 'deg) ';
         if (obj._jt_obj.rotationZ) _t += 'rotateZ(' + obj._jt_obj.rotationZ % 360 + 'deg) ';
-        if (obj._jt_obj.scaleX != 1 || obj._jt_obj.scaleY != 1 || obj._jt_obj.scaleZ != 1) _t += 'scale3d(' + obj._jt_obj.scaleX + ', ' + obj._jt_obj.scaleY + ', ' + obj._jt_obj.scaleZ + ') ';
+        if (obj._jt_obj.scaleX !== 1 || obj._jt_obj.scaleY !== 1 || obj._jt_obj.scaleZ !== 1) _t += 'scale3d(' + obj._jt_obj.scaleX + ', ' + obj._jt_obj.scaleY + ', ' + obj._jt_obj.scaleZ + ') ';
         if (obj._jt_obj.skewX || obj._jt_obj.skewY) _t += 'skew(' + obj._jt_obj.skewX + 'deg,' + obj._jt_obj.skewY + 'deg) ';
         obj.style[browserPrefix('transform')] = _t;
     }
 
     function checkNumber(value) {
-        return value + (typeof(value) == 'number' ? 'px' : '');
+        return value + (typeof(value) === 'number' ? 'px' : '');
     }
 
     // --------------------------------------------------------------------计算1rem单位值
@@ -361,60 +361,71 @@
             this.isReverse = toVars.isReverse || false;
             this.timeScale = toVars.timeScale || 1;
 
+            this.isSeek = false;
             this.isKeep = false;
             this.isYoReverse = false;
             this.isDom = isDom;
 
+            this.repeat = this.repeat < 0 ? 999999999999 : Math.floor(this.repeat);
+            this.curRepeat = 0;
+
             this.startTime = this.delay;
-            this.endTime = this.repeat < 0 ? 999999999999 : (this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1));
-            this.curTime = this.prevTime = null;
+            this.endTime = this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1);
+            this.curTime = 0;
+            this.prevTime = 0;
 
-            this._update(0);
+            this._updateProp();
 
-            if (toVars.isPlaying === undefined ? true : toVars.isPlaying) this.play();
+            if (toVars.isPlaying === undefined ? true : toVars.isPlaying) {
+                if (this.endTime !== 0) {
+                    this.play();
+                } else {
+                    if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                }
+            }
         },
 
         _update: function (time) {
             this.isKeep = false;
 
-            time = this.isReverse ? (-time * this.timeScale) : (time * this.timeScale);
+            time = (this.isReverse ? -1 : 1) * time * this.timeScale;
             this.prevTime = this.curTime;
             this.curTime = this.prevTime + time;
 
-            if (this.isReverse && this.prevTime >= 0 && this.curTime < 0) {
+            if (this.prevTime > 0 && this.curTime <= 0) {
                 this.curTime = 0;
                 this._updateProp();
-                if (this.onStart && this.prevTime >= this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
+                if (!this.isSeek && this.onStart && this.prevTime > this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
                 return this.isKeep;
-            } else if (!this.isReverse && this.prevTime < this.endTime && this.curTime >= this.endTime) {
+            } else if (this.prevTime < this.endTime && this.curTime >= this.endTime) {
                 this.curTime = this.endTime;
                 this._updateProp();
-                if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                if (!this.isSeek && this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
                 return this.isKeep;
             } else {
-                var _repeat = this.repeat < 0 ? 999999999999 : this.repeat;
-                var _prevRepeat = Math.min(_repeat, Math.max(0, Math.floor((this.prevTime - this.startTime) / (this.duration + this.repeatDelay))));
-                var _curRepeat = Math.min(_repeat, Math.max(0, Math.floor((this.curTime - this.startTime) / (this.duration + this.repeatDelay))));
-                if (_prevRepeat != _curRepeat) {
+                var _repeat = Math.min(this.repeat, Math.max(0, Math.floor((this.curTime - this.startTime) / (this.duration + this.repeatDelay))));
+                if (_repeat !== this.curRepeat) {
+                    this.curRepeat = _repeat;
                     if (this.yoyo) this.isYoReverse = !this.isYoReverse;
-                    if (this.onRepeat) this.onRepeat.apply(this.onRepeatScope, this.onRepeatParams);
+                    if (!this.isSeek && this.onRepeat) this.onRepeat.apply(this.onRepeatScope, this.onRepeatParams);
                 }
-
                 this._updateProp();
 
-                if (this.onEnd && this.isReverse && this.prevTime == this.endTime && this.curTime < this.endTime) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                if (!this.isSeek && this.onEnd && this.prevTime >= this.endTime && this.curTime < this.endTime) this.onEnd.apply(this.onEndScope, this.onEndParams);
 
-                if (this.onStart && (this.isReverse ? (this.prevTime >= this.startTime && this.curTime < this.startTime) : ((this.startTime == 0 && this.prevTime == 0 && this.curTime >= this.startTime) || (this.prevTime < this.startTime && this.curTime >= this.startTime)))) this.onStart.apply(this.onStartScope, this.onStartParams);
+                if (!this.isSeek && this.onStart && ((this.startTime === 0 && this.prevTime === 0 && this.curTime > this.startTime) || (this.prevTime < this.startTime && this.curTime >= this.startTime) || (this.prevTime > this.startTime && this.curTime <= this.startTime))) this.onStart.apply(this.onStartScope, this.onStartParams);
 
                 return true;
             }
-
         },
 
         _updateProp: function () {
-            var _time = this.curTime == this.endTime ? this.duration : ((this.curTime - this.startTime) % (this.duration + this.repeatDelay));
-
-            var _elapsed = Math.max(0, Math.min(1, this.duration == 0 ? 1 : (_time / this.duration)));
+            var _elapsed;
+            if (this.duration === 0) {
+                _elapsed = this.curTime < this.startTime ? 0 : 1;
+            } else {
+                _elapsed = Math.max(0, Math.min(1, ((this.curTime === this.endTime ? this.duration : ((this.curTime - this.startTime) % (this.duration + this.repeatDelay))) / this.duration)));
+            }
 
             if (this.isYoReverse) _elapsed = 1 - _elapsed;
 
@@ -427,13 +438,13 @@
                 var _end = this.toVars[prop];
 
                 var _n;
-                if (_end.num instanceof Array) {
+                if (Array.isArray(_end.num)) {
                     _n = this.interpolation(_end.num, _radio);
                 } else {
                     _n = _start.num + (_end.num - _start.num) * _radio;
                 }
 
-                _n = fixed3(_n);
+                _n = fixed(_n);
                 this.curVars[prop] = {num: _n, unit: _end.unit};
 
                 if (this.isDom) {
@@ -446,25 +457,6 @@
             if (_trans) updateTransform(this.target);
 
             if (this.onUpdate) this.onUpdate.apply(this.onUpdateScope, this.onUpdateParams);
-        },
-
-        _toEnd: function () {
-            var _trans = false;
-
-            for (var prop in this.fromVars) {
-                var _end = this.toVars[prop];
-
-                var _n = fixed3(_end.num);
-                this.curVars[prop] = {num: _n, unit: _end.unit};
-
-                if (this.isDom) {
-                    if (setProp(this.target, prop, _n + (_end.unit || 0))) _trans = true;
-                } else {
-                    this.target[prop] = _n + (_end.unit || 0);
-                }
-            }
-
-            if (_trans) updateTransform(this.target);
         },
 
         _addSelf: function () {
@@ -483,11 +475,12 @@
         },
 
         play: function (time) {
-            this.isKeep = true;
             this.isReverse = false;
 
-            if (time !== undefined) this.seek(time);
-            // else this._updateProp(this.curTime);
+            if (time !== undefined) this.seek(time, true);
+
+            if (this.curTime === this.endTime) return this.isKeep = false;
+            else this.isKeep = true;
 
             if (this.isPlaying) return;
             this.isPlaying = true;
@@ -505,28 +498,32 @@
         stop: function () {
             this.pause();
             if (this.curTime !== 0) {
-                this.curTime = this.prevTime = null;
-                this.seek(0);
+                this.curTime = this.curRepeat = 0;
+                this.isYoReverse = false;
+                this._updateProp();
             }
         },
 
         reverse: function (time) {
-            this.isKeep = true;
             this.isReverse = true;
 
-            if (time !== undefined) this.seek(time);
+            if (time !== undefined) this.seek(time, true);
+
+            if (this.curTime === 0) return this.isKeep = false;
+            else this.isKeep = true;
 
             if (this.isPlaying) return;
             this.isPlaying = true;
             this._addSelf();
         },
 
-        seek: function (time) {
+        seek: function (time, isSeek) {
             var _time = Math.max(0, Math.min(this.endTime, time * 1000));
             if (this.curTime === _time) return;
 
-            this.curTime = _time;
-            this._updateProp();
+            if (isSeek !== undefined) this.isSeek = isSeek;
+            this._update(_time - this.curTime);
+            this.isSeek = false;
         },
 
         setTimeScale: function (scale) {
@@ -536,7 +533,9 @@
         kill: function (toEnd) {
             this.pause();
             if (toEnd) {
-                this._toEnd();
+                this.curTime = this.endTime;
+                this.curRepeat = this.repeat;
+                this._updateProp();
                 if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
             }
             this.duration = null;
@@ -602,7 +601,7 @@
                 }
             } else {
                 for (var i in _vars) {
-                    if (typeof(obj[i]) == 'string' || typeof(obj[i]) == 'number') {
+                    if (typeof(obj[i]) === 'string' || typeof(obj[i]) === 'number') {
                         var _o = regValue(obj[i]);
                         switch (type) {
                             case 'fromTo':
@@ -626,7 +625,7 @@
             _tweens.push(new tween(obj, time, _fromVars, _toVars, _isDom));
         });
 
-        if (_tweens.length == 1) return _tweens[0];
+        if (_tweens.length === 1) return _tweens[0];
         else return _tweens;
     }
 
@@ -770,7 +769,11 @@
         },
 
         call: function (time, callback, params, isPlaying) {
-            return new tween(callback, time, {}, {onEnd: callback, onEndParams: params, isPlaying: isPlaying}, false);
+            return new tween({}, Math.max(0, time), {}, {
+                onEnd: callback,
+                onEndParams: params,
+                isPlaying: isPlaying
+            }, false);
         },
 
     });
@@ -809,7 +812,7 @@
                 _radio = _ease(i / _step);
                 var _o = {};
                 for (var j in obj) {
-                    if (obj[j] instanceof Array) {
+                    if (Array.isArray(obj[j])) {
                         _o[j] = obj.interpolation(obj[j], _radio);
                     }
                 }
@@ -840,7 +843,7 @@
     function sortBezier(target, arr) {
         for (var i in arr) {
             for (var j in arr[i]) {
-                if (i == 0) {
+                if (i === 0) {
                     target[j] = [arr[i][j]];
                 } else {
                     target[j].push(arr[i][j]);

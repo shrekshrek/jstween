@@ -45,7 +45,11 @@
 </div>
 
 <script>
-    JT.set('#box3', {opacity:0, display:'none'});
+    JT.set('#box3', {opacity: 0, display: 'none'});
+
+    JT.call(0, function () {
+        console.log(this);
+    });
 
 
     //    JT.fromTo('#box1', 1, {marginLeft: 400, opacity: 0.5}, {
@@ -56,8 +60,8 @@
 
     //    JT.set('#box1', {transformStyle: "preserve-3d"});
 
-    console.log('now1',Date.now());
-    var t = JT.fromTo('#box1', 1, {
+    console.log('now1', Date.now());
+    var t = JT.fromTo('#box1', 0, {
 //        perspective: 0,
         x: 400,
 //        rotationZ: 0,
@@ -73,13 +77,14 @@
 //        scaleX: 2,
 //        scaleY: 0.5,
         opacity: 1,
-       // delay: 1,
+        // delay: 1,
 //        repeatDelay: 0.5,
 //         repeat: -1,
-       isPlaying: false,
+//        isPlaying: false,
 //        yoyo: true,
         ease: JT.Quad.Out,
         onStart: function () {
+            // this.reverse();
             console.log('onStart');
         },
         onUpdate: function () {
@@ -89,42 +94,43 @@
             console.log('onRepeat', this.curVars);
         },
         onEnd: function () {
-            console.log("onEnd");
+            console.log("onEnd", Date.now());
             this.reverse();
+            // this.play();
 //            this.play(0.5);
         }
     });
-    console.log('now2',Date.now());
-//    JT.fromTo('#box2', 1.5, {
-//        x: 100
-//    }, {
-//        x: 200,
-////        delay: 1,
-////        repeatDelay: 0.5,
-////        repeat: 3,
-//        yoyo: true,
-//        ease: JT.Quad.Out,
-//        onStart: function () {
-//            console.log('onStart2');
-//        },
-//        onUpdate: function () {
-////            console.log('onUpdate2',this.curVars);
-//        },
-//        onRepeat: function () {
-//            console.log('onRepeat2', this.curVars);
-//        },
-//        onEnd: function () {
-//            console.log("onEnd2");
-//        }
-//    });
+    console.log('now2', Date.now());
+    //    JT.fromTo('#box2', 1.5, {
+    //        x: 100
+    //    }, {
+    //        x: 200,
+    ////        delay: 1,
+    ////        repeatDelay: 0.5,
+    ////        repeat: 3,
+    //        yoyo: true,
+    //        ease: JT.Quad.Out,
+    //        onStart: function () {
+    //            console.log('onStart2');
+    //        },
+    //        onUpdate: function () {
+    ////            console.log('onUpdate2',this.curVars);
+    //        },
+    //        onRepeat: function () {
+    //            console.log('onRepeat2', this.curVars);
+    //        },
+    //        onEnd: function () {
+    //            console.log("onEnd2");
+    //        }
+    //    });
 
-//    JT.call(2.5, function () {console.log('call');
-////        t.timeScale = 0.1;
-//        t.reverse();
-////        JT.setTimeScaleAll(0.5);
-//        JT.seekAll(1.8);
-////        JT.pauseAll();
-//    });
+    //    JT.call(2.5, function () {console.log('call');
+    ////        t.timeScale = 0.1;
+    //        t.reverse();
+    ////        JT.setTimeScaleAll(0.5);
+    //        JT.seekAll(1.8);
+    ////        JT.pauseAll();
+    //    });
 
 </script>
 </body>

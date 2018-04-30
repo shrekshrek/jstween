@@ -27,7 +27,7 @@
             this.el = vars.el;
             this.hook = vars.hook || 0;
             this.key = vars.key || 'y';
-            this.pinLength = 0;
+            this.pin = 0;
 
             this.isSeek = false;
             this.curPos = this.prevPos = null;
@@ -37,15 +37,15 @@
             this.pins = [];
         },
 
-        _update: function (step) {
+        update: function (step) {
             this.prevPos = this.curPos;
-            this.curPos = this.prevPos + step;
+            this.curPos = this.prevPos + step || 0;
 
             this._checkTween();
             this._checkCall();
             this._checkPin();
 
-            if (this.el) this.el[this.key] = -(this.curPos - this.pinLength);
+            if (this.el) this.el[this.key] = -(this.curPos - this.pin);
         },
 
         addCall: function (call, position) {
@@ -62,10 +62,10 @@
             }
         },
 
-        addTween: function (tween, position, duration) {
+        addTween: function (tween, relative, duration) {
             tween.stop();
             var _pos = JT.get(tween.el, this.key);
-            var _start = _pos - position;
+            var _start = _pos - relative;
             this.tweens.push({start: _start, tween: tween, duration: duration});
         },
 
@@ -87,45 +87,46 @@
         },
 
         _checkPin: function () {
-            this.pinLength = 0;
+            this.pin = 0;
             for (var i = 0, _len = this.pins.length; i < _len; i++) {
                 var _pin = this.pins[i];
-                if (this.curPos > _pin.start + _pin.duration) {
-                    this.pinLength += _pin.duration;
-                } else if (this.curPos > _pin.start) {
-                    this.pinLength += this.curPos - _pin.start;
+                var _curPos = this.curPos + this.hook - _pin.start;
+                if (_curPos > _pin.duration) {
+                    this.pin += _pin.duration;
+                } else if (_curPos > 0) {
+                    this.pin += _curPos;
                 }
             }
         },
 
-        fromTo: function (el, time, fromVars, toVars, position, duration) {
+        fromTo: function (el, time, fromVars, toVars, relative, duration) {
             var _tween = JT.fromTo(el, time, fromVars, toVars);
-            this.addTween(_tween, position, duration);
+            this.addTween(_tween, relative, duration);
             return this;
         },
 
-        from: function (el, time, fromVars, position, duration) {
+        from: function (el, time, fromVars, relative, duration) {
             var _tween = JT.from(el, time, fromVars);
-            this.addTween(_tween, position, duration);
+            this.addTween(_tween, relative, duration);
             return this;
         },
 
-        to: function (el, time, toVars, position, duration) {
+        to: function (el, time, toVars, relative, duration) {
             var _tween = JT.to(el, time, toVars);
-            this.addTween(_tween, position, duration);
+            this.addTween(_tween, relative, duration);
             return this;
         },
 
-        add: function (obj, position, duration) {
+        add: function (obj, relative, duration) {
             switch (typeof(obj)) {
                 case 'object':
-                    this.addTween(obj, position, duration);
+                    this.addTween(obj, relative, duration);
                     break;
                 case 'function':
-                    this.addCall(obj, position);
+                    this.addCall(obj, relative);
                     break;
                 case 'number':
-                    this.addPin(obj, position);
+                    this.addPin(obj, relative);
                     break;
                 default:
                     throw 'add action is wrong!!!';
@@ -138,7 +139,7 @@
             if (this.curPos === position) return;
 
             if (isSeek !== undefined) this.isSeek = isSeek;
-            this._update(position - this.curPos);
+            this.update(position - this.curPos);
             this.isSeek = false;
         },
 

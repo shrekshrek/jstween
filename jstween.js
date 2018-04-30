@@ -56,19 +56,17 @@
 
 
     // --------------------------------------------------------------------prefix
-    var prefix = '';
-
-    (function () {
+    var prefix = function () {
         var _d = document.createElement('div');
         var _prefixes = ['Webkit', 'Moz', 'Ms', 'O'];
 
         for (var i in _prefixes) {
             if ((_prefixes[i] + 'Transform') in _d.style) {
-                prefix = _prefixes[i];
+                return _prefixes[i];
                 break;
             }
         }
-    }());
+    }();
 
     function browserPrefix(str) {
         if (str) {
@@ -89,25 +87,25 @@
 
 
     // --------------------------------------------------------------------dom style相关方法
-    function getElement(target) {
-        if (!target) throw "target is undefined, can't tween!!!";
+    function getElement(el) {
+        if (!el) throw "el is undefined, can't tween!!!";
 
-        if (typeof(target) === 'string') {
-            return (typeof(document) === 'undefined') ? target : (document.querySelectorAll ? document.querySelectorAll(target) : document.getElementById((target.charAt(0) === '#') ? target.substr(1) : target));
+        if (typeof(el) === 'string') {
+            return document.querySelectorAll(el);
         } else {
-            return target;
+            return el;
         }
     }
 
-    function checkPropName(target, name) {
+    function checkPropName(el, name) {
         if (name === 'rotation' || name === 'scale') return name;
 
-        if (target._jt_obj[name] !== undefined) return name;
+        if (el._jt_obj[name] !== undefined) return name;
 
-        if (target.style[name] !== undefined) return name;
+        if (el.style[name] !== undefined) return name;
 
         name = browserPrefix(name);
-        if (target.style[name] !== undefined) return name;
+        if (el.style[name] !== undefined) return name;
 
         return undefined;
     }
@@ -162,9 +160,9 @@
         return {num: _value, unit: _o.unit || o1.unit};
     }
 
-    function checkJtobj(target) {
-        if (target._jt_obj === undefined)
-            target._jt_obj = {
+    function checkJtobj(el) {
+        if (el._jt_obj === undefined)
+            el._jt_obj = {
                 perspective: 0,
                 x: 0,
                 y: 0,
@@ -191,7 +189,7 @@
         return /(,| |jpeg|jpg|png|gif|-3d)/g.test(value) || !/\d/g.test(value);
     }
 
-    function getProp(target, name) {
+    function getProp(el, name) {
         switch (name) {
             case 'perspective':
             case 'x':
@@ -205,31 +203,31 @@
             case 'scaleZ':
             case 'skewX':
             case 'skewY':
-                return target._jt_obj[name];
+                return el._jt_obj[name];
             case 'rotation':
-                return target._jt_obj['rotationZ'];
+                return el._jt_obj['rotationZ'];
             case 'scale':
-                return target._jt_obj['scaleX'];
+                return el._jt_obj['scaleX'];
             default:
-                return getStyle(target, name);
+                return getStyle(el, name);
         }
     }
 
-    function getStyle(target, name) {
-        if (target.style[name]) {
-            return target.style[name];
+    function getStyle(el, name) {
+        if (el.style[name]) {
+            return el.style[name];
         } else if (document.defaultView && document.defaultView.getComputedStyle) {
             var _p = hyphenize(name);
-            var _s = document.defaultView.getComputedStyle(target, '');
+            var _s = document.defaultView.getComputedStyle(el, '');
             return _s && _s.getPropertyValue(_p);
-        } else if (target.currentStyle) {
-            return target.currentStyle[name];
+        } else if (el.currentStyle) {
+            return el.currentStyle[name];
         } else {
             return null;
         }
     }
 
-    function setProp(target, name, value) {
+    function setProp(el, name, value) {
         switch (name) {
             case 'perspective':
             case 'x':
@@ -243,23 +241,23 @@
             case 'scaleZ':
             case 'skewX':
             case 'skewY':
-                target._jt_obj[name] = value;
+                el._jt_obj[name] = value;
                 return true;
             case 'rotation':
-                target._jt_obj['rotationZ'] = value;
+                el._jt_obj['rotationZ'] = value;
                 return true;
             case 'scale':
-                target._jt_obj['scaleX'] = value;
-                target._jt_obj['scaleY'] = value;
+                el._jt_obj['scaleX'] = value;
+                el._jt_obj['scaleY'] = value;
                 return true;
             default:
-                setStyle(target, name, value);
+                setStyle(el, name, value);
                 return false;
         }
     }
 
-    function setStyle(target, name, value) {
-        target.style[name] = value;
+    function setStyle(el, name, value) {
+        el.style[name] = value;
     }
 
     function isDOM(obj) {
@@ -333,11 +331,11 @@
     }
 
     Object.assign(tween.prototype, {
-        initialize: function (target, time, fromVars, toVars, isDom) {
+        initialize: function (el, time, fromVars, toVars, isDom) {
             this.fromVars = fromVars;
             this.curVars = {};
             this.toVars = toVars;
-            this.target = target;
+            this.el = el;
             this.duration = Math.max(time, 0) * 1000;
             this.ease = toVars.ease || JT.Linear.None;
             this.delay = Math.max(toVars.delay || 0, 0) * 1000;
@@ -372,7 +370,7 @@
             this.startTime = this.delay;
             this.endTime = this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1);
             this.curTime = 0;
-            this.prevTime = 0;
+            this.prevTime = null;
 
             this._updateProp();
 
@@ -448,13 +446,13 @@
                 this.curVars[prop] = {num: _n, unit: _end.unit};
 
                 if (this.isDom) {
-                    if (setProp(this.target, prop, _n + (_end.unit || 0))) _trans = true;
+                    if (setProp(this.el, prop, _n + (_end.unit || 0))) _trans = true;
                 } else {
-                    this.target[prop] = _n + (_end.unit || 0);
+                    this.el[prop] = _n + (_end.unit || 0);
                 }
             }
 
-            if (_trans) updateTransform(this.target);
+            if (_trans) updateTransform(this.el);
 
             if (this.onUpdate) this.onUpdate.apply(this.onUpdateScope, this.onUpdateParams);
         },
@@ -540,13 +538,15 @@
             }
             this.duration = null;
             this.curTime = this.prevTime = this.startTime = this.endTime = null;
-            this.target = this.onStart = this.onRepeat = this.onEnd = this.onUpdate = null;
+            this.el = this.onStart = this.onRepeat = this.onEnd = this.onUpdate = null;
         }
     });
 
 
     // --------------------------------------------------------------------tween 全局方法
-    function addTween(type, target, time, fromVars, toVars) {
+    function addTween(type, el, time, fromVars, toVars) {
+        if (typeof time !== "number") throw "The second parameter must be a number!";
+
         switch (type) {
             case 'from':
                 checkBezier(fromVars);
@@ -556,9 +556,10 @@
                 break;
         }
 
-        var _target = getElement(target);
+        var _el = getElement(el);
         var _tweens = [];
-        each(_target, function (index, obj) {
+
+        each(_el, function (index, obj) {
             var _fromVars = {};
             var _toVars = {};
             var _isDom = isDOM(obj);
@@ -622,6 +623,7 @@
                     }
                 }
             }
+
             _tweens.push(new tween(obj, time, _fromVars, _toVars, _isDom));
         });
 
@@ -630,24 +632,24 @@
     }
 
     Object.assign(JT, {
-        get: function (target, param) {
-            var _target = getElement(target);
-            if (_target.length !== undefined) {
-                _target = _target[0];
+        get: function (el, param) {
+            var _el = getElement(el);
+            if (_el.length !== undefined) {
+                _el = _el[0];
             }
-            if (isDOM(_target)) {
-                checkJtobj(_target);
-                var _name = checkPropName(_target, param);
-                if (_name) return getProp(_target, _name);
+            if (isDOM(_el)) {
+                checkJtobj(_el);
+                var _name = checkPropName(_el, param);
+                if (_name) return getProp(_el, _name);
                 else return null;
             } else {
-                return _target[param];
+                return _el[param];
             }
         },
 
-        set: function (target, params) {
-            var _target = getElement(target);
-            each(_target, function (index, obj) {
+        set: function (el, params) {
+            var _el = getElement(el);
+            each(_el, function (index, obj) {
                 if (isDOM(obj)) {
                     checkJtobj(obj);
                     var _trans = false;
@@ -674,25 +676,25 @@
             });
         },
 
-        fromTo: function (target, time, fromVars, toVars) {
-            return addTween('fromTo', target, time, fromVars, toVars);
+        fromTo: function (el, time, fromVars, toVars) {
+            return addTween('fromTo', el, time, fromVars, toVars);
         },
 
-        from: function (target, time, fromVars) {
-            return addTween('from', target, time, fromVars, {});
+        from: function (el, time, fromVars) {
+            return addTween('from', el, time, fromVars, {});
         },
 
-        to: function (target, time, toVars) {
-            return addTween('to', target, time, {}, toVars);
+        to: function (el, time, toVars) {
+            return addTween('to', el, time, {}, toVars);
         },
 
-        kill: function (target, toEnd) {
-            var _target = getElement(target);
-            each(_target, function (index, obj) {
+        kill: function (el, toEnd) {
+            var _el = getElement(el);
+            each(_el, function (index, obj) {
                 var _len = tweens.length;
                 for (var i = _len - 1; i >= 0; i--) {
                     var _tween = tweens[i];
-                    if (_tween.target === obj) {
+                    if (_tween.el === obj) {
                         _tween.kill(toEnd);
                     }
                 }
@@ -707,61 +709,61 @@
             }
         },
 
-        play: function (target, time) {
-            actionProxyTween(target, 'play', time);
+        play: function (el, time) {
+            actionProxyTween(el, 'play', time);
         },
 
         playAll: function (time) {
             actionProxyAllTweens('play', time);
         },
 
-        pause: function (target) {
-            actionProxyTween(target, 'pause');
+        pause: function (el) {
+            actionProxyTween(el, 'pause');
         },
 
         pauseAll: function () {
             actionProxyAllTweens('pause');
         },
 
-        stop: function (target) {
-            actionProxyTween(target, 'stop');
+        stop: function (el) {
+            actionProxyTween(el, 'stop');
         },
 
         stopAll: function () {
             actionProxyAllTweens('stop');
         },
 
-        reverse: function (target, time) {
-            actionProxyTween(target, 'reverse', time);
+        reverse: function (el, time) {
+            actionProxyTween(el, 'reverse', time);
         },
 
         reverseAll: function (time) {
             actionProxyAllTweens('reverse', time);
         },
 
-        seek: function (target, time) {
-            actionProxyTween(target, 'seek', time);
+        seek: function (el, time) {
+            actionProxyTween(el, 'seek', time);
         },
 
         seekAll: function (time) {
             actionProxyAllTweens('seek', time);
         },
 
-        setTimeScale: function (target, scale) {
-            actionProxyTween(target, 'setTimeScale', scale);
+        setTimeScale: function (el, scale) {
+            actionProxyTween(el, 'setTimeScale', scale);
         },
 
         setTimeScaleAll: function (scale) {
             actionProxyAllTweens('setTimeScale', scale);
         },
 
-        isTweening: function (target) {
-            var _target = getElement(target);
-            _target = _target[0] || _target;
+        isTweening: function (el) {
+            var _el = getElement(el);
+            _el = _el[0] || _el;
             var _len = tweens.length;
             for (var i = _len - 1; i >= 0; i--) {
                 var _tween = tweens[i];
-                if (_tween.target === _target) {
+                if (_tween.el === _el) {
                     return true;
                 }
             }
@@ -778,13 +780,13 @@
 
     });
 
-    function actionProxyTween(target, action, params) {
-        var _target = getElement(target);
+    function actionProxyTween(el, action, params) {
+        var _el = getElement(el);
         var _len = tweens.length;
-        each(_target, function (index, obj) {
+        each(_el, function (index, obj) {
             for (var i = _len - 1; i >= 0; i--) {
                 var _tween = tweens[i];
-                if (_tween.target === obj) {
+                if (_tween.el === obj) {
                     _tween[action](params);
                 }
             }
@@ -840,13 +842,13 @@
         }
     }
 
-    function sortBezier(target, arr) {
+    function sortBezier(el, arr) {
         for (var i in arr) {
             for (var j in arr[i]) {
                 if (i === 0) {
-                    target[j] = [arr[i][j]];
+                    el[j] = [arr[i][j]];
                 } else {
-                    target[j].push(arr[i][j]);
+                    el[j].push(arr[i][j]);
                 }
             }
         }

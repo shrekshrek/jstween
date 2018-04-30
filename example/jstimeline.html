@@ -46,14 +46,10 @@
 </div>
 
 <script>
-    var tl = JTL.create({
-        // repeat: 2,
-        // onRepeat: function () {
-        //     console.log('repeat');
-        // }
-    });
+    var tl = JTL.create();
     tl.add(function () {
         console.log('start');
+        tl.play();
     });
 
     // tl.from('#box1', 1, {marginLeft: 300, ease:JT.Quad.InOut});
@@ -66,7 +62,19 @@
     ////    tl.kill('#box3', '-=2');
     tl.add('l1', '-=1.0');
     tl.fromTo('#box1', 1, {marginLeft: 500}, {marginLeft: 600}, 'l1');
-    tl.fromTo('#box3', 1.5, {marginLeft: 300}, {marginLeft: 500}, 'l1+=0.5');
+    tl.fromTo('#box3', 1.5, {marginLeft: 300}, {
+        marginLeft: 500,
+        repeat: 1,
+        yoyo: true,
+        onRepeat: function () {
+            console.log('repeat~~~~~');
+        },
+        onStart: function () {
+            console.log('start~~~~~');
+        }, onEnd: function () {
+            console.log('end~~~~~');
+        }
+    }, 'l1+=0.5');
     tl.add(function () {
         console.log('again');
 //        tl.seek(2.5);
@@ -75,8 +83,8 @@
 
     tl.add(function () {
         console.log('again2');
-//        tl.reverse();
-        tl.play(0);
+        tl.reverse();
+        // tl.play(0);
     }, '+=0.5');
     //
     tl.play(0);

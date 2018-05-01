@@ -3,7 +3,6 @@
  **/
 
 (function (factory) {
-
     if (typeof define === 'function' && define.amd) {
         define(['jstween', 'exports'], function (JT, exports) {
             window.JTL = factory(exports, JT);
@@ -14,7 +13,6 @@
     } else {
         window.JTL = factory({}, window.JT);
     }
-
 }(function (JTL, JT) {
     // --------------------------------------------------------------------辅助方法
     function regValue(value) {

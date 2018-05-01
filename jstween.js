@@ -3,6 +3,7 @@
  **/
 
 (function (factory) {
+
     if (typeof define === 'function' && define.amd) {
         define(['exports'], function (exports) {
             window.JT = factory(exports);
@@ -12,6 +13,7 @@
     } else {
         window.JT = factory({});
     }
+
 }(function (JT) {
     // --------------------------------------------------------------------辅助方法
     function each(obj, callback) {

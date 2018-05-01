@@ -3,6 +3,7 @@
  **/
 
 (function (factory) {
+
     if (typeof define === 'function' && define.amd) {
         define(['jstween', 'exports'], function (JT, exports) {
             window.JP = factory(exports, JT);
@@ -13,6 +14,7 @@
     } else {
         window.JP = factory({}, window.JT);
     }
+
 }(function (JP, JT) {
     // --------------------------------------------------------------------parallax
     function parallax() {

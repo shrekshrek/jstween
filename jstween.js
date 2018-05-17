@@ -393,12 +393,18 @@
             if (this.prevTime > 0 && this.curTime <= 0) {
                 this.curTime = 0;
                 this._updateProp();
-                if (!this.isSeek && this.onStart && this.prevTime > this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
+                if (!this.isSeek) {
+                    if (this.onEnd && this.prevTime >= this.endTime) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                    if (this.onStart && this.prevTime > this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
+                }
                 return this.isKeep;
             } else if (this.prevTime < this.endTime && this.curTime >= this.endTime) {
                 this.curTime = this.endTime;
                 this._updateProp();
-                if (!this.isSeek && this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                if (!this.isSeek) {
+                    if (this.onStart && this.prevTime <= this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
+                    if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                }
                 return this.isKeep;
             } else {
                 var _repeat = Math.min(this.repeat, Math.max(0, Math.floor((this.curTime - this.startTime) / (this.duration + this.repeatDelay))));
@@ -409,9 +415,11 @@
                 }
                 this._updateProp();
 
-                if (!this.isSeek && this.onEnd && this.prevTime >= this.endTime && this.curTime < this.endTime) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                if (!this.isSeek) {
+                    if (this.onEnd && this.prevTime >= this.endTime && this.curTime < this.endTime) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                    if (this.onStart && ((this.startTime === 0 && this.prevTime === 0 && this.curTime > this.startTime) || (this.prevTime < this.startTime && this.curTime >= this.startTime) || (this.prevTime > this.startTime && this.curTime <= this.startTime))) this.onStart.apply(this.onStartScope, this.onStartParams);
+                }
 
-                if (!this.isSeek && this.onStart && ((this.startTime === 0 && this.prevTime === 0 && this.curTime > this.startTime) || (this.prevTime < this.startTime && this.curTime >= this.startTime) || (this.prevTime > this.startTime && this.curTime <= this.startTime))) this.onStart.apply(this.onStartScope, this.onStartParams);
 
                 return true;
             }

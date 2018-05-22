@@ -47,23 +47,23 @@
 <script>
     // JT.set('#box3', {opacity: 0, display: 'none'});
 
-    // JT.call(0, function () {
-    //     console.log(this);
-    // });
+    JT.call(0, function () {
+        console.log(this);
+    });
 
     var tt = JT.to('#box2', 1, {
-        y: 10, delay:1, onStart: function () {
+        x: 200, delay:1, onStart: function () {
             console.log('start');
         }, onEnd: function(){
             console.log('end');
             tt.reverse();
         }
     });
-    //    JT.fromTo('#box1', 1, {marginLeft: 400, opacity: 0.5}, {
-    //        marginLeft: 200, opacity: 1, repeat:-1, yoyo:false, repeatDelay:0, ease: JT.Quad.Out, onEnd: function () {
-    //            console.log("1 complete");
-    //        }
-    //    });
+    JT.fromTo('#box1', 1, {marginLeft: 400, opacity: 0.5}, {
+        marginLeft: 200, opacity: 1, repeat: 1, yoyo: true, repeatDelay: 0, ease: JT.Quad.Out, onEnd: function () {
+            console.log("1 complete");
+        }
+    });
 
     //    JT.set('#box1', {transformStyle: "preserve-3d"});
 

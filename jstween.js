@@ -97,34 +97,31 @@
         }
     }
 
-    function checkPropName(el, name) {
-        if (name === 'rotation' || name === 'scale') return name;
+    function checkPropName(el, name, isDom) {
+        if (isDom) {
+            if (name === 'rotation' || name === 'scale') return name;
 
-        if (el._jt_obj[name] !== undefined) return name;
+            if (el._jt_obj[name] !== undefined) return name;
 
-        if (el.style[name] !== undefined) return name;
+            if (el.style[name] !== undefined) return name;
 
-        name = browserPrefix(name);
-        if (el.style[name] !== undefined) return name;
+            name = browserPrefix(name);
+            if (el.style[name] !== undefined) return name;
+        } else {
+            if (typeof(el[name]) === 'string' || typeof(el[name]) === 'number') return name;
+        }
 
         return undefined;
     }
 
-    function checkValue(o1, o2, o3, push) {
+    function checkValue(o1, o2) {
         var o = {};
         if (Array.isArray(o2)) {
-            o.num = [];
-            for (var i in o2) {
+            o.num = [o1.num];
+            for (var i = 0, l = o2.length; i < l; i++) {
                 var _o = calcValue(o1, o2[i]);
-                o.num[i] = _o.num;
+                o.num.push(_o.num);
                 o.unit = _o.unit;
-            }
-            if (o3 !== undefined) {
-                if (push) {
-                    o.num.push(o3.num);
-                } else {
-                    o.num.unshift(o3.num);
-                }
             }
         } else {
             o = calcValue(o1, o2);
@@ -260,7 +257,7 @@
         el.style[name] = value;
     }
 
-    function isDOM(obj) {
+    function checkDom(obj) {
         return typeof(obj) === 'object' && obj.nodeType === 1;
     }
 
@@ -359,6 +356,7 @@
             this.isReverse = toVars.isReverse || false;
             this.timeScale = toVars.timeScale || 1;
 
+            this.isReady = false;
             this.isSeek = false;
             this.isKeep = false;
             this.isYoReverse = false;
@@ -367,73 +365,81 @@
             this.repeat = this.repeat < 0 ? 999999999999 : Math.floor(this.repeat);
             this.curRepeat = 0;
 
+            this.elapsed = null;
+
             this.startTime = this.delay;
             this.endTime = this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1);
             this.curTime = 0;
-            this.prevTime = null;
+            this.lastTime = null;
 
-            this._updateProp();
-
-            if (toVars.isPlaying === undefined ? true : toVars.isPlaying) {
-                if (this.endTime !== 0) {
-                    this.play();
-                } else {
-                    if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
-                }
-            }
+            if (toVars.isPlaying || true) this.play();
         },
 
         _update: function (time) {
             this.isKeep = false;
 
             time = (this.isReverse ? -1 : 1) * time * this.timeScale;
-            this.prevTime = this.curTime;
-            this.curTime = this.prevTime + time;
+            var _lastTime = this.curTime;
+            var _curTime = Math.min(this.endTime, Math.max(0, _lastTime + time));
 
-            if (this.prevTime > 0 && this.curTime <= 0) {
-                this.curTime = 0;
-                this._updateProp();
-                if (!this.isSeek) {
-                    if (this.onEnd && this.prevTime >= this.endTime) this.onEnd.apply(this.onEndScope, this.onEndParams);
-                    if (this.onStart && this.prevTime > this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
-                }
-                return this.isKeep;
-            } else if (this.prevTime < this.endTime && this.curTime >= this.endTime) {
-                this.curTime = this.endTime;
-                this._updateProp();
-                if (!this.isSeek) {
-                    if (this.onStart && this.prevTime <= this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
-                    if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
-                }
-                return this.isKeep;
-            } else {
-                var _repeat = Math.min(this.repeat, Math.max(0, Math.floor((this.curTime - this.startTime) / (this.duration + this.repeatDelay))));
-                if (_repeat !== this.curRepeat) {
-                    this.curRepeat = _repeat;
-                    if (this.yoyo) this.isYoReverse = !this.isYoReverse;
-                    if (!this.isSeek && this.onRepeat) this.onRepeat.apply(this.onRepeatScope, this.onRepeatParams);
-                }
-                this._updateProp();
+            if (_curTime === this.curTime) return false;
 
-                if (!this.isSeek) {
-                    if (this.onEnd && this.prevTime >= this.endTime && this.curTime < this.endTime) this.onEnd.apply(this.onEndScope, this.onEndParams);
-                    if (this.onStart && ((this.startTime === 0 && this.prevTime === 0 && this.curTime > this.startTime) || (this.prevTime < this.startTime && this.curTime >= this.startTime) || (this.prevTime > this.startTime && this.curTime <= this.startTime))) this.onStart.apply(this.onStartScope, this.onStartParams);
-                }
+            if ((_lastTime < 0 && _curTime < 0) || (_lastTime > this.endTime && _curTime > this.endTime)) return false;
 
+            this.lastTime = _lastTime;
+            this.curTime = _curTime;
 
-                return true;
+            if (!this.isReady) {
+                initData(this);
+                this.isReady = true;
             }
+
+            var _repeat = Math.min(this.repeat, Math.max(0, Math.floor((this.curTime - this.startTime) / (this.duration + this.repeatDelay))));
+            var _isRepeat = false;
+            if (_repeat !== this.curRepeat) {
+                this.curRepeat = _repeat;
+                if (this.yoyo) this.isYoReverse = this.curRepeat % 2 !== 0;
+                _isRepeat = true;
+            }
+
+            this._updateProp();
+
+            if (this.lastTime < this.startTime && this.curTime < this.startTime) return true;
+
+            if (this.lastTime < this.curTime) {
+                if (this.lastTime <= this.startTime && this.curTime > this.startTime) {
+                    if (!this.isSeek && this.onStart) this.onStart.apply(this.onStartScope, this.onStartParams);
+                }
+
+                if (_isRepeat && !this.isSeek && this.onRepeat) this.onRepeat.apply(this.onRepeatScope, this.onRepeatParams);
+
+                if (this.lastTime < this.endTime && this.curTime >= this.endTime) {
+                    if (!this.isSeek && this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                    return this.isKeep;
+                }
+            } else {
+                if (this.lastTime >= this.endTime && this.curTime < this.endTime) {
+                    if (!this.isSeek && this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                }
+
+                if (_isRepeat && !this.isSeek && this.onRepeat) this.onRepeat.apply(this.onRepeatScope, this.onRepeatParams);
+
+                if (this.lastTime > this.startTime && this.curTime <= this.startTime) {
+                    if (!this.isSeek && this.onStart) this.onStart.apply(this.onStartScope, this.onStartParams);
+                    return this.isKeep;
+                }
+            }
+
+            return true;
         },
 
         _updateProp: function () {
-            var _elapsed;
-            if (this.duration === 0) {
-                _elapsed = this.curTime < this.startTime ? 0 : 1;
-            } else {
-                _elapsed = Math.max(0, Math.min(1, ((this.curTime === this.endTime ? this.duration : ((this.curTime - this.startTime) % (this.duration + this.repeatDelay))) / this.duration)));
-            }
+            var _elapsed = Math.min(1, Math.max(0, (this.curTime === this.endTime ? this.duration : (this.curTime - this.startTime) % (this.duration + this.repeatDelay)) / this.duration));
 
             if (this.isYoReverse) _elapsed = 1 - _elapsed;
+
+            if (_elapsed === this.elapsed) return;
+            this.elapsed = _elapsed;
 
             var _radio = this.ease(_elapsed);
 
@@ -462,7 +468,7 @@
 
             if (_trans) updateTransform(this.el);
 
-            if (this.onUpdate) this.onUpdate.apply(this.onUpdateScope, this.onUpdateParams);
+            if (!this.isSeek && this.onUpdate) this.onUpdate.apply(this.onUpdateScope, this.onUpdateParams);
         },
 
         _addSelf: function () {
@@ -527,7 +533,7 @@
             var _time = Math.max(0, Math.min(this.endTime, time * 1000));
             if (this.curTime === _time) return;
 
-            if (isSeek !== undefined) this.isSeek = isSeek;
+            this.isSeek = isSeek || false;
             this._update(_time - this.curTime);
             this.isSeek = false;
         },
@@ -545,24 +551,25 @@
                 if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
             }
             this.duration = null;
-            this.curTime = this.prevTime = this.startTime = this.endTime = null;
+            this.curTime = this.lastTime = this.startTime = this.endTime = null;
             this.el = this.onStart = this.onRepeat = this.onEnd = this.onUpdate = null;
         }
     });
 
 
     // --------------------------------------------------------------------tween 全局方法
-    function addTween(type, el, time, fromVars, toVars) {
+    function initData(obj) {
+        for (var i in obj.fromVars) {
+            var _o = regValue(obj.isDom ? getProp(obj.el, i) : obj.el[i]);
+            obj.fromVars[i] = checkValue(_o, obj.fromVars[i]);
+            obj.toVars[i] = checkValue(obj.fromVars[i], obj.toVars[i]);
+        }
+    }
+
+    function createTween(type, el, time, fromVars, toVars) {
         if (typeof time !== "number") throw "The second parameter must be a number!";
 
-        switch (type) {
-            case 'from':
-                checkBezier(fromVars);
-                break;
-            default:
-                checkBezier(toVars);
-                break;
-        }
+        checkBezier(toVars);
 
         var _el = getElement(el);
         var _tweens = [];
@@ -570,7 +577,7 @@
         each(_el, function (index, obj) {
             var _fromVars = {};
             var _toVars = {};
-            var _isDom = isDOM(obj);
+            var _isDom = checkDom(obj);
             var _vars;
             switch (type) {
                 case 'fromTo':
@@ -584,58 +591,35 @@
                     break;
             }
 
-            if (_isDom) {
-                checkJtobj(obj);
-                for (var i in _vars) {
-                    var _name = checkPropName(obj, i);
-                    if (_name) {
-                        var _o = regValue(getProp(obj, _name));
-                        switch (type) {
-                            case 'fromTo':
-                                _fromVars[_name] = checkValue(_o, fromVars[i]);
-                                _toVars[_name] = checkValue(_o, toVars[i], _fromVars[_name], false);
-                                break;
-                            case 'from':
-                                _fromVars[_name] = checkValue(_o, fromVars[i], _o, true);
-                                _toVars[_name] = _o;
-                                break;
-                            case 'to':
-                                _fromVars[_name] = _o;
-                                _toVars[_name] = checkValue(_o, toVars[i], _o, false);
-                                break;
-                        }
-                    } else {
-                        _toVars[i] = _vars[i];
+            if (_isDom) checkJtobj(obj);
+
+            for (var i in _vars) {
+                var _name = checkPropName(obj, i, _isDom);
+                if (_name) {
+                    switch (type) {
+                        case 'fromTo':
+                            _fromVars[_name] = fromVars[i];
+                            _toVars[_name] = toVars[i];
+                            break;
+                        case 'from':
+                            _fromVars[_name] = fromVars[i];
+                            _toVars[_name] = null;
+                            break;
+                        case 'to':
+                            _fromVars[_name] = null;
+                            _toVars[_name] = toVars[i];
+                            break;
                     }
-                }
-            } else {
-                for (var i in _vars) {
-                    if (typeof(obj[i]) === 'string' || typeof(obj[i]) === 'number') {
-                        var _o = regValue(obj[i]);
-                        switch (type) {
-                            case 'fromTo':
-                                _fromVars[i] = checkValue(_o, fromVars[i]);
-                                _toVars[i] = checkValue(_o, toVars[i], _fromVars[i], false);
-                                break;
-                            case 'from':
-                                _fromVars[i] = checkValue(_o, fromVars[i], _o, true);
-                                _toVars[i] = _o;
-                                break;
-                            case 'to':
-                                _fromVars[i] = _o;
-                                _toVars[i] = checkValue(_o, toVars[i], _o, false);
-                                break;
-                        }
-                    } else {
-                        _toVars[i] = _vars[i];
-                    }
+                } else {
+                    _toVars[i] = _vars[i];
                 }
             }
 
             _tweens.push(new tween(obj, time, _fromVars, _toVars, _isDom));
         });
 
-        if (_tweens.length === 1) return _tweens[0];
+        if (_tweens.length === 0) return null;
+        else if (_tweens.length === 1) return _tweens[0];
         else return _tweens;
     }
 
@@ -645,9 +629,10 @@
             if (_el.length !== undefined) {
                 _el = _el[0];
             }
-            if (isDOM(_el)) {
+            var _isDom = checkDom(_el);
+            if (_isDom) {
                 checkJtobj(_el);
-                var _name = checkPropName(_el, param);
+                var _name = checkPropName(_el, param, _isDom);
                 if (_name) return getProp(_el, _name);
                 else return null;
             } else {
@@ -658,11 +643,12 @@
         set: function (el, params) {
             var _el = getElement(el);
             each(_el, function (index, obj) {
-                if (isDOM(obj)) {
+                var _isDom = checkDom(obj);
+                if (_isDom) {
                     checkJtobj(obj);
                     var _trans = false;
                     for (var i in params) {
-                        var _name = checkPropName(obj, i);
+                        var _name = checkPropName(obj, i, _isDom);
                         if (_name) {
                             if (checkString(params[i])) {
                                 setProp(obj, _name, params[i]);
@@ -672,28 +658,26 @@
                             }
                         }
                     }
-
                     if (_trans) updateTransform(obj);
-
                 } else {
-                    for (var j in params) {
-                        var _o = checkValue(regValue(obj[j]), params[j]);
-                        obj[j] = _o.num + (_o.unit || 0);
+                    for (var i in params) {
+                        var _o = checkValue(regValue(obj[i]), params[i]);
+                        obj[i] = _o.num + (_o.unit || 0);
                     }
                 }
             });
         },
 
         fromTo: function (el, time, fromVars, toVars) {
-            return addTween('fromTo', el, time, fromVars, toVars);
+            return (time || toVars.delay) ? createTween('fromTo', el, time, fromVars, toVars) : this.set(el, toVars);
         },
 
         from: function (el, time, fromVars) {
-            return addTween('from', el, time, fromVars, {});
+            return (time || fromVars.delay) ? createTween('from', el, time, fromVars, {}) : this.set(el, fromVars);
         },
 
         to: function (el, time, toVars) {
-            return addTween('to', el, time, {}, toVars);
+            return (time || toVars.delay) ? createTween('to', el, time, {}, toVars) : this.set(el, toVars);
         },
 
         kill: function (el, toEnd) {
@@ -718,51 +702,51 @@
         },
 
         play: function (el, time) {
-            actionProxyTween(el, 'play', time);
+            actionProxy(el, 'play', time);
         },
 
         playAll: function (time) {
-            actionProxyAllTweens('play', time);
+            actionProxyAll('play', time);
         },
 
         pause: function (el) {
-            actionProxyTween(el, 'pause');
+            actionProxy(el, 'pause');
         },
 
         pauseAll: function () {
-            actionProxyAllTweens('pause');
+            actionProxyAll('pause');
         },
 
         stop: function (el) {
-            actionProxyTween(el, 'stop');
+            actionProxy(el, 'stop');
         },
 
         stopAll: function () {
-            actionProxyAllTweens('stop');
+            actionProxyAll('stop');
         },
 
         reverse: function (el, time) {
-            actionProxyTween(el, 'reverse', time);
+            actionProxy(el, 'reverse', time);
         },
 
         reverseAll: function (time) {
-            actionProxyAllTweens('reverse', time);
+            actionProxyAll('reverse', time);
         },
 
         seek: function (el, time) {
-            actionProxyTween(el, 'seek', time);
+            actionProxy(el, 'seek', time);
         },
 
         seekAll: function (time) {
-            actionProxyAllTweens('seek', time);
+            actionProxyAll('seek', time);
         },
 
         setTimeScale: function (el, scale) {
-            actionProxyTween(el, 'setTimeScale', scale);
+            actionProxy(el, 'setTimeScale', scale);
         },
 
         setTimeScaleAll: function (scale) {
-            actionProxyAllTweens('setTimeScale', scale);
+            actionProxyAll('setTimeScale', scale);
         },
 
         isTweening: function (el) {
@@ -771,24 +755,22 @@
             var _len = tweens.length;
             for (var i = _len - 1; i >= 0; i--) {
                 var _tween = tweens[i];
-                if (_tween.el === _el) {
-                    return true;
-                }
+                if (_tween.el === _el) return true;
             }
             return false;
         },
 
         call: function (time, callback, params, isPlaying) {
-            return new tween({}, Math.max(0, time), {}, {
+            return (time && params.delay) ? new tween({}, Math.max(0, time), {}, {
                 onEnd: callback,
                 onEndParams: params,
                 isPlaying: isPlaying
-            }, false);
+            }, false) : callback.apply(callback, params);
         },
 
     });
 
-    function actionProxyTween(el, action, params) {
+    function actionProxy(el, action, params) {
         var _el = getElement(el);
         var _len = tweens.length;
         each(_el, function (index, obj) {
@@ -801,7 +783,7 @@
         });
     }
 
-    function actionProxyAllTweens(action, params) {
+    function actionProxyAll(action, params) {
         var _len = tweens.length;
         for (var i = _len - 1; i >= 0; i--) {
             var _tween = tweens[i];
@@ -851,7 +833,7 @@
     }
 
     function sortBezier(el, arr) {
-        for (var i in arr) {
+        for (var i = 0, l = arr.length; i < l; i++) {
             for (var j in arr[i]) {
                 if (i === 0) {
                     el[j] = [arr[i][j]];

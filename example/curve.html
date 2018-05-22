@@ -65,7 +65,6 @@
 <script>
     var _body = document.getElementsByClassName('b1')[0];
     var _a0 = [{x: 200, y: 100, z:-500}, {x: 800, y: 100, z:400}, {x: 200, y: 400, z:-300}, {x: 300, y: 300, z:200}, {x: 200, y: 100, z:-500}];
-    var _a1 = [{x: 800, y: 100, z:400}, {x: 200, y: 400, z:-300}, {x: 300, y: 300, z:200}, {x: 200, y: 100, z:-500}];
     var _a2 = JT.path({
         through:_a0,
         ease: JT.Quad.In,
@@ -89,7 +88,7 @@
 
     JT.set('#box1', {transformOrigin: "0% 0%"});
     JT.fromTo('#box1', 10, {x: 200, y: 100, z:-500, opacity:1, rotationZ:0}, {
-        through: _a1,
+        through: _a0.slice(1),
         rotationZ: 360,
 //        scaleX: 2,
 //        scaleY: 0.5,

@@ -357,7 +357,7 @@
             this.timeScale = toVars.timeScale || 1;
 
             this.isFrom = toVars.isFrom || false;
-            this.isReady = false;
+            this.isInited = false;
             this.isSeek = false;
             this.isKeep = false;
             this.isYoReverse = false;
@@ -397,20 +397,14 @@
             }
 
             if (this.isFrom) {
-                if (!this.isReady) {
-                    initData(this);
-                    this.isReady = true;
-                }
+                initData(this);
                 this._updateProp();
             }
 
             if (this.lastTime < this.startTime && this.curTime < this.startTime) return true;
 
             if (!this.isFrom) {
-                if (!this.isReady) {
-                    initData(this);
-                    this.isReady = true;
-                }
+                initData(this);
                 this._updateProp();
             }
 
@@ -567,6 +561,9 @@
 
     // --------------------------------------------------------------------tween 全局方法
     function initData(obj) {
+        if (obj.isInited) return;
+        obj.isInited = true;
+
         for (var i in obj.fromVars) {
             var _o = regValue(obj.isDom ? getProp(obj.el, i) : obj.el[i]);
             obj.fromVars[i] = obj.fromVars[i] === null ? _o : checkValue(_o, obj.fromVars[i]);

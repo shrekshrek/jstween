@@ -356,6 +356,7 @@
             this.isReverse = toVars.isReverse || false;
             this.timeScale = toVars.timeScale || 1;
 
+            this.isFrom = toVars.isFrom || false;
             this.isReady = false;
             this.isSeek = false;
             this.isKeep = false;
@@ -384,15 +385,8 @@
 
             if (_curTime === this.curTime) return false;
 
-            if ((_lastTime < 0 && _curTime < 0) || (_lastTime > this.endTime && _curTime > this.endTime)) return false;
-
             this.lastTime = _lastTime;
             this.curTime = _curTime;
-
-            if (!this.isReady) {
-                initData(this);
-                this.isReady = true;
-            }
 
             var _repeat = Math.min(this.repeat, Math.max(0, Math.floor((this.curTime - this.startTime) / (this.duration + this.repeatDelay))));
             var _isRepeat = false;
@@ -402,9 +396,23 @@
                 _isRepeat = true;
             }
 
-            this._updateProp();
+            if (this.isFrom) {
+                if (!this.isReady) {
+                    initData(this);
+                    this.isReady = true;
+                }
+                this._updateProp();
+            }
 
             if (this.lastTime < this.startTime && this.curTime < this.startTime) return true;
+
+            if (!this.isFrom) {
+                if (!this.isReady) {
+                    initData(this);
+                    this.isReady = true;
+                }
+                this._updateProp();
+            }
 
             if (this.lastTime < this.curTime) {
                 if (this.lastTime <= this.startTime && this.curTime > this.startTime) {
@@ -561,8 +569,8 @@
     function initData(obj) {
         for (var i in obj.fromVars) {
             var _o = regValue(obj.isDom ? getProp(obj.el, i) : obj.el[i]);
-            obj.fromVars[i] = checkValue(_o, obj.fromVars[i]);
-            obj.toVars[i] = checkValue(obj.fromVars[i], obj.toVars[i]);
+            obj.fromVars[i] = obj.fromVars[i] === null ? _o : checkValue(_o, obj.fromVars[i]);
+            obj.toVars[i] = obj.toVars[i] === null ? _o : checkValue(obj.fromVars[i], obj.toVars[i]);
         }
     }
 
@@ -582,12 +590,15 @@
             switch (type) {
                 case 'fromTo':
                     _vars = toVars;
+                    _vars.isFrom = true;
                     break;
                 case 'from':
                     _vars = fromVars;
+                    _vars.isFrom = true;
                     break;
                 case 'to':
                     _vars = toVars;
+                    _vars.isFrom = false;
                     break;
             }
 

@@ -78,13 +78,9 @@
 
     var requestFrame = window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.oRequestAnimationFrame ||
-        window.msRequestAnimationFrame ||
         function (callback) {
             window.setTimeout(callback, 1000 / 60);
         };
-
 
     // --------------------------------------------------------------------dom style相关方法
     function getElement(el) {
@@ -97,7 +93,20 @@
         }
     }
 
+    var keywords = [
+        'ease', 'delay', 'yoyo', 'repeat', 'repeatDelay',
+        'onStart', 'onStartScope', 'onStartParams',
+        'onRepeat', 'onRepeatScope', 'onRepeatParams',
+        'onEnd', 'onEndScope', 'onEndParams',
+        'onUpdate', 'onUpdateScope', 'onUpdateParams',
+        'interpolation', 'isReverse', 'timeScale', 'isFrom', 'isPlaying'
+    ];
+
     function checkPropName(el, name, isDom) {
+        for (var i = 0, l = keywords.length; i < l; i++) {
+            if (name === keywords[i]) return null;
+        }
+
         if (isDom) {
             if (name === 'rotation' || name === 'scale') return name;
 
@@ -111,7 +120,7 @@
             if (typeof(el[name]) === 'string' || typeof(el[name]) === 'number') return name;
         }
 
-        return undefined;
+        return null;
     }
 
     function checkValue(o1, o2) {
@@ -213,14 +222,10 @@
     function getStyle(el, name) {
         if (el.style[name]) {
             return el.style[name];
-        } else if (document.defaultView && document.defaultView.getComputedStyle) {
-            var _p = hyphenize(name);
-            var _s = document.defaultView.getComputedStyle(el, '');
-            return _s && _s.getPropertyValue(_p);
-        } else if (el.currentStyle) {
-            return el.currentStyle[name];
         } else {
-            return null;
+            var _p = hyphenize(name);
+            var _s = window.getComputedStyle(el, null);
+            return _s[_p] || _s.getPropertyValue(_p);
         }
     }
 

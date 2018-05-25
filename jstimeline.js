@@ -48,6 +48,7 @@
         var _now = JT.now();
         var _step = _now - lastTime;
         lastTime = _now;
+        if (_step > 500) _step = 33;
 
         tempTimelines = timelines.slice(0);
         for (var i = 0; i < _len; i++) {

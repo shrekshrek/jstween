@@ -775,7 +775,7 @@
         },
 
         call: function (time, callback, params, isPlaying) {
-            return (time && params.delay) ? new tween({}, Math.max(0, time), {}, {
+            return time ? new tween({}, Math.max(0, time), {}, {
                 onEnd: callback,
                 onEndParams: params,
                 isPlaying: isPlaying

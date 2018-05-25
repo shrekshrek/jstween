@@ -104,7 +104,7 @@
 
     function checkPropName(el, name, isDom) {
         for (var i = 0, l = keywords.length; i < l; i++) {
-            if (name === keywords[i]) return null;
+            if (name === keywords[i]) return undefined;
         }
 
         if (isDom) {
@@ -120,7 +120,7 @@
             if (typeof(el[name]) === 'string' || typeof(el[name]) === 'number') return name;
         }
 
-        return null;
+        return undefined;
     }
 
     function checkValue(o1, o2) {

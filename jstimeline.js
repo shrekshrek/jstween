@@ -89,7 +89,7 @@
             this.startTime = this.delay;
             this._updateEndTime();
             this.curTime = null;
-            this.prevTime = null;
+            this.lastTime = null;
 
             this.labels = [];
             this.tweens = [];
@@ -105,35 +105,46 @@
             this.isKeep = false;
 
             time = (this.isReverse ? -1 : 1) * time * this.timeScale;
-            this.prevTime = this.curTime;
-            this.curTime = this.prevTime + time;
+            var _lastTime = this.curTime;
+            var _curTime = Math.min(this.endTime, Math.max(0, _lastTime + time));
 
-            if (this.prevTime > 0 && this.curTime <= 0) {
-                this.curTime = 0;
-                this._updateProp();
-                if (!this.isSeek && this.onStart && this.prevTime > this.startTime) this.onStart.apply(this.onStartScope, this.onStartParams);
-                return this.isKeep;
-            } else if (this.prevTime < this.endTime && this.curTime >= this.endTime) {
-                this.curTime = this.endTime;
-                this._updateProp();
-                if (!this.isSeek && this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
-                return this.isKeep;
+            if (_curTime === this.curTime) return false;
+
+            this.lastTime = _lastTime;
+            this.curTime = _curTime;
+
+            this._updateProp();
+
+            if (this.lastTime < this.startTime && this.curTime < this.startTime) return true;
+
+            if (this.lastTime < this.curTime) {
+                if (this.lastTime <= this.startTime && this.curTime > this.startTime) {
+                    if (!this.isSeek && this.onStart) this.onStart.apply(this.onStartScope, this.onStartParams);
+                }
+
+                if (this.lastTime < this.endTime && this.curTime >= this.endTime) {
+                    if (!this.isSeek && this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                    return this.isKeep;
+                }
             } else {
-                this._updateProp();
+                if (this.lastTime >= this.endTime && this.curTime < this.endTime) {
+                    if (!this.isSeek && this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
+                }
 
-                if (!this.isSeek && this.onEnd && this.prevTime >= this.endTime && this.curTime < this.endTime) this.onEnd.apply(this.onEndScope, this.onEndParams);
-
-                if (!this.isSeek && this.onStart && ((this.startTime === 0 && this.prevTime === 0 && this.curTime > this.startTime) || (this.prevTime < this.startTime && this.curTime >= this.startTime) || (this.prevTime > this.startTime && this.curTime <= this.startTime))) this.onStart.apply(this.onStartScope, this.onStartParams);
-
-                return true;
+                if (this.lastTime > this.startTime && this.curTime <= this.startTime) {
+                    if (!this.isSeek && this.onStart) this.onStart.apply(this.onStartScope, this.onStartParams);
+                    return this.isKeep;
+                }
             }
+
+            return true;
         },
 
         _updateProp: function () {
             this._checkTween();
             this._checkCall();
 
-            if (this.onUpdate) this.onUpdate.apply(this.onUpdateScope, this.onUpdateParams);
+            if (!this.isSeek && this.onUpdate) this.onUpdate.apply(this.onUpdateScope, this.onUpdateParams);
         },
 
         _addSelf: function () {
@@ -185,7 +196,7 @@
         _checkCall: function () {
             for (var i = 0, _len = this.calls.length; i < _len; i++) {
                 var _call = this.calls[i];
-                var _prevTime = this.prevTime - this.startTime;
+                var _prevTime = this.lastTime - this.startTime;
                 var _curTime = this.curTime - this.startTime;
                 if (!this.isSeek && ((_call.time === 0 && _prevTime === 0 && _curTime > 0) || (_prevTime < _call.time && _curTime >= _call.time) || (_prevTime > _call.time && _curTime <= _call.time) || (_call.time === this.endTime && _prevTime === this.endTime && _curTime < this.endTime))) {
                     _call.call();
@@ -341,7 +352,7 @@
             this.tweens = [];
             this.calls = [];
             this.duration = null;
-            this.curTime = this.prevTime = this.startTime = this.endTime = null;
+            this.curTime = this.lastTime = this.startTime = this.endTime = null;
             this.onStart = this.onEnd = this.onUpdate = null;
         }
 

@@ -25,9 +25,6 @@
 
     var requestFrame = window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.oRequestAnimationFrame ||
-        window.msRequestAnimationFrame ||
         function (callback) {
             window.setTimeout(callback, 1000 / 60);
         };
@@ -108,7 +105,7 @@
             var _lastTime = this.curTime;
             var _curTime = Math.min(this.endTime, Math.max(0, _lastTime + time));
 
-            if (_curTime === this.curTime) return false;
+            if (_curTime === this.curTime) return true;
 
             this.lastTime = _lastTime;
             this.curTime = _curTime;
@@ -341,8 +338,8 @@
             var _time = Math.max(0, Math.min(this.endTime, this._parsePosition(position)));
             if (this.curTime === _time) return;
 
-            if (isSeek !== undefined) this.isSeek = isSeek;
-            this._update(_time - this.curTime);
+            this.isSeek = isSeek || false;
+            this._update((this.isReverse ? -1 : 1) * (_time - this.curTime));
             this.isSeek = false;
         },
 

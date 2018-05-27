@@ -389,7 +389,7 @@
             var _lastTime = this.curTime;
             var _curTime = Math.min(this.endTime, Math.max(0, _lastTime + time));
 
-            if (_curTime === this.curTime) return false;
+            if (_curTime === this.curTime) return true;
 
             this.lastTime = _lastTime;
             this.curTime = _curTime;
@@ -542,7 +542,7 @@
             if (this.curTime === _time) return;
 
             this.isSeek = isSeek || false;
-            this._update(_time - this.curTime);
+            this._update((this.isReverse ? -1 : 1) * (_time - this.curTime));
             this.isSeek = false;
         },
 

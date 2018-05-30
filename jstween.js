@@ -376,7 +376,7 @@
 
             this.startTime = this.delay;
             this.endTime = this.startTime + this.repeatDelay * this.repeat + this.duration * (this.repeat + 1);
-            this.curTime = 0;
+            this.curTime = null;
             this.lastTime = null;
 
             if (toVars.isPlaying || true) this.play();

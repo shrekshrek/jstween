@@ -314,11 +314,7 @@
 
         stop: function () {
             this.pause();
-            if (this.curTime !== 0) {
-                this.curTime = 0;
-                this.isYoReverse = false;
-                this._updateProp();
-            }
+            this.seek(0, true);
         },
 
         reverse: function (position) {
@@ -343,8 +339,9 @@
             this.isSeek = false;
         },
 
-        kill: function () {
+        kill: function (toEnd) {
             this.pause();
+            if (toEnd) this.seek(this.endTime);
             this.labels = [];
             this.tweens = [];
             this.calls = [];

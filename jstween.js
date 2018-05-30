@@ -517,11 +517,7 @@
 
         stop: function () {
             this.pause();
-            if (this.curTime !== 0) {
-                this.curTime = this.curRepeat = 0;
-                this.isYoReverse = false;
-                this._updateProp();
-            }
+            this.seek(0, true);
         },
 
         reverse: function (time) {
@@ -552,12 +548,7 @@
 
         kill: function (toEnd) {
             this.pause();
-            if (toEnd) {
-                this.curTime = this.endTime;
-                this.curRepeat = this.repeat;
-                this._updateProp();
-                if (this.onEnd) this.onEnd.apply(this.onEndScope, this.onEndParams);
-            }
+            if (toEnd) this.seek(this.endTime);
             this.duration = null;
             this.curTime = this.lastTime = this.startTime = this.endTime = null;
             this.el = this.onStart = this.onRepeat = this.onEnd = this.onUpdate = null;

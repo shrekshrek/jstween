@@ -389,7 +389,7 @@
             this.curTime = null;
             this.lastTime = null;
 
-            if (toVars.isPlaying || true) this.play();
+            if (toVars.isPlaying !== false) this.play();
         },
 
         _update: function (time) {

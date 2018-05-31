@@ -193,16 +193,21 @@
         _checkCall: function () {
             for (var i = 0, _len = this.calls.length; i < _len; i++) {
                 var _call = this.calls[i];
-                var _prevTime = this.lastTime - this.startTime;
+                var _lastTime = this.lastTime - this.startTime;
                 var _curTime = this.curTime - this.startTime;
-                if (!this.isSeek && ((_call.time === 0 && _prevTime === 0 && _curTime > 0) || (_prevTime < _call.time && _curTime >= _call.time) || (_prevTime > _call.time && _curTime <= _call.time) || (_call.time === this.endTime && _prevTime === this.endTime && _curTime < this.endTime))) {
-                    _call.call();
+                var _startTime = _call.time;
+                if (!this.isSeek) {
+                    if (_lastTime < _curTime) {
+                        if ((_startTime === 0 && _lastTime === 0 && _curTime > 0) || (_lastTime < _startTime && _curTime >= _startTime)) _call.call();
+                    } else {
+                        if ((_lastTime > _startTime && _curTime <= _startTime) || (_startTime === this.endTime && _lastTime === this.endTime && _curTime < this.endTime)) _call.call();
+                    }
                 }
             }
         },
 
         addTween: function (tween, position) {
-            tween.stop();
+            // tween.pause();
             var _time = this._parsePosition(position);
             this.duration = Math.max(this.duration, _time + tween.endTime);
             this.tweens.push({time: _time, tween: tween});
@@ -212,8 +217,17 @@
         _checkTween: function () {
             for (var i = 0, _len = this.tweens.length; i < _len; i++) {
                 var _tween = this.tweens[i];
+                var _lastTime = this.lastTime - this.startTime;
                 var _curTime = this.curTime - this.startTime;
-                _tween.tween.seek((_curTime - _tween.time) / 1000, this.isSeek);
+                var _startTime = _tween.time;
+                var _endTime = _tween.time + _tween.tween.endTime;
+                if (_lastTime < _startTime && _curTime < _startTime) {
+                    if (_tween.tween.curTime !== null && _tween.tween.curTime > 0) _tween.tween.seek(0, this.isSeek);
+                } else if (_lastTime > _endTime && _curTime > _endTime) {
+                    if (_tween.tween.curTime < _tween.tween.endTime) _tween.tween.seek(_tween.tween.endTime, this.isSeek);
+                } else {
+                    _tween.tween.seek((_curTime - _startTime) / 1000, this.isSeek);
+                }
             }
         },
 

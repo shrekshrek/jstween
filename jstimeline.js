@@ -220,12 +220,7 @@
                 var _lastTime = this.lastTime - this.startTime;
                 var _curTime = this.curTime - this.startTime;
                 var _startTime = _tween.time;
-                var _endTime = _tween.time + _tween.tween.endTime;
-                if (_lastTime < _startTime && _curTime < _startTime) {
-                    if (_tween.tween.curTime !== null && _tween.tween.curTime > 0) _tween.tween.seek(0, this.isSeek);
-                } else if (_lastTime > _endTime && _curTime > _endTime) {
-                    if (_tween.tween.curTime < _tween.tween.endTime) _tween.tween.seek(_tween.tween.endTime, this.isSeek);
-                } else {
+                if (_tween.tween.curTime !== null || _lastTime >= _startTime || _curTime >= _startTime) {
                     _tween.tween.seek((_curTime - _startTime) / 1000, this.isSeek);
                 }
             }

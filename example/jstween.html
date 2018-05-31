@@ -48,11 +48,11 @@
     // JT.set('#box3', {opacity: 0, display: 'none'});
 
     JT.call(1.5, function () {
-        tt.kill();
+        // tt.kill();
     });
 
     var tt = JT.to('#box2', 1, {
-        x: 400, delay:1, onStart: function () {
+        x: 400, autoAlpha:0, delay:1, onStart: function () {
             console.log('start');
         }, onEnd: function(){
             console.log('end');

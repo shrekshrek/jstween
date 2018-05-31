@@ -102,13 +102,17 @@
         'interpolation', 'isReverse', 'timeScale', 'isFrom', 'isPlaying'
     ];
 
+    var specialProps = ['rotation', 'scale', 'autoAlpha'];
+
     function checkPropName(el, name, isDom) {
         for (var i = 0, l = keywords.length; i < l; i++) {
             if (name === keywords[i]) return undefined;
         }
 
         if (isDom) {
-            if (name === 'rotation' || name === 'scale') return name;
+            for (var i = 0, l = specialProps.length; i < l; i++) {
+                if (name === specialProps[i]) return name;
+            }
 
             if (el._jt_obj[name] !== undefined) return name;
 
@@ -214,6 +218,8 @@
                 return el._jt_obj['rotationZ'];
             case 'scale':
                 return el._jt_obj['scaleX'];
+            case 'autoAlpha':
+                return getStyle(el, 'opacity');
             default:
                 return getStyle(el, name);
         }
@@ -252,6 +258,10 @@
                 el._jt_obj['scaleX'] = value;
                 el._jt_obj['scaleY'] = value;
                 return true;
+            case 'autoAlpha':
+                setStyle(el, 'opacity', value);
+                setStyle(el, 'display', value > 0 ? 'block' : 'none');
+                return false;
             default:
                 setStyle(el, name, value);
                 return false;

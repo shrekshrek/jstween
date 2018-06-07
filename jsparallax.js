@@ -2,20 +2,18 @@
  * GIT: https://github.com/shrekshrek/jstween
  **/
 
-(function (factory) {
-
-    if (typeof define === 'function' && define.amd) {
-        define(['jstween', 'exports'], function (JT, exports) {
-            window.JP = factory(exports, JT);
-        });
-    } else if (typeof exports !== 'undefined') {
+(function (global, factory) {
+    if (typeof exports === 'object' && typeof module !== 'undefined') {
         var JT = require('jstween');
-        factory(exports, JT);
+        module.exports = factory(JT);
+    } else if (typeof define === 'function' && define.amd) {
+        define(['jstween'], factory);
     } else {
-        window.JP = factory({}, window.JT);
+        global.JP = factory(global.JT);
     }
+}(this, (function (JT) {
+    'use strict';
 
-}(function (JP, JT) {
     // --------------------------------------------------------------------parallax
     function parallax() {
         this.initialize.apply(this, arguments);
@@ -154,14 +152,15 @@
 
 
     //---------------------------------------------------------------全局方法
-    Object.assign(JP, {
+    var JP = {
         create: function (vars) {
             return new parallax(vars);
         },
         kill: function (pl) {
             pl.kill();
         }
-    });
+    };
 
     return JP;
-}));
+
+})));

@@ -2,19 +2,15 @@
  * GIT: https://github.com/shrekshrek/jstween
  **/
 
-(function (factory) {
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+        typeof define === 'function' && define.amd ? define(factory) :
+            (global.JT = factory());
+}(this, (function () {
+    'use strict';
 
-    if (typeof define === 'function' && define.amd) {
-        define(['exports'], function (exports) {
-            window.JT = factory(exports);
-        });
-    } else if (typeof exports !== 'undefined') {
-        factory(exports);
-    } else {
-        window.JT = factory({});
-    }
+    var JT = {};
 
-}(function (JT) {
     // --------------------------------------------------------------------辅助方法
     function each(obj, callback) {
         if (obj.length && obj.length > 0) {
@@ -61,23 +57,18 @@
         var _prefixes = ['Webkit', 'Moz', 'Ms', 'O'];
 
         for (var i in _prefixes) {
-            if ((_prefixes[i] + 'Transform') in _d.style) {
-                return _prefixes[i];
-                break;
-            }
+            if ((_prefixes[i] + 'Transform') in _d.style) return _prefixes[i];
         }
     }();
 
     function browserPrefix(str) {
-        if (str) {
-            return prefix + firstUper(str);
-        } else {
-            return prefix;
-        }
+        return prefix + str ? firstUper(str) : '';
     }
 
     var requestFrame = window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
         function (callback) {
             window.setTimeout(callback, 1000 / 60);
         };
@@ -143,31 +134,31 @@
     }
 
     function calcValue(o1, o2) {
-        var _o = regValue(o2);
+        var _o2 = regValue(o2);
 
-        if (o1.unit === 'rem' && _o.unit !== 'rem') {
+        if (o1.unit === 'rem' && _o2.unit !== 'rem') {
             checkRem();
             o1.num = fixed(o1.num * remUnit);
-            o1.unit = 'px'
-        } else if (o1.unit !== 'rem' && _o.unit === 'rem') {
+            o1.unit = 'px';
+        } else if (o1.unit !== 'rem' && _o2.unit === 'rem') {
             checkRem();
             o1.num = fixed(o1.num / remUnit);
             o1.unit = 'rem';
         }
 
         var _value;
-        switch (_o.ext) {
+        switch (_o2.ext) {
             case '+=':
-                _value = o1.num + _o.num;
+                _value = o1.num + _o2.num;
                 break;
             case '-=':
-                _value = o1.num - _o.num;
+                _value = o1.num - _o2.num;
                 break;
             default:
-                _value = _o.num;
+                _value = _o2.num;
                 break;
         }
-        return {num: _value, unit: _o.unit || o1.unit};
+        return {num: _value, unit: _o2.unit};
     }
 
     function checkJtobj(el) {
@@ -235,7 +226,17 @@
         }
     }
 
-    function setProp(el, name, value) {
+    var cssNumber = {
+        'column-count': 1,
+        'columns': 1,
+        'font-weight': 1,
+        'line-height': 1,
+        'opacity': 1,
+        'z-index': 1,
+        'zoom': 1
+    };
+
+    function setProp(el, name, value, unit) {
         switch (name) {
             case 'perspective':
             case 'x':
@@ -263,6 +264,7 @@
                 setStyle(el, 'display', value > 0 ? 'block' : 'none');
                 return false;
             default:
+                value = !cssNumber[hyphenize(name)] ? value + (unit || "px") : value;
                 setStyle(el, name, value);
                 return false;
         }
@@ -478,7 +480,7 @@
                 this.curVars[prop] = {num: _n, unit: _end.unit};
 
                 if (this.isDom) {
-                    if (setProp(this.el, prop, _n + (_end.unit || 0))) _trans = true;
+                    if (setProp(this.el, prop, _n, _end.unit)) _trans = true;
                 } else {
                     this.el[prop] = _n + (_end.unit || 0);
                 }
@@ -666,10 +668,10 @@
                         var _name = checkPropName(obj, i, _isDom);
                         if (_name) {
                             if (checkString(params[i])) {
-                                setProp(obj, _name, params[i]);
+                                setProp(obj, _name, params[i], '');
                             } else {
                                 var _o = checkValue(regValue(getProp(obj, _name)), params[i]);
-                                if (setProp(obj, _name, _o.num + (_o.unit || 0))) _trans = true;
+                                if (setProp(obj, _name, _o.num, _o.unit)) _trans = true;
                             }
                         }
                     }
@@ -1079,4 +1081,5 @@
     });
 
     return JT;
-}));
+
+})));

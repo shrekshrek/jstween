@@ -2,20 +2,18 @@
  * GIT: https://github.com/shrekshrek/jstween
  **/
 
-(function (factory) {
-
-    if (typeof define === 'function' && define.amd) {
-        define(['jstween', 'exports'], function (JT, exports) {
-            window.JTL = factory(exports, JT);
-        });
-    } else if (typeof exports !== 'undefined') {
+(function (global, factory) {
+    if (typeof exports === 'object' && typeof module !== 'undefined') {
         var JT = require('jstween');
-        factory(exports, JT);
+        module.exports = factory(JT);
+    } else if (typeof define === 'function' && define.amd) {
+        define(['jstween'], factory);
     } else {
-        window.JTL = factory({}, window.JT);
+        global.JTL = factory(global.JT);
     }
+}(this, (function (JT) {
+    'use strict';
 
-}(function (JTL, JT) {
     // --------------------------------------------------------------------辅助方法
     function regValue(value) {
         var _r = /(^[a-zA-Z]\w*|)(\+=|-=|)(\d*\.\d*|\d*)/;
@@ -25,6 +23,8 @@
 
     var requestFrame = window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
         function (callback) {
             window.setTimeout(callback, 1000 / 60);
         };
@@ -363,14 +363,15 @@
 
 
     //---------------------------------------------------------------全局方法
-    Object.assign(JTL, {
+    var JTL = {
         create: function (vars) {
             return new timeline(vars);
         },
         kill: function (tl) {
             tl.kill();
         }
-    });
+    };
 
     return JTL;
-}));
+
+})));

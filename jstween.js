@@ -233,7 +233,7 @@
         'line-height': 1,
         'opacity': 1,
         'z-index': 1,
-        'zoom': 1
+        'zoom': 1,
     };
 
     function setProp(el, name, value, unit) {
@@ -257,7 +257,7 @@
                 el._jt_obj[name] = value;
                 return true;
             case 'rotation':
-                el._jt_obj['rotationZ'] = value;
+                el._jt_obj['rotationZ'] = value % 360 + 'deg';
                 return true;
             case 'scale':
                 el._jt_obj['scaleX'] = value;
@@ -268,7 +268,7 @@
                 setStyle(el, 'display', value > 0 ? 'block' : 'none');
                 return false;
             default:
-                value = !cssNumber[hyphenize(name)] ? value + (unit || "px") : value;
+                if (unit !== undefined) value = !cssNumber[hyphenize(name)] ? value + (unit || "px") : value;
                 setStyle(el, name, value);
                 return false;
         }
@@ -668,7 +668,7 @@
                         var _name = checkPropName(obj, i, _isDom);
                         if (_name) {
                             if (checkString(params[i])) {
-                                setProp(obj, _name, params[i], '');
+                                if (setProp(obj, _name, params[i])) _trans = true;
                             } else {
                                 var _o = checkValue(regValue(getProp(obj, _name)), params[i]);
                                 if (setProp(obj, _name, _o.num, _o.unit)) _trans = true;

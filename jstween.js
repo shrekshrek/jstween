@@ -237,6 +237,7 @@
     };
 
     function setProp(el, name, value, unit) {
+        console.log(el, name, value, unit);
         switch (name) {
             case 'x':
             case 'y':
@@ -268,7 +269,7 @@
                 setStyle(el, 'display', value > 0 ? 'block' : 'none');
                 return false;
             default:
-                if (unit !== undefined) value = !cssNumber[hyphenize(name)] ? value + (unit || "px") : value;
+                if (unit !== undefined) value = !cssNumber[hyphenize(name)] ? value + (unit || "px") : value + unit;
                 setStyle(el, name, value);
                 return false;
         }

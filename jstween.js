@@ -237,7 +237,6 @@
     };
 
     function setProp(el, name, value, unit) {
-        console.log(el, name, value, unit);
         switch (name) {
             case 'x':
             case 'y':

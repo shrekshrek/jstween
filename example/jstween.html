@@ -45,20 +45,20 @@
 </div>
 
 <script>
-    JT.set('#box3', {autoAlpha: 0});
+    JT.set('#box3', {lineHeight: '10'});
 
-    JT.call(1.5, function () {
-        // tt.kill();
-    });
+    // JT.call(1.5, function () {
+    //     // tt.kill();
+    // });
 
-    var tt = JT.to('#box2', 1, {
-        x: 400, autoAlpha: 0, delay: 1, onStart: function () {
-            console.log('start');
-        }, onEnd: function () {
-            console.log('end');
-            // tt.reverse();
-        }
-    });
+    // var tt = JT.to('#box2', 1, {
+    //     x: 400, autoAlpha: 0, delay: 1, onStart: function () {
+    //         console.log('start');
+    //     }, onEnd: function () {
+    //         console.log('end');
+    //         // tt.reverse();
+    //     }
+    // });
     // JT.to('#box2', 1, {x: 100, delay:1.5});
 
     // JT.fromTo('#box1', 1, {marginLeft: 400, opacity: 0.5}, {

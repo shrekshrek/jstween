@@ -77,7 +77,7 @@
     function getElement(el) {
         if (!el) throw "el is undefined, can't tween!!!";
 
-        if (typeof(el) === 'string') {
+        if (typeof (el) === 'string') {
             return document.querySelectorAll(el);
         } else {
             return el;
@@ -112,7 +112,7 @@
             name = browserPrefix(name);
             if (el.style[name] !== undefined) return name;
         } else {
-            if (typeof(el[name]) === 'string' || typeof(el[name]) === 'number') return name;
+            if (typeof (el[name]) === 'string' || typeof (el[name]) === 'number') return name;
         }
 
         return undefined;
@@ -164,7 +164,6 @@
     function checkJtobj(el) {
         if (el._jt_obj === undefined)
             el._jt_obj = {
-                perspective: 0,
                 x: 0,
                 y: 0,
                 z: 0,
@@ -192,7 +191,6 @@
 
     function getProp(el, name) {
         switch (name) {
-            case 'perspective':
             case 'x':
             case 'y':
             case 'z':
@@ -250,7 +248,6 @@
             case 'skewY':
                 el._jt_obj[name] = value % 360 + 'deg';
                 return true;
-            case 'perspective':
             case 'scaleX':
             case 'scaleY':
             case 'scaleZ':
@@ -279,12 +276,11 @@
     }
 
     function checkDom(obj) {
-        return typeof(obj) === 'object' && obj.nodeType === 1;
+        return typeof (obj) === 'object' && obj.nodeType === 1;
     }
 
     function updateTransform(obj) {
         var _t = '';
-        if (obj._jt_obj.perspective) _t += 'perspective(' + obj._jt_obj.perspective + ') ';
         if (obj._jt_obj.x || obj._jt_obj.y || obj._jt_obj.z) _t += 'translate3d(' + obj._jt_obj.x + ',' + obj._jt_obj.y + ',' + obj._jt_obj.z + ') ';
         if (obj._jt_obj.rotationX) _t += 'rotateX(' + obj._jt_obj.rotationX + ') ';
         if (obj._jt_obj.rotationY) _t += 'rotateY(' + obj._jt_obj.rotationY + ') ';
@@ -1015,8 +1011,7 @@
                 if (!a || a < 1) {
                     a = 1;
                     s = p / 4;
-                }
-                else s = p * Math.asin(1 / a) / (2 * Math.PI);
+                } else s = p * Math.asin(1 / a) / (2 * Math.PI);
                 return -(a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
             },
             Out: function (k) {
@@ -1026,8 +1021,7 @@
                 if (!a || a < 1) {
                     a = 1;
                     s = p / 4;
-                }
-                else s = p * Math.asin(1 / a) / (2 * Math.PI);
+                } else s = p * Math.asin(1 / a) / (2 * Math.PI);
                 return (a * Math.pow(2, -10 * k) * Math.sin((k - s) * (2 * Math.PI) / p) + 1);
             },
             InOut: function (k) {
@@ -1037,8 +1031,7 @@
                 if (!a || a < 1) {
                     a = 1;
                     s = p / 4;
-                }
-                else s = p * Math.asin(1 / a) / (2 * Math.PI);
+                } else s = p * Math.asin(1 / a) / (2 * Math.PI);
                 if ((k *= 2) < 1) return -0.5 * (a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
                 return a * Math.pow(2, -10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p) * 0.5 + 1;
             }

@@ -136,14 +136,97 @@
     function calcValue(o1, o2) {
         var _o2 = regValue(o2);
 
-        if (o1.unit === 'rem' && _o2.unit !== 'rem') {
-            checkRem();
-            o1.num = fixed(o1.num * remUnit);
-            o1.unit = 'px';
-        } else if (o1.unit !== 'rem' && _o2.unit === 'rem') {
-            checkRem();
-            o1.num = fixed(o1.num / remUnit);
-            o1.unit = 'rem';
+        switch (_o2.unit) {
+            case 'rem':
+                switch (o1.unit) {
+                    case 'rem':
+                        break;
+                    case 'vw':
+                        checkRem();
+                        checkVw();
+                        o1.num = fixed(o1.num * vwUnit / remUnit);
+                        o1.unit = 'rem';
+                        break;
+                    case 'vh':
+                        checkRem();
+                        checkVh();
+                        o1.num = fixed(o1.num * vhUnit / remUnit);
+                        o1.unit = 'rem';
+                        break;
+                    default:
+                        checkRem();
+                        o1.num = fixed(o1.num / remUnit);
+                        o1.unit = 'rem';
+                        break;
+                }
+                break;
+            case 'vw':
+                switch (o1.unit) {
+                    case 'rem':
+                        checkRem();
+                        checkVw();
+                        o1.num = fixed(o1.num * remUnit / vwUnit);
+                        o1.unit = 'vw';
+                        break;
+                    case 'vw':
+                        break;
+                    case 'vh':
+                        checkVh();
+                        checkVw();
+                        o1.num = fixed(o1.num * vhUnit / vwUnit);
+                        o1.unit = 'vw';
+                        break;
+                    default:
+                        checkVw();
+                        o1.num = fixed(o1.num / vwUnit);
+                        o1.unit = 'vw';
+                        break;
+                }
+                break;
+            case 'vh':
+                switch (o1.unit) {
+                    case 'rem':
+                        checkRem();
+                        checkVh();
+                        o1.num = fixed(o1.num * remUnit / vhUnit);
+                        o1.unit = 'vh';
+                        break;
+                    case 'vw':
+                        checkVw();
+                        checkVh();
+                        o1.num = fixed(o1.num * vwUnit / vhUnit);
+                        o1.unit = 'vh';
+                        break;
+                    case 'vh':
+                        break;
+                    default:
+                        checkVh();
+                        o1.num = fixed(o1.num / vhUnit);
+                        o1.unit = 'vh';
+                        break;
+                }
+                break;
+            default:
+                switch (o1.unit) {
+                    case 'rem':
+                        checkRem();
+                        o1.num = fixed(o1.num * remUnit);
+                        o1.unit = 'px';
+                        break;
+                    case 'vw':
+                        checkVw();
+                        o1.num = fixed(o1.num * vwUnit);
+                        o1.unit = 'px';
+                        break;
+                    case 'vh':
+                        checkVh();
+                        o1.num = fixed(o1.num * vhUnit);
+                        o1.unit = 'px';
+                        break;
+                    default:
+                        break;
+                }
+                break;
         }
 
         var _value;
@@ -179,7 +262,7 @@
     }
 
     function regValue(value) {
-        var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(e[+-]?[0-9]{0,2}|)(rem|px|%|)/i;
+        var _r = /(\+=|-=|)(-|)(\d+\.\d+|\d+)(e[+-]?[0-9]{0,2}|)(rem|px|%|vw|vh|)/i;
         var _a = _r.exec(value);
         if (_a) return {num: fixed(_a[2] + _a[3] + _a[4]), unit: _a[5], ext: _a[1]};
         else return {num: 0, unit: 'px', ext: ''};
@@ -282,11 +365,11 @@
     function updateTransform(obj) {
         var _t = '';
         if (obj._jt_obj.x || obj._jt_obj.y || obj._jt_obj.z) _t += 'translate3d(' + obj._jt_obj.x + ',' + obj._jt_obj.y + ',' + obj._jt_obj.z + ') ';
+        if (obj._jt_obj.scaleX !== 1 || obj._jt_obj.scaleY !== 1 || obj._jt_obj.scaleZ !== 1) _t += 'scale3d(' + obj._jt_obj.scaleX + ', ' + obj._jt_obj.scaleY + ', ' + obj._jt_obj.scaleZ + ') ';
+        if (obj._jt_obj.skewX || obj._jt_obj.skewY) _t += 'skew(' + obj._jt_obj.skewX + ',' + obj._jt_obj.skewY + ') ';
         if (obj._jt_obj.rotationX) _t += 'rotateX(' + obj._jt_obj.rotationX + ') ';
         if (obj._jt_obj.rotationY) _t += 'rotateY(' + obj._jt_obj.rotationY + ') ';
         if (obj._jt_obj.rotationZ) _t += 'rotateZ(' + obj._jt_obj.rotationZ + ') ';
-        if (obj._jt_obj.scaleX !== 1 || obj._jt_obj.scaleY !== 1 || obj._jt_obj.scaleZ !== 1) _t += 'scale3d(' + obj._jt_obj.scaleX + ', ' + obj._jt_obj.scaleY + ', ' + obj._jt_obj.scaleZ + ') ';
-        if (obj._jt_obj.skewX || obj._jt_obj.skewY) _t += 'skew(' + obj._jt_obj.skewX + ',' + obj._jt_obj.skewY + ') ';
         obj.style[browserPrefix('transform')] = _t;
     }
 
@@ -306,6 +389,18 @@
         tempDiv.style.borderLeftWidth = '1rem';
         remUnit = parseFloat(tempDiv.offsetWidth);
         body.removeChild(tempDiv);
+    }
+
+
+    // --------------------------------------------------------------------计算1vw,1vh单位值
+    var vwUnit, vhUnit;
+
+    function checkVw() {
+        vwUnit = window.innerWidth / 100;
+    }
+
+    function checkVh() {
+        vhUnit = window.innerHeight / 100;
     }
 
 

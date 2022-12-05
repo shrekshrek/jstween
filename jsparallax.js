@@ -132,6 +132,8 @@
 
             this.tween = JT.fromTo(el, 1, fromVars, toVars);
 
+            this._update();
+
             parallaxs.push(this);
 
             if (!isUpdating) {
@@ -152,8 +154,15 @@
 
         _update: function () {
             const scrollTop = document.scrollingElement.scrollTop;
-            let _ratio = (scrollTop - this.from.value) / (this.to.value - this.from.value);
-            this.tween.seek(_ratio);
+            this.elapsed = (scrollTop - this.from.value) / (this.to.value - this.from.value);
+            this.isInside = this.elapsed >= 0 && this.elapsed <= 1;
+            this.isOutside = this.elapsed < 0 || this.elapsed > 1;
+
+            this.tween.seek(this.elapsed);
+
+            if (this.isInside && this.onInside) this.onInside.apply(this, this.elapsed);
+            if (this.isOutside && this.onOutside) this.onOutside.apply(this, this.elapsed);
+            if (this.onUpdate) this.onUpdate.apply(this, this.elapsed);
         },
 
         kill: function () {
@@ -174,8 +183,15 @@
 
         reset: function () {
             var _len = parallaxs.length;
-            for (var i = 0; i < _len; i++) {
+            for (var i = _len - 1; i >= 0; i--) {
                 parallaxs[i]._reset();
+            }
+        },
+
+        kill: function () {
+            var _len = parallaxs.length;
+            for (var i = _len - 1; i >= 0; i--) {
+                parallaxs[i].kill();
             }
         }
     };

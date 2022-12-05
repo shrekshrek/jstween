@@ -142,20 +142,20 @@
                     case 'rem':
                         break;
                     case 'vw':
-                        checkRem();
-                        checkVw();
-                        o1.num = fixed(o1.num * vwUnit / remUnit);
+                        var _remUnit = getRem();
+                        var _vwUnit = getVw();
+                        o1.num = fixed(o1.num * _vwUnit / _remUnit);
                         o1.unit = 'rem';
                         break;
                     case 'vh':
-                        checkRem();
-                        checkVh();
-                        o1.num = fixed(o1.num * vhUnit / remUnit);
+                        var _remUnit = getRem();
+                        var _vhUnit = getVh();
+                        o1.num = fixed(o1.num * _vhUnit / _remUnit);
                         o1.unit = 'rem';
                         break;
                     default:
-                        checkRem();
-                        o1.num = fixed(o1.num / remUnit);
+                        var _remUnit = getRem();
+                        o1.num = fixed(o1.num / _remUnit);
                         o1.unit = 'rem';
                         break;
                 }
@@ -163,22 +163,22 @@
             case 'vw':
                 switch (o1.unit) {
                     case 'rem':
-                        checkRem();
-                        checkVw();
-                        o1.num = fixed(o1.num * remUnit / vwUnit);
+                        var _remUnit = getRem();
+                        var _vwUnit = getVw();
+                        o1.num = fixed(o1.num * _remUnit / _vwUnit);
                         o1.unit = 'vw';
                         break;
                     case 'vw':
                         break;
                     case 'vh':
-                        checkVh();
-                        checkVw();
-                        o1.num = fixed(o1.num * vhUnit / vwUnit);
+                        var _vhUnit = getVh();
+                        var _vwUnit = getVw();
+                        o1.num = fixed(o1.num * _vhUnit / _vwUnit);
                         o1.unit = 'vw';
                         break;
                     default:
-                        checkVw();
-                        o1.num = fixed(o1.num / vwUnit);
+                        var _vwUnit = getVw();
+                        o1.num = fixed(o1.num / _vwUnit);
                         o1.unit = 'vw';
                         break;
                 }
@@ -186,22 +186,22 @@
             case 'vh':
                 switch (o1.unit) {
                     case 'rem':
-                        checkRem();
-                        checkVh();
-                        o1.num = fixed(o1.num * remUnit / vhUnit);
+                        var _remUnit = getRem();
+                        var _vhUnit = getVh();
+                        o1.num = fixed(o1.num * _remUnit / _vhUnit);
                         o1.unit = 'vh';
                         break;
                     case 'vw':
-                        checkVw();
-                        checkVh();
-                        o1.num = fixed(o1.num * vwUnit / vhUnit);
+                        var _vwUnit = getVw();
+                        var _vhUnit = getVh();
+                        o1.num = fixed(o1.num * _vwUnit / _vhUnit);
                         o1.unit = 'vh';
                         break;
                     case 'vh':
                         break;
                     default:
-                        checkVh();
-                        o1.num = fixed(o1.num / vhUnit);
+                        var _vhUnit = getVh();
+                        o1.num = fixed(o1.num / _vhUnit);
                         o1.unit = 'vh';
                         break;
                 }
@@ -209,18 +209,18 @@
             default:
                 switch (o1.unit) {
                     case 'rem':
-                        checkRem();
-                        o1.num = fixed(o1.num * remUnit);
+                        var _remUnit = getRem();
+                        o1.num = fixed(o1.num * _remUnit);
                         o1.unit = 'px';
                         break;
                     case 'vw':
-                        checkVw();
-                        o1.num = fixed(o1.num * vwUnit);
+                        var _vwUnit = getVw();
+                        o1.num = fixed(o1.num * _vwUnit);
                         o1.unit = 'px';
                         break;
                     case 'vh':
-                        checkVh();
-                        o1.num = fixed(o1.num * vhUnit);
+                        var _vhUnit = getVh();
+                        o1.num = fixed(o1.num * _vhUnit);
                         o1.unit = 'px';
                         break;
                     default:
@@ -374,9 +374,9 @@
     }
 
     // --------------------------------------------------------------------计算1rem单位值
-    var body, tempDiv, remUnit;
+    var body, tempDiv;
 
-    function checkRem() {
+    function getRem() {
         if (!tempDiv) {
             tempDiv = document.createElement('div');
             tempDiv.style.cssText = 'border:0 solid; position:absolute; line-height:0px;';
@@ -387,22 +387,25 @@
 
         body.appendChild(tempDiv);
         tempDiv.style.borderLeftWidth = '1rem';
-        remUnit = parseFloat(tempDiv.offsetWidth);
+        var _remUnit = parseFloat(tempDiv.offsetWidth);
         body.removeChild(tempDiv);
+
+        return _remUnit;
     }
 
+    JT.getRem = getRem;
 
     // --------------------------------------------------------------------计算1vw,1vh单位值
-    var vwUnit, vhUnit;
-
-    function checkVw() {
-        vwUnit = window.innerWidth / 100;
+    function getVw() {
+        return window.innerWidth / 100;
     }
 
-    function checkVh() {
-        vhUnit = window.innerHeight / 100;
+    function getVh() {
+        return window.innerHeight / 100;
     }
 
+    JT.getVw = getVw;
+    JT.getVh = getVh;
 
     // --------------------------------------------------------------------全局update
     var tweens = [];

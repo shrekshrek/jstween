@@ -14,138 +14,153 @@
 }(this, (function (JT) {
     'use strict';
 
+    // --------------------------------------------------------------------辅助方法
+    function regValue(value) {
+        var _r = /(^[a-zA-Z]\w*|)(\+=|-=|)(\d*\.\d*|\d*)/;
+        var _a = _r.exec(value);
+        return {label: _a[1], ext: _a[2], num: parseFloat(_a[3])};
+    }
+
+    var requestFrame = window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback) {
+            window.setTimeout(callback, 1000 / 60);
+        };
+
+    // --------------------------------------------------------------------全局update
+    var parallaxs = [];
+    var tempParallaxs = [];
+    var isUpdating = false;
+    var lastTime = 0;
+
+    function globalUpdate() {
+        var _len = parallaxs.length;
+        if (_len === 0) {
+            isUpdating = false;
+            return;
+        }
+
+        var _now = JT.now();
+        var _step = _now - lastTime;
+        lastTime = _now;
+        if (_step > 500) _step = 33;
+
+        tempParallaxs = parallaxs.slice(0);
+        for (var i = 0; i < _len; i++) {
+            tempParallaxs[i]._update(_step);
+        }
+
+        requestFrame(globalUpdate);
+    }
+
+    // --------------------------------------------------------------------坐标计算
+    function fixed(n) {
+        return Math.round(n * 1000) / 1000;
+    }
+
+    const reg = /(t|m|b|)(t|m|b|)(\+|-|)(\d+\.\d+|\d+|)(rem|px|%|vw|vh|)/i;
+
+    // const reg = /(tt|tm|tb|mt|mm|mb|bt|bm|bb|)(\+|-|)(\d+\.\d+|\d+|)(rem|px|%|vw|vh|)/i;
+
+    function regValue(value, el) {
+        const scrollTop = document.scrollingElement.scrollTop;
+        const viewportHeight = window.innerHeight;
+        const elemSize = el.getBoundingClientRect();
+
+        var _y = 0;
+        var _a = reg.exec(value);
+
+        if (_a[1] == 't') _y += (elemSize.top + scrollTop)
+        if (_a[1] == 'm') _y += (elemSize.top + scrollTop) + elemSize.height / 2
+        if (_a[1] == 'b') _y += (elemSize.top + scrollTop) + elemSize.height
+
+        if (_a[2] == 't') _y -= 0
+        if (_a[2] == 'm') _y -= viewportHeight / 2
+        if (_a[2] == 'b') _y -= viewportHeight
+
+        var _n = fixed(_a[3] + _a[4]);
+        switch (_a[5]) {
+            case 'rem':
+                _n *= JT.getRem();
+                break;
+            case 'vw':
+                _n *= JT.getVw();
+                break;
+            case 'vh':
+                _n *= JT.getVh();
+                break;
+        }
+
+        if (_a[1] && _a[2]) _y -= _n;
+        else if (!_a[1] && !_a[2]) _y += _n;
+        else throw "from or to value error!!!";
+
+        return {
+            origin: value,
+            value: _y,
+        };
+    }
+
+
     // --------------------------------------------------------------------parallax
     function parallax() {
         this.initialize.apply(this, arguments);
     }
 
     Object.assign(parallax.prototype, {
-        initialize: function (vars) {
-            vars = vars || {};
-            this.el = vars.el;
-            this.hook = vars.hook || 0;
-            this.key = vars.key || 'y';
-            this.pin = 0;
+        initialize: function (el, fromVars, toVars) {
+            this.el = this.anchor = typeof (el) === 'string' ? document.querySelector(el) : el;
 
-            this.isSeek = false;
-            this.curPos = this.prevPos = null;
+            if (toVars.anchor) {
+                this.anchor = document.querySelector(toVars.anchor);
+                delete toVars.anchor;
+            }
 
-            this.tweens = [];
-            this.calls = [];
-            this.pins = [];
-        },
+            this.from = regValue(fromVars.from, this.anchor);
+            this.to = regValue(toVars.to, this.anchor);
+            delete fromVars.from;
+            delete toVars.to;
 
-        update: function (step) {
-            this.prevPos = this.curPos;
-            this.curPos = this.prevPos + step || 0;
+            this.origin = {};
+            for (var i in fromVars) {
+                this.origin[i] = JT.get(this.el, i);
+            }
 
-            this._checkTween();
-            this._checkCall();
-            this._checkPin();
+            toVars.isPlaying = false;
 
-            if (this.el) this.el[this.key] = -(this.curPos - this.pin);
-        },
+            this.tween = JT.fromTo(el, 1, fromVars, toVars);
 
-        addCall: function (call, position) {
-            this.calls.push({start: position, call: call});
-            this._updateEndTime();
-        },
+            parallaxs.push(this);
 
-        _checkCall: function () {
-            for (var i = 0, _len = this.calls.length; i < _len; i++) {
-                var _call = this.calls[i];
-                var _prevPos = this.prevPos + this.hook - _call.start;
-                var _curPos = this.curPos + this.hook - _call.start;
-                if (!this.isSeek && ((_call.start === 0 && _prevPos === 0 && _curPos > 0) || (_prevPos < _call.start && _curPos >= _call.start) || (_prevPos > _call.start && _curPos <= _call.start) || (_call.start === this.endTime && _prevPos === this.endTime && _curPos < this.endTime))) _call.call();
+            if (!isUpdating) {
+                lastTime = JT.now();
+                isUpdating = true;
+                requestFrame(globalUpdate);
             }
         },
 
-        addTween: function (tween, relative, duration) {
-            tween.stop();
-            var _pos = JT.get(tween.el, this.key);
-            var _start = _pos - relative;
-            this.tweens.push({start: _start, tween: tween, duration: duration});
-        },
-
-        _checkTween: function () {
-            for (var i = 0, _len = this.tweens.length; i < _len; i++) {
-                var _tween = this.tweens[i];
-                var _prevPos = this.prevPos + this.hook - _tween.start;
-                var _curPos = this.curPos + this.hook - _tween.start;
-                if (_tween.duration === 0) {
-                    if (!this.isSeek && ((_tween.start === 0 && _prevPos === 0 && _curPos > 0) || (_prevPos < _tween.start && _curPos >= _tween.start) || (_prevPos > _tween.start && _curPos <= _tween.start) || (_tween.start === this.endTime && _prevPos === this.endTime && _curPos < this.endTime))) _tween.play(0);
-                } else {
-                    _tween.tween.seek(_curPos / _tween.duration * _tween.tween.endTime / 1000, this.isSeek);
-                }
+        _reset() {
+            for (var i in this.origin) {
+                JT.set(this.el, this.origin[i]);
             }
+
+            this.from = regValue(this.from.origin, this.anchor);
+            this.to = regValue(this.to.origin, this.anchor);
         },
 
-        addPin: function (position, duration) {
-            this.pins.push({start: position, duration: duration});
-        },
-
-        _checkPin: function () {
-            this.pin = 0;
-            for (var i = 0, _len = this.pins.length; i < _len; i++) {
-                var _pin = this.pins[i];
-                var _curPos = this.curPos + this.hook - _pin.start;
-                if (_curPos > _pin.duration) {
-                    this.pin += _pin.duration;
-                } else if (_curPos > 0) {
-                    this.pin += _curPos;
-                }
-            }
-        },
-
-        fromTo: function (el, time, fromVars, toVars, relative, duration) {
-            var _tween = JT.fromTo(el, time, fromVars, toVars);
-            this.addTween(_tween, relative, duration);
-            return this;
-        },
-
-        from: function (el, time, fromVars, relative, duration) {
-            var _tween = JT.from(el, time, fromVars);
-            this.addTween(_tween, relative, duration);
-            return this;
-        },
-
-        to: function (el, time, toVars, relative, duration) {
-            var _tween = JT.to(el, time, toVars);
-            this.addTween(_tween, relative, duration);
-            return this;
-        },
-
-        add: function (obj, relative, duration) {
-            switch (typeof(obj)) {
-                case 'object':
-                    this.addTween(obj, relative, duration);
-                    break;
-                case 'function':
-                    this.addCall(obj, relative);
-                    break;
-                case 'number':
-                    this.addPin(obj, relative);
-                    break;
-                default:
-                    throw 'add action is wrong!!!';
-                    break;
-            }
-            return this;
-        },
-
-        seek: function (position, isSeek) {
-            if (this.curPos === position) return;
-
-            if (isSeek !== undefined) this.isSeek = isSeek;
-            this.update(position - this.curPos);
-            this.isSeek = false;
+        _update: function () {
+            const scrollTop = document.scrollingElement.scrollTop;
+            let _ratio = (scrollTop - this.from.value) / (this.to.value - this.from.value);
+            this.tween.seek(_ratio);
         },
 
         kill: function () {
-            this.tweens = [];
-            this.calls = [];
-            this.pins = [];
-            this.curPos = this.prevPos = null;
+            var i = parallaxs.indexOf(this);
+            if (i !== -1) parallaxs.splice(i, 1);
+            this.tween.kill();
+            this.el = this.anchor = this.origin = null;
         }
 
     });
@@ -153,11 +168,15 @@
 
     //---------------------------------------------------------------全局方法
     var JP = {
-        create: function (vars) {
-            return new parallax(vars);
+        create: function (el, fromVars, toVars) {
+            return new parallax(el, fromVars, toVars);
         },
-        kill: function (pl) {
-            pl.kill();
+
+        reset: function () {
+            var _len = parallaxs.length;
+            for (var i = 0; i < _len; i++) {
+                parallaxs[i]._reset();
+            }
         }
     };
 

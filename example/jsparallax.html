@@ -17,6 +17,8 @@
         .box {
             width: 100px;
             height: 100px;
+            margin-top: 50vh;
+            background: #fff;
         }
 
         #box1 {
@@ -27,10 +29,12 @@
         #box2 {
             background: #0f0;
             margin-left: 200px;
+            margin-top: 0vh;
         }
 
         #box3 {
             background: #00f;
+            /*transform: translate(100px, 100px);*/
         }
     </style>
 </head>
@@ -43,33 +47,35 @@
     </div>
     <div id="box3" class="box">
     </div>
+    <div id="box4" class="box">
+    </div>
+    <div id="box5" class="box">
+    </div>
 </div>
 
 <script>
-    var pl = JP.create({hook: 20});
-    pl.from('#box2', 1.5, {marginLeft: 400}, 0, 100);
-    console.log(pl);
+    console.log(document.querySelector('#box1').getBoundingClientRect());
+    console.log(document.querySelector('#box2').getBoundingClientRect());
+    console.log(document.querySelector('#box3').getBoundingClientRect());
 
-    var oldY = 0;
-    var isDown = false;
-    document.addEventListener('mousedown', function (evt) {
-        oldY = evt.clientY;
-        isDown = true;
-    });
-    document.addEventListener('mouseup', function (evt) {
-        isDown = false;
-    });
-    document.addEventListener('mousemove', function (evt) {
-        if (isDown) {
-            var y = evt.clientY;
-            pl.seek(y);
-//            tl.update(y - oldY);
-            oldY = y;
-//            console.log(y);
-        }
-    });
+    JP.create('#box1', {from: 0, y: 0}, {
+        to: 500,
+        y: -200,
+        ease: JT.Quad.InOut
+    })
 
+    JP.create('#box3', {
+        from: 'mb',
+        x: 0
+    }, {
+        to: 'mt',
+        x: 500,
+        ease: JT.Quad.InOut
+    })
 
+    window.onresize = function(){
+        JP.reset();
+    }
 </script>
 </body>
 </html>

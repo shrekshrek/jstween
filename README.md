@@ -4,7 +4,7 @@ jstimeline为jstween的扩展库,类似于greensock的TimelineLite,不过功能�
 
 jsparallax为jstween的扩展库,用于开发滚屏错层效果.  
 
-默认单位是px,支持rem。  
+默认单位是px,支持rem,vw,vh。  
 
 API文档请查看doc目录  
 

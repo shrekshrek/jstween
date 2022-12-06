@@ -14,13 +14,6 @@
 }(this, (function (JT) {
     'use strict';
 
-    // --------------------------------------------------------------------辅助方法
-    function regValue(value) {
-        var _r = /(^[a-zA-Z]\w*|)(\+=|-=|)(\d*\.\d*|\d*)/;
-        var _a = _r.exec(value);
-        return {label: _a[1], ext: _a[2], num: parseFloat(_a[3])};
-    }
-
     var requestFrame = window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
@@ -117,6 +110,14 @@
                 this.anchor = document.querySelector(toVars.anchor);
                 delete toVars.anchor;
             }
+            if (toVars.onInside) {
+                this.onInside = toVars.onInside;
+                delete toVars.onInside;
+            }
+            if (toVars.onOutside) {
+                this.onOutside = toVars.onOutside;
+                delete toVars.onOutside;
+            }
 
             this.from = regValue(fromVars.from, this.anchor);
             this.to = regValue(toVars.to, this.anchor);
@@ -183,7 +184,7 @@
 
         reset: function () {
             var _len = parallaxs.length;
-            for (var i = _len - 1; i >= 0; i--) {
+            for (var i = 0; i < _len; i++) {
                 parallaxs[i]._reset();
             }
         },
